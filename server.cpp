@@ -1,77 +1,85 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <iostream>
-
-// step1 :      creation of mini server that accept any kind of request using socket  creates a socket using a specific communication domain (e.g., AF_INET for IPv4) and a socket type (e.g., SOCK_STREAM for TCP, SOCK_DGRAM for UDP).
-//and it return a fail descriptor of that socket AF_INET: Address family (IPv4).
-//SOCK_STREAM: Specifies that we are using a TCP connection (reliable, stream-based).
-//0: Specifies the protocol (0 selects the default protocol for the given socket type, which is TCP for SOCK_STREAM).
-
-
-
-//step 2:       binding the socket , The bind function is used to bind a socket to a particular IP address and port, allowing it to receive data at that address and port.
-
-
-//step 3:       After binding the socket, the server needs to start listening for incoming connection requests. This is where the server gets ready to accept connections from clients
-
-
-//step 4:       accept() extracts the first connection request on the queue of pending connections, creates a new socket for the communication with the client, and returns a new socket file descriptor.
-
-//step 5: Once the connection is established, the server can start sending and receiving data with the client. This is done using functions like send(), recv(), read(), and write(). These allow the server to exchange data with the client.
-
-
-
+#include <poll.h>
 
 int main()
 {
-	//step 1
-	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (server_fd < 0)
-	{
-		std::cout<< "socket failed" << std::endl;
-		exit(1);
-	}
-	struct sockaddr_in server_addr;
-	socklen_t server_addr_len = sizeof(server_addr);
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	server_addr.sin_port = htons(8080);
-	if (bind(server_fd, (struct sockaddr*)&server_addr, server_addr_len) == -1)
-	{
-		std::cout<< "bind failed" << std::endl;
-		exit(1);
-	}
-	while (1)
-	{
-		//step 2
-		std::cout << "Server is listening on localhost:8080...\n";
-		//step 3
-		if (listen(server_fd, 1000) == -1)
-		{
-			std::cout<< "listen failed" << std::endl;
-			exit(1);	
-		}
-		//step 4
-		struct sockaddr_in client_address;
-		socklen_t addrlen = sizeof(client_address);
-		int new_socket = accept(server_fd, (struct sockaddr*)&client_address, &addrlen);
+    // Step 1: Create the socket
+    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0)
+    {
+        std::cout << "socket failed" << std::endl;
+        exit(1);
+    }
 
-		if (new_socket < 0)
-		{
-			std::cout<< "accept failed" << std::endl;
-			exit(1);
-		}
+    // Step 2: Setup server address and bind it
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Binding to localhost
+    server_addr.sin_port = htons(8080); // Port 8080
 
-		char buffer[1024] = {0};
-		recv(new_socket, buffer, sizeof(buffer), 0); 
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+    {
+        std::cout << "bind failed" << std::endl;
+        exit(1);
+    }
 
-		std::string message = "HTTP/1.1 200 OK\r\n"
-							"Content-Type: text/plain\r\n"
-							"Content-Length: " + std::to_string(10) + "\r\n"
-							"\r\n" +  // Blank line separating headers and body
-							"hell world";
-		send(new_socket, message.c_str(), strlen(message.c_str()), 0);
-	}
+    // Step 3: Start listening for connections
+    std::cout << "Server is listening on localhost:8080...\n";
+    if (listen(server_fd, 1000) == -1)
+    {
+        std::cout << "listen failed" << std::endl;
+        exit(1);
+    }
+
+    // Step 4: Accept and handle client connections
+    while (1)
+    {
+        struct sockaddr_in client_address;
+        socklen_t addrlen = sizeof(client_address);
+        int new_socket = accept(server_fd, (struct sockaddr*)&client_address, &addrlen);
+
+        if (new_socket < 0)
+        {
+            std::cout << "accept failed" << std::endl;
+            continue;  // Skip to the next iteration if accept fails
+        }
+
+        // Step 5: Receive data from the client
+        char buffer[1024] = {0};
+        int bytes_received = recv(new_socket, buffer, sizeof(buffer), 0);
+        if (bytes_received < 0)
+        {
+            std::cout << "recv failed" << std::endl;
+        }
+        else
+        {
+            std::cout << "Received request:\n" << buffer << std::endl;
+        }
+
+        // Step 6: Prepare HTTP response
+        std::string message = "HTTP/1.1 200 OK\r\n"
+                            "Content-Type: text/plain\r\n"
+                            "Content-Length: " + std::to_string(11) + "\r\n"
+                            "\r\n" +  // Blank line separating headers and body
+                            "Hello world";
+
+        // Step 7: Send HTTP response to client
+        int bytes_sent = send(new_socket, message.c_str(), message.length(), 0);
+        if (bytes_sent < 0)
+        {
+            std::cout << "send failed" << std::endl;
+        }
+
+        // Step 8: Close the client socket after the response
+        close(new_socket);
+    }
+
+    // Never reached, but if we were to stop the server, we'd close the server socket.
+    close(server_fd);
+
+    return 0;
 }
