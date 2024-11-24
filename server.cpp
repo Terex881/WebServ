@@ -90,7 +90,7 @@ void    Server::ft_server_init()
                 int client_socket = events[i].ident;
                 char buffer[1024] = {0};
                 int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-                if (bytes_received <= 0)
+                if (bytes_received  <= 0)
                 {
                     // Client has closed the connection or error occurred
                     std::cout << "Client " << client_socket << " disconnected or error occurred." << std::endl;
@@ -111,8 +111,9 @@ void    Server::ft_server_init()
                 else
                 {
                     // Print the received request (this is a simple echo)
-                    std::cout << "Received request from client: " << buffer << std::endl;
-
+                    std::string msg;
+                    msg.assign(buffer, 1024);
+                    std::cout << msg << std::endl;
                     // Send a simple HTTP response
                     std::string message = "HTTP/1.1 200 OK\r\n"
                                           "Content-Type: text/plain\r\n"
