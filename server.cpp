@@ -1,25 +1,10 @@
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/event.h>
-#include <fcntl.h>
-#include <vector>
-#include <algorithm>
+#include "Server.hpp"
+#include <ostream>
 
-#define MAX_CLIENTS 128  // Set a limit for the number of clients
+#define MAX_CLIENTS 128
 
-// Set a socket to non-blocking mode
-void set_non_blocking(int fd)
+void    Server::ft_server_init()
 {
-    int flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-}
-
-int main()
-{
-    // Step 1: Create the server socket
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0)
     {
@@ -27,14 +12,10 @@ int main()
         exit(1);
     }
 
-    // Set the server socket to non-blocking
-    set_non_blocking(server_fd);
-
-    // Step 2: Setup server address and bind it
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Binding to localhost
-    server_addr.sin_port = htons(8080); // Port 8080
+    server_addr.sin_addr.s_addr = inet_addr(this->host.c_str()); // by default Binding to localhost
+    server_addr.sin_port = htons(this->port); // by default Port 8080
 
     if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
     {
@@ -42,138 +23,137 @@ int main()
         exit(1);
     }
 
-    // Step 3: Start listening for connections
-    std::cout << "Server is listening on localhost:8080...\n";
+    std::cout << "Server is listening on "<<this->host << ":"<<this->port<<std::endl;
     if (listen(server_fd, MAX_CLIENTS) == -1)
     {
         std::cout << "listen failed" << std::endl;
         exit(1);
     }
 
-    // Step 4: Create kqueue
     int kq = kqueue();
     if (kq == -1)
     {
-        std::cout << "kqueue creation failed" << std::endl;
+        std::cout << "kqueue failed" << std::endl;
         exit(1);
     }
 
-    // Step 5: Register the server socket with kqueue for read events
-    struct kevent change;
-    EV_SET(&change, server_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    if (kevent(kq, &change, 1, NULL, 0, NULL) == -1)
-    {
-        std::cout << "kevent registration for server socket failed" << std::endl;
-        exit(1);
-    }
+    struct kevent event;
+    EV_SET(&event, server_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+    kevent(kq, &event, 1, NULL, 0, NULL);
 
-    // Step 6: Event loop
-    std::vector<int> clients;
+    // Array to store client socket file descriptors
+    int client_sockets[MAX_CLIENTS] = {0};
 
-    while (1)
+    while (true)
     {
         struct kevent events[MAX_CLIENTS];
-        int num_events = kevent(kq, NULL, 0, events, MAX_CLIENTS, NULL);
-
-        if (num_events < 0)
+        int n = kevent(kq, NULL, 0, events, MAX_CLIENTS, NULL); // Wait for events
+        if (n < 0)
         {
             std::cout << "kevent failed" << std::endl;
             exit(1);
         }
 
-        // Step 7: Process events
-        for (int i = 0; i < num_events; i++)
+        for (int i = 0; i < n; ++i)
         {
-            if (events[i].filter == EVFILT_READ)
+            if (events[i].ident == server_fd && events[i].filter == EVFILT_READ)
             {
-                if (events[i].ident == server_fd)
+                // Accept new client connection
+                struct sockaddr_in client_addr;
+                socklen_t addrlen = sizeof(client_addr);
+                int new_socket = accept(server_fd, (struct sockaddr*)&client_addr, &addrlen);
+                if (new_socket < 0)
                 {
-                    // Accept a new connection
-                    struct sockaddr_in client_addr;
-                    socklen_t addrlen = sizeof(client_addr);
-                    int new_socket = accept(server_fd, (struct sockaddr*)&client_addr, &addrlen);
-                    if (new_socket < 0)
-                    {
-                        std::cout << "accept failed" << std::endl;
-                        continue;
-                    }
-
-                    // Set new client socket to non-blocking
-                    set_non_blocking(new_socket);
-
-                    // Register the new client socket with kqueue for read events
-                    EV_SET(&change, new_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-                    if (kevent(kq, &change, 1, NULL, 0, NULL) == -1)
-                    {
-                        std::cout << "kevent registration for client socket failed" << std::endl;
-                        continue;
-                    }
-
-                    std::cout << "New client connected: " << new_socket << std::endl;
-
-                    // Add new client socket to the list of active clients
-                    clients.push_back(new_socket);
+                    std::cout << "accept failed" << std::endl;
+                    continue;
                 }
-                else
+
+                std::cout << "New client connected: " << new_socket << std::endl;
+
+                // Add the new socket to the kqueue for future reading events
+                EV_SET(&event, new_socket, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                kevent(kq, &event, 1, NULL, 0, NULL);
+
+                // Optionally, store the socket in an array for further management
+                for (int j = 0; j < MAX_CLIENTS; ++j)
                 {
-                    // Handle data from an existing client
-                    char buffer[1024] = {0};
-                    int bytes_received = recv(events[i].ident, buffer, sizeof(buffer), 0);
-                    if (bytes_received < 0)
+                    if (client_sockets[j] == 0)
                     {
-                        // Handle non-blocking case: no data available
-                        if (errno != EWOULDBLOCK && errno != EAGAIN)
-                        {
-                            std::cout << "recv failed" << std::endl;
-                        }
-                        continue;
-                    }
-                    else if (bytes_received == 0)
-                    {
-                        // Client disconnected, clean up
-                        std::cout << "Client disconnected: " << events[i].ident << std::endl;
-                        close(events[i].ident);
-                        clients.erase(std::remove(clients.begin(), clients.end(), events[i].ident), clients.end());
-                    }
-                    else
-                    {
-                        // Print the received request
-                        // std::cout << "Received request from client " << events[i].ident << ":\n" << buffer << std::endl;
-
-                        // Step 8: Prepare HTTP response
-                        std::string message = "HTTP/1.1 200 OK\r\n"
-                                              "Content-Type: text/plain\r\n"
-                                              "Content-Length: " + std::to_string(11) + "\r\n"
-                                              "\r\n" +  // Blank line separating headers and body
-                                              "Hello world";
-
-                        // Send HTTP response to the client
-                        int bytes_sent = send(events[i].ident, message.c_str(), message.length(), 0);
-                        if (bytes_sent < 0)
-                        {
-                            std::cout << "send failed" << std::endl;
-                        }
+                        client_sockets[j] = new_socket;
+                        break;
                     }
                 }
             }
-            else if (events[i].filter == EVFILT_EXCEPT)
+            else if (events[i].filter == EVFILT_READ)
             {
-                // Handle exceptional events like client disconnections
-                std::cout << "Exceptional event on client socket: " << events[i].ident << std::endl;
-                close(events[i].ident);
-                clients.erase(std::remove(clients.begin(), clients.end(), events[i].ident), clients.end());
+                // Handle reading data from the client socket
+                int client_socket = events[i].ident;
+                char buffer[1024] = {0};
+                int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
+                if (bytes_received <= 0)
+                {
+                    // Client has closed the connection or error occurred
+                    std::cout << "Client " << client_socket << " disconnected or error occurred." << std::endl;
+                    close(client_socket);
+                    EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+                    kevent(kq, &event, 1, NULL, 0, NULL);
+
+                    // Remove from the client list
+                    for (int j = 0; j < MAX_CLIENTS; ++j)
+                    {
+                        if (client_sockets[j] == client_socket)
+                        {
+                            client_sockets[j] = 0;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Print the received request (this is a simple echo)
+                    std::cout << "Received request from client: " << buffer << std::endl;
+
+                    // Send a simple HTTP response
+                    std::string message = "HTTP/1.1 200 OK\r\n"
+                                          "Content-Type: text/plain\r\n"
+                                          "Content-Length: " + std::to_string(11) + "\r\n"
+                                          "\r\n" +  // Blank line separating headers and body
+                                          "Hello world";
+
+                    int bytes_sent = send(client_socket, message.c_str(), message.length(), 0);
+                    if (bytes_sent < 0)
+                    {
+                        std::cout << "send failed" << std::endl;
+                    }
+
+                    // Optionally close the connection after serving
+                    close(client_socket);
+                    EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+                    kevent(kq, &event, 1, NULL, 0, NULL);
+                }
             }
         }
     }
 
     // Cleanup: Close server socket and client connections
     close(server_fd);
-    for (size_t i = 0; i < clients.size(); ++i)
-    {
-        close(clients[i]);
-    }
 
-    return 0;
 }
 
-//93.64 - 2.39
+Server::Server(std::string host, int port)
+{
+    this->host = host;
+    this->port = port;
+}
+
+Server::Server()
+{
+    this->host = "127.0.0.1";
+    this->port = 8080;
+}
+
+Server::~Server()
+{
+    std::cout << "good bye...\n";
+}
+
