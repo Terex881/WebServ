@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/event.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 class Server{
 
