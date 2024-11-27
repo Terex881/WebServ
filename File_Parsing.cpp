@@ -6,6 +6,11 @@ File_Parsing::File_Parsing():file("file.conf")
 		exit(1);
 }
 
+File_Parsing::~File_Parsing()
+{
+	file.close();
+}
+
 void	trime_line(string &line)
 {
 	int i = 0;
@@ -62,16 +67,16 @@ int	is_num(string word)
 
 int	check_port(vector<string> line)
 {
-	int num = 0;
+	double num = 0;
 
 	size_t index = line[1].find(';');
 	if (line[1].length() != (index + 1))
 		return 0;
-	if (!(line[1].length() >= 2) || !(line[1].length() <= 5))
+	if (!(line[1].length() >= 2))
 		return (0);
 	line[1] = line[1].substr(0, index);
-	num = atoi(line[1].c_str());
-	if (num == 0)
+	num = strtod(line[1].c_str(), NULL);
+	if (num <= 0)
 		return 0;
 
 	if (!is_num(line[1]))
@@ -133,15 +138,15 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 		if (contain_bracket(line))
 		{
 			if (words.size() < 2 || words.size() > 3)
-				exit(1);
+				(*file).close(), exit(1);
 			// checking keys format {}
 			if ((words.size() == 3 && words[2] != "{"))
-				exit(1);
+				(*file).close(), exit(1);
 			if (words.size() == 2 && words[1].find("/") != string::npos)
-				exit(1);
+				(*file).close(), exit(1);
 
 			if (key != "http" && key != "servers" && key != "location")
-				exit(1);
+				(*file).close(), exit(1);
 			child = recursive_push(file, key, open_bracket, close_bracket);
 			if (key == "location")
 				child.values["path"] = words[1];
@@ -158,14 +163,14 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 		{
 			// regular key : value
 			if (key == "listen" && !check_port(words))
-				exit(1);
+				(*file).close(), exit(1);
 			else if (!check_val(words))
-				exit(1);
+				(*file).close(), exit(1);
 			if (parent == "location" && key != "root" && key != "methods"
 				&& key != "cgi" && key != "directory_listing" && key != "return")
-				exit(1);
+				(*file).close(), exit(1);
 			if (parent == "servers" && key != "listen" && key != "error_page")
-				exit(1);
+				(*file).close(), exit(1);
 
 			if (key == "methods" || key == "error_page" || key == "return")
 			{
@@ -203,12 +208,12 @@ void File_Parsing::Checking_Hierarchy(const DynamicStruct &block, DynamicStruct 
 
 	// http : must contain 2 key:value (default) and only 1 children
 	if (name == "http" && (block.values.size() != 2 || block.children.size() != 1))
-		exit(1);
+		file.close(), exit(1);
 	// http : must contain at least 2 key:value (default) and only 1 children (location)
 	if (name == "servers" && (block.values.size() < 3 || block.children.size() != 1))
-		exit(1);
+		file.close(), exit(1);
 	if (name == "location" && block.values.size() <= 3)
-		exit(1);
+		file.close(), exit(1);
 	
 	for (it = block.values.begin(); it != block.values.end(); it++)
 	{
@@ -219,11 +224,11 @@ void File_Parsing::Checking_Hierarchy(const DynamicStruct &block, DynamicStruct 
 		if (current != "" && parent != "")
 		{
 			if (current == "http" && parent != ".")
-				exit(1);
+				file.close(), exit(1);
 			if ((current == "servers" && parent != "http"))
-				exit(1);
+				file.close(), exit(1);
 			if (current == "location" && parent != "servers")
-				exit(1);
+				file.close(), exit(1);
 		}
 		if (it->first == "path")
 			path = it->second;
@@ -236,7 +241,7 @@ void File_Parsing::Checking_Hierarchy(const DynamicStruct &block, DynamicStruct 
 				path = "";
 			}
 			else
-				exit(1);	
+				file.close(), exit(1);	
 		}
 		if (current == "servers" && it->first != "error_page")
 		{
@@ -246,7 +251,7 @@ void File_Parsing::Checking_Hierarchy(const DynamicStruct &block, DynamicStruct 
 				port_cart.push_back(it->second);
 			}
 			else
-				exit(1);
+				file.close(), exit(1);
 		}
 	}
 

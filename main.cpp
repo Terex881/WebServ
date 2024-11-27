@@ -2,7 +2,6 @@
 
 int main()
 {
-
 	File_Parsing parse;
 	int open_b = 0;
 	int close_b = 0;
@@ -28,5 +27,4 @@ int main()
 	}
 
 	cout << "\n**************** Success **************** " << endl;
-	// parse.obj = parse.recursive_push();
 }
