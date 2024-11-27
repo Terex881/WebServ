@@ -1,6 +1,6 @@
 #include "./File_Parsing.hpp"
 
-File_Parsing::File_Parsing():file("file.conf")
+File_Parsing::File_Parsing():file("./config_file/file.conf")
 {
 	if (!file.is_open())
 		exit(1);
