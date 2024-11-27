@@ -16,7 +16,7 @@ public:
 	int port;
 	Server();
 	Server(std::string host, int port);
-	void ft_server_init();
+	int ft_server_init();
 	~Server();
 };
 
