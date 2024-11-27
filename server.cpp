@@ -6,7 +6,12 @@
 
 int    Server::ft_server_init()
 {
-    
+    if (this->port < 1024 || this->port > 65535)
+    {
+        std::cout << "Error port number\n";
+        exit(1);
+    }
+
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0)
     {

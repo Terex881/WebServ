@@ -14,7 +14,7 @@ int main()
 
     // Initialize servers
     server[0] = new Server("127.0.0.1", 6000);
-    server[1] = new Server("127.0.0.1", 6000);
+    server[1] = new Server("127.0.0.1", 8080);
 
     // Initialize each server and get their listening socket fd
     fd[0] = server[0]->ft_server_init();
