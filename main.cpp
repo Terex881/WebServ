@@ -1,3 +1,4 @@
+#include "Delete.hpp"
 #include "Server.hpp"
 #include <iostream>
 #include <sys/event.h>
@@ -60,7 +61,7 @@ int main()
             // Check if the event corresponds to one of the server's listening sockets
             for (int j = 0; j < size; ++j)
             {
-                if (events[i].ident == fd[j] && events[i].filter == EVFILT_READ)
+                if ((int)events[i].ident == fd[j] && events[i].filter == EVFILT_READ)
                 {
                     // Accept new client connection
                     struct sockaddr_in client_addr;
@@ -123,8 +124,14 @@ int main()
                     std::string msg(buffer);
                     std::cout << "Received from client: " << msg << std::endl;
 
+                    
+                    Delete a("test.txt");
+                    a.Delete_File();
+                    std::string response = a.response;
+
+
                     // Send a response back
-                    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
+                    // std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
                     send(client_socket, response.c_str(), response.length(), 0);
 
                     // Close the client connection after serving

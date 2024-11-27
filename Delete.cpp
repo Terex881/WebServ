@@ -20,8 +20,25 @@ int Delete::Can_Be_Deleted()
 {
 	struct stat file_info;
 
+	//check if it is a directory
+	DIR *dir = opendir(this->file_to_deleted.c_str());
+	if (dir != nullptr)
+	{
+		std::cout << "It's a directory!" << std::endl;
+		closedir(dir);
+		this->flag_response = 403;
+		this->response = "HTTP/1.1 403 Forbidden\r\n"
+                                          "Content-Type: text/plain\r\n"
+                                          "Content-Length: " + std::to_string(11) + "\r\n"
+                                          "\r\n" +  // Blank line separating headers and body
+                                          "Forbidden You do not have permission to delete this file.";
+        return 0;
+	}
+
+
     // Check if file exists and retrieve file stats
-    if (stat(this->file_to_deleted.c_str(), &file_info) != 0) {
+    if (stat(this->file_to_deleted.c_str(), &file_info) != 0)
+	{
         std::cout << "File does not exist or could not be accessed: " << this->file_to_deleted << std::endl;
 		this->flag_response = 404;
 		this->response = "HTTP/1.1 404 Not Found\r\n"
