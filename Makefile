@@ -5,7 +5,7 @@ CC = c++
 # FLAG = -Wall -Wextra -Werror -std=c++98
 
 OBJ = main.o Request.o
-.SILENT: # rmove 
+
 all: $(NAME)
 
 $(NAME): $(OBJ)

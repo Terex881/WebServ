@@ -1,5 +1,7 @@
 #include "Request.hpp"
-#include <cstdlib>
+#include <stdexcept>
+#include <string>
+// #include <vector>
 
 void getFirstLine(string line, map<string, string> &mp)
 {
@@ -13,11 +15,35 @@ void getFirstLine(string line, map<string, string> &mp)
 	mp["version"] = word;
 }
 
-void parseChunkedBody(string line, map<string, string> mp)
+
+void trim(string &str)
 {
-	char *end; // check if i need to parse with end 
-	long lenght = std::strtol(line.c_str(), &end, 16);
-	cout << lenght << endl;
+	std::string::size_type first = str.find_first_not_of("\r\n");
+	std::string::size_type last = str.find_last_not_of("\r\n");
+	str = str.substr(first, last - first + 1);
+	// cout <<"---->:" <<  str << endl;
+}
+
+void parseChunkedBody(string line)
+{
+	char *end; string res;
+    while (1337)
+	{
+		long l = strtol(line.c_str(), &end, 16);
+		if (l == 0)
+			break;
+		line = end;
+		trim(line);
+
+		res = line.substr(0, l);
+		cout << l << "   " << res.length() << endl;
+		if (l != res.length())
+			throw invalid_argument("error");
+
+
+		line.erase(0, l + 2);
+		trim(line);
+    }
 }
 
 void parseRequest(string str)
@@ -38,11 +64,9 @@ void parseRequest(string str)
 		else
 			throw invalid_argument("bad request");
 	}
-
 	getline(ss, line, '\0');
-	cout << line << endl;
-	// if (mp.find("Transfer-Encoding")->second == "chunked\r")
-	// 	parseChunkedBody(line, mp);
+	if (mp.find("Transfer-Encoding")->second == "chunked\r")
+		parseChunkedBody(line);
     // else
     // {
 	//     std::map<string, string>::iterator it = mp.find("Content-Length"); 
