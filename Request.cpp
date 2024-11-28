@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include <fstream>
 #include <stdexcept>
 #include <string>
 // #include <vector>
@@ -17,38 +18,42 @@ void getFirstLine(string line, map<string, string> &mp)
 
 
 void trim(string &str)
-{
+{	
 	std::string::size_type first = str.find_first_not_of("\r\n");
 	std::string::size_type last = str.find_last_not_of("\r\n");
-	str = str.substr(first, last - first + 1);
-	// cout <<"---->:" <<  str << endl;
+	if (first == std::string::npos || last == std::string::npos)
+		exit(1);
+	else
+		str = str.substr(first, last - first + 1);
 }
 
-void parseChunkedBody(string line)
+void parseChunkedBody(string line, std::ofstream &tmp)
 {
 	char *end; string res;
     while (1337)
 	{
 		long l = strtol(line.c_str(), &end, 16);
-		if (l == 0)
-			break;
 		line = end;
+		if (l == 0){
+			if (!line.empty())
+				throw invalid_argument("error3"); // if the length not valid stdtol fails return 0
+			break;
+		}
 		trim(line);
-
 		res = line.substr(0, l);
-		cout << l << "   " << res.length() << endl;
 		if (l != res.length())
-			throw invalid_argument("error");
-
-
-		line.erase(0, l + 2);
+			throw invalid_argument("error1");
+		tmp << res;
+		line.erase(0, l);
+		if (line[0] != '\r' && line[1] != '\n')
+			throw invalid_argument("error2"); // ckech if it fails to close the file
 		trim(line);
     }
 }
 
-void parseRequest(string str)
+Request::Request(string str)
 {
-	std::map<string, string> mp;
+	ofstream tmp("file_to_read.txt");
 	string line, key, val;
 	stringstream ss(str);
 	getline(ss, line, '\n');
@@ -64,16 +69,17 @@ void parseRequest(string str)
 		else
 			throw invalid_argument("bad request");
 	}
-	getline(ss, line, '\0');
+	getline(ss, line, '\0'); // read body
 	if (mp.find("Transfer-Encoding")->second == "chunked\r")
-		parseChunkedBody(line);
-    // else
-    // {
-	//     std::map<string, string>::iterator it = mp.find("Content-Length"); 
-	//     // cout << it->first << "    " << it->second << endl;
-	//     if (line.length() != stoi(it->second))
-	//     	throw invalid_argument("erro");
-    // }
-	// for(std::map<string, string>::iterator it = mp.begin(); it != mp.end(); it++)
-	// 	cout << it->first << "    " << it->second << "1" << endl;
+		parseChunkedBody(line, tmp);
+	else if (mp.find("Content-Length") != mp.end())
+	{
+		std::map<string, string>::iterator it = mp.find("Content-Length");
+		trim(line);
+		
+		if (line.length() != std::atoi(it->second.c_str()))
+			throw invalid_argument("erro");
+		
+		tmp << line;
+    }
 }
