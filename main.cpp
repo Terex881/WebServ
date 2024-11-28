@@ -12,6 +12,7 @@ int main(int argc, char **argv)
 	///////////////////////////////////////
 	if (argc != 2)
 		return 0;
+	char *end = NULL;
 	File_Parsing p(argv[1]);
 
 	int size = p.servers_count;
@@ -22,7 +23,9 @@ int main(int argc, char **argv)
 	// Initialize servers
 	for (vector<dt>::iterator it = p.host_port.begin(); it != p.host_port.end(); it++)
 	{
-		server[i++] = new Server(it->key, std::atoi(it->val.c_str()));
+		server[i++] = new Server(it->key, std::strtod(it->val.c_str(), &end));
+		if (*end)
+			return 1;
 	}
 	i = 0;
 	while (i < size)

@@ -40,7 +40,7 @@ int    Server::ft_server_init()
     return (server_fd);
 }
 
-Server::Server(std::string host, int port)
+Server::Server(std::string host, double port)
 {
     this->host = host;
     this->port = port;

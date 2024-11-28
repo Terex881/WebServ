@@ -13,9 +13,10 @@ class Server{
 
 public:
 	std::string host;
-	int port;
+	std::string end;
+	double port;
 	Server();
-	Server(std::string host, int port);
+	Server(std::string host, double port);
 	int ft_server_init();
 	~Server();
 };
