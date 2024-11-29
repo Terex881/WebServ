@@ -23,7 +23,7 @@ int main()
 					"Content-Length: 12\r\n"
 					"Content-Type: applicationx-www-form-urlencoded\r\n"
 					"\r\n"
-					"name=Jjj%20U\r\n";
+					"ncame=Jj%20U\r\n";
 		Request request(str1);
 	} catch (const std::exception &e) {
 		cout << e.what()  << endl;
