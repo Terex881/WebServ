@@ -20,7 +20,7 @@ int main()
     fd[1] = server[1]->ft_server_init();
 
     //start servers
-    server[0]->ft_start(size, fd);
+    Server::ft_start(size, fd);
 
     return 0;
 }
