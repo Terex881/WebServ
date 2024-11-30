@@ -1,5 +1,5 @@
 CC = c++
-CC += -Wall -Wextra -Werror
+CC += -Wall -Wextra -Werror -g -fsanitize=address
 RM = rm -f
 NAME = webserv
 
