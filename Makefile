@@ -19,6 +19,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME)
+	rm -rf $(NAME) rm file_to_read.txt
 
 re: fclean all
