@@ -84,7 +84,7 @@ void    Server::ft_start(int size, int *fd)
 			if (!is_new_connection && events[i].filter == EVFILT_READ)
 			{
 				int client_socket = events[i].ident;
-				char buffer[1024] = {0};
+				char buffer[65535] = {0};
 				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
 				if (bytes_received <= 0)
 				{
@@ -107,8 +107,24 @@ void    Server::ft_start(int size, int *fd)
 				else
 				{
 					// Handle incoming message (echo or any other processing)
+
+					std::string request_headers(buffer, bytes_received);
+                    size_t content_length = 0;
+
+                    // Simple method to extract the Content-Length (you might want to improve this with proper header parsing)
+                    size_t pos = request_headers.find("Content-Length: ");
+					
+                    if (pos != std::string::npos)
+                    {
+                        pos += 15;  // Skip "Content-Length: "
+                        size_t end_pos = request_headers.find("\r\n", pos);
+                        if (end_pos != std::string::npos)
+                            content_length = std::stoi(request_headers.substr(pos, end_pos - pos));
+                    }
+
+
 					std::string msg;
-                    msg.assign(buffer, 1024);
+                    msg.assign(buffer, content_length);
                     std::cout << msg << std::endl;
 
 					// std::cout << "Received from client: " << msg << std::endl;
