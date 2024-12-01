@@ -8,6 +8,11 @@
 #include <sys/event.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <exception>
+#include <iostream>
+#include <sys/event.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 class Server{
 

@@ -28,7 +28,7 @@ void    Server::ft_start(int size, int *fd)
 	}
 
 	// Array to store client socket file descriptors
-	int client_sockets[MAX_CLIENTS] = {0};
+	// int client_sockets[MAX_CLIENTS] = {0};
 
 	while (true)
 	{
@@ -66,14 +66,14 @@ void    Server::ft_start(int size, int *fd)
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
 					// Optionally, store the socket in an array for further management
-					for (int k = 0; k < MAX_CLIENTS; ++k)
-					{
-						if (client_sockets[k] == 0)
-						{
-							client_sockets[k] = new_socket;
-							break;
-						}
-					}
+					// for (int k = 0; k < MAX_CLIENTS; ++k)
+					// {
+					// 	if (client_sockets[k] == 0)
+					// 	{
+					// 		client_sockets[k] = new_socket;
+					// 		break;
+					// 	}
+					// }
 
 					is_new_connection = true;
 					break;
@@ -95,26 +95,29 @@ void    Server::ft_start(int size, int *fd)
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
 					// Remove from the client list
-					for (int j = 0; j < MAX_CLIENTS; ++j)
-					{
-						if (client_sockets[j] == client_socket)
-						{
-							client_sockets[j] = 0;
-							break;
-						}
-					}
+					// for (int j = 0; j < MAX_CLIENTS; ++j)
+					// {
+					// 	if (client_sockets[j] == client_socket)
+					// 	{
+					// 		client_sockets[j] = 0;
+					// 		break;
+					// 	}
+					// }
 				}
 				else
 				{
 					// Handle incoming message (echo or any other processing)
-					std::string msg(buffer);
-					std::cout << "Received from client: " << msg << std::endl;
+					std::string msg;
+                    msg.assign(buffer, 1024);
+                    std::cout << msg << std::endl;
+
+					// std::cout << "Received from client: " << msg << std::endl;
 
                     // salah handle request here test
 
 
                     
-                    // Request(msg.c_str());
+                    Request(msg.c_str());
 
 
 

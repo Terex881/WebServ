@@ -1,24 +1,23 @@
-CC = c++
-CC += -Wall -Wextra -Werror -g -fsanitize=address
-RM = rm -f
 NAME = webserv
 
-SRC_FILE = main.cpp Delete.cpp Server.cpp ./parsing/File_Parsing.cpp Request.cpp
-SRC_HEADER = Delete.hpp Server.hpp ./parsing/File_Parsing.hpp ./parsing/DynamicStruct.hpp Request.hpp
+CC = c++
 
-all: $(NAME) 
+FLAG =  -g -fsanitize=address -std=c++98
 
-OBJS = $(SRC_FILE:.cpp=.o)
+OBJ = main.o Delete.o Server.o File_Parsing.o Request.o
 
-$(NAME): $(OBJS)
-	$(CC) $(SRC_FILE) -o $(NAME)
+all: $(NAME)
 
-%.o: %.cpp $(SRC_HEADER)
-	$(CC) -c $< -o $@
+$(NAME): $(OBJ)
+	$(CC) $(OBJ) $(FLAG) -o $@
+
+%.o: %.cpp Request.hpp Delete.hpp Server.hpp File_Parsing.hpp DynamicStruct.hpp
+	$(CC) $(FLAG) -c $< -o $@
 
 clean:
-	$(RM) -rf $(OBJS)
+	rm -rf $(OBJ)
 
 fclean: clean
-	$(RM) -rf webserv
-re: clean all
+	rm -rf $(NAME) rm file_to_read.txt #file to pbuffer to it
+
+re: fclean all
