@@ -32,7 +32,6 @@ File_Parsing::~File_Parsing()
 void	trime_line(string &line)
 {
 	int i = 0;
-	int j = 0;
 	int last = 0;
 
 	if (line.length() > 0)
