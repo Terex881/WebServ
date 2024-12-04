@@ -18,6 +18,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt
+	rm -rf $(NAME) rm file_to_read.txt resume.py profile.jpg file*
 
 re: fclean all
