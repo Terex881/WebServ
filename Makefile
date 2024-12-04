@@ -2,8 +2,7 @@ NAME = request
 
 CC = c++
 
-# FLAG = -Wall -Wextra -Werror -std=c++98
-FLAG = -g -fsanitize=address -std=c++98
+FLAG =  -g -fsanitize=address -std=c++98
 
 OBJ = main.o Request.o
 

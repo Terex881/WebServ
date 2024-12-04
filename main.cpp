@@ -25,33 +25,22 @@ int main()
 					"\r\n"
 					"ncame=Jj%20U\r\n";
 					//---------------------------------------------------
-		string str2="POST /upload HTTP/1.1\r\n"
-					"Host: example.com\r\n"
-					"User-Agent: Mozilla/5.0\r\n"
-					"Content-Length: 68137\r\n"
-					"Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryABC123\r\n"
-					"\r\n"
-					"------WebKitFormBoundaryABC123\r\n"
-					"Content-Disposition: form-data; name=\"description\"\r\n"
-					"\r\n"
-					"Project documentation for Q4 software release. Contains key implementation details and project milestones.\r\n"
-					"------WebKitFormBoundaryABC123\r\n"
-					"Content-Disposition: form-data; name=\"myFile\"; filename=\"project_report.txt\"\r\n"
-					"Content-Type: text/plain\r\n"
-					"\r\n"
-					"Technical Overview:\r\n"
-					"- Project initiated on September 15, 2024\r\n"
-					"- Primary objectives include system redesign and performance optimization\r\n"
-					"- Key team members: Alice Johnson, Robert Chen, Maria Rodriguez\r\n"
-					"\r\n"
-					"Total estimated development time: 4 months\r\n"
-					"Projected completion date: January 30, 2025\r\n"
-					"\r\n"
-					"Budget allocation: $450,000\r\n"
-					"------WebKitFormBoundaryABC123--\r\n";
-		Request request(str);
+		std::string str2 = "POST /?=&1111=2334 HTTP/1.1\r\n"
+                   "User-Agent: PostmanRuntime/7.33.0\r\n"
+                   "Accept: */*\r\n"
+                   "Postman-Token: aa819387-b087-4dd5-a149-02e28b7deffa\r\n"
+                   "Host: 127.0.0.1:4455\r\n"
+                   "Accept-Encoding: gzip, deflate, br\r\n"
+                   "Connection: keep-alive\r\n"
+                   "Content-Length: 4456932\r\n"
+                   "Content-Type: video/mp4\r\n\r\n"
+                   "ftypisomisomiso2avc1mp41��moovlmvhd���@��trak\tkhd�+@��$edtselst�+�Nmdia mdhd<@U�GhdlrvideISO Media file produced by Google Inc.��minfvmhd$dinfdref\r\n"
+                   "u�����@@�l�stsd�avc1��HH��2avcCM@\r\n"
+                   "D�h� colrnclxpaspbtrt/G/Gstts\r\n";
+                              
+		Request request(str2);
 	} catch (const std::exception &e) {
 		cout << e.what()  << endl;
 	}
-	return 0;
+	return 0; 
 }

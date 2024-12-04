@@ -42,7 +42,7 @@ void parseChunkedBody(string line, std::ofstream &tmp)
 	char *end; string res;
     while (1337)
 	{
-		long l = strtol(line.c_str(), &end, 16);
+		unsigned long l = strtol(line.c_str(), &end, 16);
 		line = end;
 		if (l == 0){
 			if (!line.empty())
@@ -71,8 +71,8 @@ void parseBodyTypes(string line, map<string, string> mp)
 	else if (mp.find("Content-Length") != mp.end())
 	{
 		std::map<string, string>::iterator it = mp.find("Content-Length");
-		if (line.length() - 2 != std::atoi(it->second.c_str()))
-			throw invalid_argument("erro");
+		// if (line.size() != std::atoi(it->second.c_str())) // return it to .lenght
+		// 	throw invalid_argument("erro");
 		tmp << line;
     }
 
@@ -98,6 +98,7 @@ Request::Request(string str)
 	if (mp.find("method")->second == "POST")
 	{
 		getline(ss, line, '\0'); // read body
+		cout << line << endl;
 		parseBodyTypes(line, mp);
 	}
 }
