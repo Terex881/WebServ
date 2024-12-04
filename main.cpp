@@ -7,7 +7,7 @@ int main()
 	try {
 		string str= "POST /upload HTTP/1.1\r\n"
 					"Host: example.com\r\n"
-					"Content-Type: application/json\r\n"
+					"Content-Type:	application/json\r\n"
 					"Transfer-Encoding: chunked\r\n"
 					"\r\n"
         			"8\r\n"
@@ -25,33 +25,34 @@ int main()
 					"\r\n"
 					"ncame=Jj%20U\r\n";
 					//---------------------------------------------------
-		string str2="POST /upload HTTP/1.1\r\n"
-					"Host: example.com\r\n"
-					"User-Agent: Mozilla/5.0\r\n"
-					"Content-Length: 68137\r\n"
-					"Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryABC123\r\n"
-					"\r\n"
-					"------WebKitFormBoundaryABC123\r\n"
-					"Content-Disposition: form-data; name=\"description\"\r\n"
-					"\r\n"
-					"Project documentation for Q4 software release. Contains key implementation details and project milestones.\r\n"
-					"------WebKitFormBoundaryABC123\r\n"
-					"Content-Disposition: form-data; name=\"myFile\"; filename=\"project_report.txt\"\r\n"
-					"Content-Type: text/plain\r\n"
-					"\r\n"
-					"Technical Overview:\r\n"
-					"- Project initiated on September 15, 2024\r\n"
-					"- Primary objectives include system redesign and performance optimization\r\n"
-					"- Key team members: Alice Johnson, Robert Chen, Maria Rodriguez\r\n"
-					"\r\n"
-					"Total estimated development time: 4 months\r\n"
-					"Projected completion date: January 30, 2025\r\n"
-					"\r\n"
-					"Budget allocation: $450,000\r\n"
-					"------WebKitFormBoundaryABC123--\r\n";
+		string str2=	"POST /profile/upload HTTP/1.1\r\n"
+						"Host: myapp.com\r\n"
+						"Content-Type: multipart/form-data; boundary=----FormBoundary123456\r\n"
+						"\r\n"
+						// "------FormBoundary123456\r\n"
+						// "Content-Disposition: form-data; name=\"user_id\"\r\n"
+						// "\r\n"
+						// "1234\r\n"
+						// "------FormBoundary123456\r\n"
+						// "Content-Disposition: form-data; name=\"full_name\"\r\n"
+						// "\r\n"
+						// "John Doe\r\n0"
+						"------FormBoundary123456\r\n"
+						"Content-Disposition: form-data; name=\"profile_picture\"; filename=\"profile.jpg\"\r\n"
+						"Content-Type: image/jpeg\r\n"
+						"\r\n"
+						"(binary image data would be here)\r\n"
+						"------FormBoundary123456\r\n"
+						"Content-Disposition: form-data; name=\"resume\"; filename=\"resume.pdf\"\r\n"
+						"Content-Type: application/pdf\r\n"
+						"\r\n"
+						"(binary PDF data would be here)\r\n"
+						"------FormBoundary123456--\r\n";
 		Request request(str);
 	} catch (const std::exception &e) {
-		cout << e.what()  << endl;
+		cout << e.what() << endl;
 	}
 	return 0;
 }
+
+

@@ -19,6 +19,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt
+	rm -rf $(NAME) rm file_to_read.txt resume.pdf profile.jpg
 
 re: fclean all

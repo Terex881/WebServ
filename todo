@@ -1,0 +1,11 @@
+Fielding & Reschke           Standards Track                   [Page 21]
+
+
+RFC 7230           HTTP/1.1 Message Syntax and Routing         June 2014
+--------------------------
+  Various ad hoc limitations on request-line length are found in
+   practice.  It is RECOMMENDED that all HTTP senders and recipients
+   support, at a minimum, request-line lengths of 8000 octets. --> page 22
+
+
+Example of INVALID: Content-Type : application/json --> 400 bad request
