@@ -6,9 +6,7 @@
 #include <string>
 #include <fstream>
 
-
 using namespace std;
-
 
 void parseRequest(string str);
 
@@ -16,7 +14,7 @@ void parseRequest(string str);
 class Request
 {
     private:
-    	std::map<string, string> mp;
+    	std::map<string, string> headerMap;
 
     public:
         Request(string body);
