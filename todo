@@ -9,3 +9,6 @@ RFC 7230           HTTP/1.1 Message Syntax and Routing         June 2014
 
 
 Example of INVALID: Content-Type : application/json --> 400 bad request
+
+
+// chck on host if exist

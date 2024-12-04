@@ -7,7 +7,7 @@ int main()
 	try {
 		string str= "POST /upload HTTP/1.1\r\n"
 					"Host: example.com\r\n"
-					"Content-Type:	application/json\r\n"
+					"Content-Type :	 application/json\r\n"
 					"Transfer-Encoding: chunked\r\n"
 					"\r\n"
         			"8\r\n"
@@ -29,26 +29,26 @@ int main()
 						"Host: myapp.com\r\n"
 						"Content-Type: multipart/form-data; boundary=----FormBoundary123456\r\n"
 						"\r\n"
-						// "------FormBoundary123456\r\n"
-						// "Content-Disposition: form-data; name=\"user_id\"\r\n"
-						// "\r\n"
-						// "1234\r\n"
-						// "------FormBoundary123456\r\n"
-						// "Content-Disposition: form-data; name=\"full_name\"\r\n"
-						// "\r\n"
-						// "John Doe\r\n0"
+						"------FormBoundary123456\r\n"
+						"Content-Disposition: form-data; name=\"user_id\"\r\n"
+						"\r\n"
+						"1234\r\n"
+						"------FormBoundary123456\r\n"
+						"Content-Disposition: form-data; name=\"full_name\"\r\n"
+						"\r\n"
+						"John Doe\r\n"
 						"------FormBoundary123456\r\n"
 						"Content-Disposition: form-data; name=\"profile_picture\"; filename=\"profile.jpg\"\r\n"
 						"Content-Type: image/jpeg\r\n"
 						"\r\n"
 						"(binary image data would be here)\r\n"
 						"------FormBoundary123456\r\n"
-						"Content-Disposition: form-data; name=\"resume\"; filename=\"resume.pdf\"\r\n"
+						"Content-Disposition: form-data; name=\"resume\"; filename=\"resume.py\"\r\n"
 						"Content-Type: application/pdf\r\n"
 						"\r\n"
 						"(binary PDF data would be here)\r\n"
 						"------FormBoundary123456--\r\n";
-		Request request(str);
+		Request request(str2);
 	} catch (const std::exception &e) {
 		cout << e.what() << endl;
 	}
