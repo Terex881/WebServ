@@ -22,7 +22,7 @@ void parseFirstLine(string line, map<string, string> &headerMap)
 		cout << "bad URL\n";
 	it = headerMap.find("version");
 	if (it->second != "HTTP/1.1\r")
-		cout << "invalid version\n";
+		cout << "\033[31mred error: invalid version\n";
 }
 
 void trim(string &str){	
@@ -131,6 +131,7 @@ Request::Request(string str)
 	}
 	if (headerMap.find("method")->second == "POST")
 	{
+		cout << headerMap.find("Content-Length")->second << endl;
 		string str = ss.str();
 		line.assign(str);
 		// getline(ss, line, '\0'); // read body
