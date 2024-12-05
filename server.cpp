@@ -90,15 +90,18 @@ void Server::ft_start(int size, int *fd) {
                 } else {
                     // Handle incoming message (echo or any other processing)
                     std::string msg(buffer, bytes_received);
-                    std::cout << "Received from client: " << msg << std::endl;
-                    if (msg.find("POST") != std::string::npos ) { //&& msg.find("%%EOF") != std::string::npos
+    				cout << "\033[44mReceived from client: \033[0m" << msg.size() << ":  :"<< msg << std::endl;
+    				
 
-
-                        // call salah
-                        Request(msg.c_str());
+                    if (msg.find("POST") != std::string::npos) {
                         // Prepare a response to send
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
                         client_buffers[client_socket] = response;
+
+
+                        //salah 
+
+                        // Request(msg.c_str());
 
                         // Add a write event to the kqueue
                         EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
@@ -109,51 +112,50 @@ void Server::ft_start(int size, int *fd) {
                          send(client_socket, response.c_str(), response.size(), 0);
                     }
                 }
-             //}else if (events[i].filter == EVFILT_WRITE) {
-            //     int client_socket = events[i].ident;
-            //     // std::string &response = client_buffers[client_socket];
-            //     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world2";
-            //     int bytes_sent = send(client_socket, response.c_str(), response.length(), 0);
-            //     if (bytes_sent < 0) {
-            //         std::cerr << "send failed" << std::endl;
-            //         close(client_socket);
-            //         EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-            //         kevent(kq, &event, 1, NULL, 0, NULL);
+            } else if (events[i].filter == EVFILT_WRITE) {
+                int client_socket = events[i].ident;
+                // std::string &response = client_buffers[client_socket];
+                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world2";
+                int bytes_sent = send(client_socket, response.c_str(), response.length(), 0);
+                if (bytes_sent < 0) {
+                    std::cerr << "send failed" << std::endl;
+                    close(client_socket);
+                    EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+                    kevent(kq, &event, 1, NULL, 0, NULL);
 
-            //         // Remove from the client list
-            //         for (int j = 0; j < MAX_CLIENTS; ++j) {
-            //             if (client_sockets[j] == client_socket) {
-            //                 client_sockets[j] = 0;
-            //                 break;
-            //             }
-            //         }
-            //} 
-            // else {
-            //         // Remove the write event after sending the response
-            //         // EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-            //         // kevent(kq, &event, 1, NULL, 0, NULL);
+                    // Remove from the client list
+                    for (int j = 0; j < MAX_CLIENTS; ++j) {
+                        if (client_sockets[j] == client_socket) {
+                            client_sockets[j] = 0;
+                            break;
+                        }
+                    }
+                } else {
+                    // Remove the write event after sending the response
+                    EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+                    kevent(kq, &event, 1, NULL, 0, NULL);
 
-            //         // Close the client connection after serving
-            //         close(client_socket);
-            //         EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-            //         kevent(kq, &event, 1, NULL, 0, NULL);
+                    // Close the client connection after serving
+                    close(client_socket);
+                    EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+                    kevent(kq, &event, 1, NULL, 0, NULL);
 
-            //         // Remove from the client list
-            //         for (int j = 0; j < MAX_CLIENTS; ++j) {
-            //             if (client_sockets[j] == client_socket) {
-            //                 client_sockets[j] = 0;
-            //                 break;
-            //             }
-            //         }
-            //     }
+                    // Remove from the client list
+                    for (int j = 0; j < MAX_CLIENTS; ++j) {
+                        if (client_sockets[j] == client_socket) {
+                            client_sockets[j] = 0;
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
 
     // Cleanup: Close all server and client connections
-    // for (int i = 0; i < size; ++i) {
-    //     close(fd[i]);
-    // }
+    for (int i = 0; i < size; ++i) {
+        close(fd[i]);
+    }
 }
 
 int    Server::ft_server_init()

@@ -18,6 +18,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt #file to pbuffer to it
+	rm -rf $(NAME) rm file_to_read.txt *.py
 
 re: fclean all
