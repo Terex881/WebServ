@@ -90,7 +90,13 @@ void Server::ft_start(int size, int *fd) {
                     // Handle incoming message (echo or any other processing)
                     std::string msg(buffer, bytes_received);
                     std::cout << "Received from client: " << msg << std::endl;
-                    if (msg.find("POST") != std::string::npos && msg.find("%%EOF") != std::string::npos) {
+                    if (msg.find("POST") != std::string::npos) { // && msg.find("%%EOF") != std::string::npos
+
+
+                        //salah 
+
+
+
                         // Prepare a response to send
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
                         client_buffers[client_socket] = response;
