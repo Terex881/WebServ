@@ -1,8 +1,10 @@
 #include "Server.hpp"
 #include "Delete.hpp"
 #include <ostream>
+#include <cstring>
 
 #define MAX_CLIENTS 128
+#define BUFFER_SIZE 4096
 
 void Server::ft_start(int size, int *fd) {
     int kq = kqueue();
@@ -70,7 +72,7 @@ void Server::ft_start(int size, int *fd) {
             // If it's not a new connection, it's a client sending data
             if (!is_new_connection && events[i].filter == EVFILT_READ) {
                 int client_socket = events[i].ident;
-                char buffer[4096] = {0};
+                char buffer[BUFFER_SIZE] = {0};
                 int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
                 if (bytes_received <= 0) {
                     // Client has closed the connection or error occurred
@@ -90,12 +92,9 @@ void Server::ft_start(int size, int *fd) {
                     // Handle incoming message (echo or any other processing)
                     std::string msg(buffer, bytes_received);
                     std::cout << "Received from client: " << msg << std::endl;
-                    if (msg.find("POST") != std::string::npos) { // && msg.find("%%EOF") != std::string::npos
+                    if (msg.find("POST") != std::string::npos) {
 
-
-                        //salah 
-
-
+                        //salah
 
                         // Prepare a response to send
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
@@ -104,16 +103,14 @@ void Server::ft_start(int size, int *fd) {
                         // Add a write event to the kqueue
                         EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
                         kevent(kq, &event, 1, NULL, 0, NULL);
-                    }
-                    else if (msg.find("GET") != std::string::npos){
-                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world3";
-                         send(client_socket, response.c_str(), response.size(), 0);
+                    } else if (msg.find("GET") != std::string::npos) {
+                        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world3";
+                        send(client_socket, response.c_str(), response.size(), 0);
                     }
                 }
             } else if (events[i].filter == EVFILT_WRITE) {
                 int client_socket = events[i].ident;
-                // std::string &response = client_buffers[client_socket];
-                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world2";
+                std::string &response = client_buffers[client_socket];
                 int bytes_sent = send(client_socket, response.c_str(), response.length(), 0);
                 if (bytes_sent < 0) {
                     std::cerr << "send failed" << std::endl;
@@ -156,17 +153,14 @@ void Server::ft_start(int size, int *fd) {
     }
 }
 
-int    Server::ft_server_init()
-{
-    if (this->port < 1024 || this->port > 65535)
-    {
+int Server::ft_server_init() {
+    if (this->port < 1024 || this->port > 65535) {
         std::cout << "Error port number\n";
         exit(1);
     }
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0)
-    {
+    if (server_fd < 0) {
         std::cout << "socket failed" << std::endl;
         exit(1);
     }
@@ -176,15 +170,13 @@ int    Server::ft_server_init()
     server_addr.sin_addr.s_addr = inet_addr(this->host.c_str()); // by default Binding to localhost
     server_addr.sin_port = htons(this->port); // by default Port 8080
 
-    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-    {
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         std::cout << "bind failed" << std::endl;
         exit(1);
     }
 
-    std::cout << "Server is listening on "<<this->host << ":"<<this->port<<std::endl;
-    if (listen(server_fd, MAX_CLIENTS) == -1)
-    {
+    std::cout << "Server is listening on " << this->host << ":" << this->port << std::endl;
+    if (listen(server_fd, MAX_CLIENTS) == -1) {
         std::cout << "listen failed" << std::endl;
         exit(1);
     }
@@ -192,19 +184,16 @@ int    Server::ft_server_init()
     return (server_fd);
 }
 
-Server::Server(std::string host, int port)
-{
+Server::Server(std::string host, int port) {
     this->host = host;
     this->port = port;
 }
 
-Server::Server()
-{
+Server::Server() {
     this->host = "127.0.0.1";
     this->port = 8080;
 }
 
-Server::~Server()
-{
+Server::~Server() {
     std::cout << "good bye...\n";
 }
