@@ -1,37 +1,48 @@
 #include "Request.hpp"
-#include <cstddef>
-#include <fstream>
-#include <ostream>
-#include <sys/stat.h>
 
-size_t Request::size1 = 0;
+int Request::isFinish = 0;
+string Request::header;
+string Request::body;
 
-void parseFirstLine(string line, map<string, string> &headerMap)
+
+Request::Request()
+{
+	bodySize = 0;
+	isFinish = 0;
+}
+
+void Request::print(map<string, string> &mp)
+{
+	for(map<string, string>::iterator it = mp.begin(); it!=mp.end(); it++)
+		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
+
+}
+void parseFirstLine(string line, map<string, string> &mp)
 {
 	string word;
 	string key;
 	int i = 0;
 	if (std::count(line.begin(),line.end(), ' ') != 2)
-		cout << "\033[31merro: found 2 spaces in the first line\033[0m" << std::endl;
+		cout << RED << "erro: found 2 spaces in the first line" << std::endl;
 
 	while(line.length() > 0)
 	{
 		word = line.substr(0, line.find(" ")); line.erase(0, word.length());
 		key = (i == 0) ? "method" : (i == 1) ? "path" : "version";
-		headerMap[key] = word; i++;
+		mp[key] = word; i++;
 		line.erase(0, 1);
 	}
-	map<string, string>::iterator it = headerMap.find("method");
+	map<string, string>::iterator it = mp.find("method");
 	if (it->second != "POST" && it->second != "GET" && it->second != "DELETE")
-		cout << "\033[31m501 Not IheaderMaplemented\033[0m" << std::endl;
+		cout << RED << "501 Not Implemented" << std::endl;
 
-	it = headerMap.find("path");// check other characters
+	it = mp.find("path");// check other characters
 	if (it->second.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
-		cout << "\033[31mbad URL\033[0m" << std::endl;
+		cout << RED << "bad URL" << std::endl;
 
-	it = headerMap.find("version");
-	if (it->second != "HTTP/1.1\r")
-		cout << "\033[31merror: invalid version\033[0m" << std::endl;
+	it = mp.find("version");
+	if (it->second != "HTTP/1.1")
+		cout << RED << "error: invalid version" << std::endl;
 
 }
 
@@ -43,8 +54,9 @@ void trim(string &str){
 	str = str.substr(first, last - first + 1);
 }
 
-void parseChunkedBody(string line, std::ofstream &tmp)
+void parseChunkedBody(string line)
 {
+	std::ofstream tmp("OK");
 	char *end; string res;
 	// read until 0 and parse 
     while (1337)
@@ -54,13 +66,13 @@ void parseChunkedBody(string line, std::ofstream &tmp)
 		if (l == 0)
 		{
 			if (!line.empty())
-				cout << "\033[31merror: strtol doesn't found an hexadecimal return 0\033[0m" << std::endl; // if the length not valid strtol fails return 0
+				cout << RED << "error: strtol doesn't found an hexadecimal return 0\033[0m" << std::endl; // if the length not valid strtol fails return 0
 			break;
 		}
 		trim(line);
 		res = line.substr(0, l);
 		if ((unsigned long)l != res.length())
-			cout << "\033[31merror: the length of the chunked data dosn't match\033[0m" << std::endl;
+			cout << RED << "error: the length of the chunked data dosn't match\033[0m" << std::endl;
 
 		tmp << res;
 		line.erase(0, l);
@@ -70,103 +82,129 @@ void parseChunkedBody(string line, std::ofstream &tmp)
 		trim(line);
     }
 }
-
-void parseBoundryBody(string line, map<string, string> headerMap)
+void Request::parseHeader(string &header)
 {
-	string title, boundry, fileName, subBody;
-	unsigned long filePos; unsigned long namePos; int i = 0;
-	map<string, string>::iterator it = headerMap.find("Content-Type");
-	string seperator = "--" + it->second.substr(it->second.find("=") + 1, it->second.find("\r") - it->second.find("=") - 1);
-	
-	while(!line.empty())
+	size_t pos = header.find("\r\n");
+	string firstLine = header.substr(0, pos);
+	// check if first line has space in start and print error 
+	header.erase(0, pos + 2);
+	parseFirstLine(firstLine, mp);
+
+	while(!header.empty())
 	{
-		line = line.c_str() + seperator.length() + 2; // +2 to skip \r\n 
-		subBody = line.substr(0, line.find(seperator));
-		size_t subBodyLength = subBody.length();
-		filePos = subBody.find("filename=\"");
-		if (filePos != std::string::npos)
+		size_t colonPos = header.find(":");
+		if(colonPos == string::npos || std::isspace(header[colonPos - 1]) || std:: isspace(header[0]))
 		{
-			subBody.erase(0, filePos + 10);
-			fileName = subBody.substr(0, subBody.find("\"\r"));
-			ofstream binaryDataFile(fileName);
-			trim(subBody);
-			string binaryData = subBody.substr(subBody.find("\r\n\r\n")+4, subBody.length()); // add 4 to skip \r\n\r\n
-			binaryDataFile << binaryData;
+			cout << RED << "foud space or doesn't find :";
+			break;
 		}
-		else if (!subBody.empty())
-		{
-			trim(subBody);
-			ofstream file("file" + to_string(i)); i++;
-			file << subBody;
-		}
-		line.erase(0, subBodyLength); trim(line);
+
+		size_t lineEnd = header.find("\r\n");
+		if(lineEnd == string::npos)
+			lineEnd = header.length();
+
+		string key = header.substr(0, colonPos);
+		key.erase(0, key.find_first_not_of(" "));
+
+		string value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
+		value.erase(0, value.find_first_not_of(" "));
+
+		mp[key] = value;
+		
+		header.erase(0, lineEnd + 2);
 	}
+	map<string, string>::iterator lengthPos = mp.find("Content-Length");
+	if (lengthPos != mp.end())
+		bodySize = std::atol(lengthPos->second.c_str());
+
+	print(mp);
+	isFinish = 1;
 }
 
-void Request::parseBodyTypes(string line, map<string, string> headerMap)
+void parseBoundryBody(string &body, map<string, string> mp)
 {
-	char *end;
-	std::map<string, string>::iterator it;
-	ofstream tmp("file_to_read.py");
-	if (headerMap.find("Transfer-Encoding")->second == "chunked\r")
-		parseChunkedBody(line, tmp);
+	string fileContent, fileName;
+	size_t contentStartPos, filePos;
+	string CRLF = "\r\n";
+	string seperator = body.substr(0, body.find_first_of(CRLF));
 	
-	// if (headerMap.find("Content-Length") != headerMap.end())
-	if (size1 != 0)
+	while (!body.empty())
 	{
-		// it = headerMap.find("Content-Length");
-		if (line.length() != size1)
-			cout << "\033[31mcontent-length doesn't match with size of the body\033[0m" << std::endl;
-		tmp << line;
-    }
-	// else if (headerMap.find("Content-Type") != headerMap.end())
-	// 	parseBoundryBody(line, headerMap);
-}
-
-Request::Request(string request)
-{
-	static int i;
-	string line, key, val;
-	static string body;
-	stringstream ss(request);
-	
-	if (!i)
-	{
-		getline(ss, line, '\n');
-		parseFirstLine(line, headerMap); // store first line in the map
-		while(getline(ss, line, '\n') && line != "\r")
+		body.erase(0, seperator.length() + 2);
+		
+		if (body.find(seperator) == string::npos) 
+			break;
+		
+		filePos = body.find("filename=\"");
+		if (filePos != string::npos)
 		{
-			if (line.find(": ") != std::string::npos)
+			body.erase(0, filePos + 10);
+		fileName = body.substr(0, body.find_first_of("\"")); // check if filename hold "
+			
+			contentStartPos = body.find(CRLF + CRLF);
+			if (contentStartPos != string::npos)
 			{
-				key = line.substr(0, line.find(":"));
-				val = line.substr(line.find(":") + 2, line.find("\r"));
-				if (isspace(key[0]) || isspace(key[key.length()-1]) || isspace(val[0]) || isspace(val[val.length()-2]))
-					cout << "\033[31merror: found spaces\033[0m" << std::endl;
-				headerMap[key] = val;
+				fileContent = body.substr(contentStartPos + 4, body.find(seperator) - contentStartPos - 4 - 2);
+				ofstream outFile(fileName, ios::binary);
+				if (outFile.is_open())
+					outFile << fileContent; // check if open fails
 			}
-			else
-				cout << "\033[31merror: no : founded\033[0m" << std::endl;
 		}
-		i = 1;
-		size1 = stoi(headerMap.find("Content-Length")->second);
+		body.erase(0, body.find(seperator));
 	}
-	while(getline(ss, line, '\n'))
+}
+
+void Request::parseBodyTypes(string body, map<string, string> mp)
+{
+	map<string, string>::iterator chunked = mp.find("Transfer-Encoding");
+	map<string, string>::iterator boundry = mp.find("Content-Type");
+
+	if (chunked != mp.end() && chunked->second == "chunked")
+		parseChunkedBody(body);
+	if (boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos)
+		parseBoundryBody(body, mp);
+	// else
+	// 	exit(12);
+
+
+
+
+}
+
+
+
+void Request::request(string &request)
+{
+	
+	if (!isFinish)
 	{
-		body += line;
-		if (!ss.eof())
-			body += "\n";	
+		size_t pos = request.find("\r\n\r\n");
+		if (pos != string::npos)
+		{
+			header += request.substr(0, pos);
+			request.erase(0, pos + 4);
+			// cout << YELLOW << ":" << request << ":" << endl;
+			parseHeader(header);
+		}
+		else
+			header.append(request);
 	}
+	if (isFinish == 1)
+	{
+		
+		body += request;
+		cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
+		parseBodyTypes(body, mp);
+	}
+	ofstream ss("hh.py");
+	ss << request;
 
-	// ofstream s("out.py");
-	// s << body;
-
-	// cout << "---->\033[31m" << body.length() << "\033[0m" << std::endl;
 	
-	ofstream file("salah.py");
-	file << "body lenth is :" << body.length() << endl;
-	file << "size is :" << size1;
 
 	
-	if (size1 == body.length())
-		parseBodyTypes(body, headerMap);
+	
+	
+
+
+	
 }

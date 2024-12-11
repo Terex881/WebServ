@@ -3,7 +3,7 @@
 #include <ostream>
 #include <cstring>
 #include <vector>
-
+#include "Request.hpp"
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
 
@@ -11,6 +11,7 @@
 void Server::ft_start(int size, int *fd) {
 
 
+	Request request;
 	int kq = kqueue();
 	if (kq == -1) {
 		std::cerr << "kqueue failed" << std::endl;
@@ -99,15 +100,12 @@ void Server::ft_start(int size, int *fd) {
 					std::string msg;
 					msg.assign(buffer, bytes_received);
 
-					std::cout << "Received from client: " << msg<< std::endl;
+					std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
-
-
-
-
-
+					request.request(msg);
+				
 		
 
 					// 	// Prepare a response to send
