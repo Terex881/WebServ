@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Delete.hpp"
-#include "./Header.hpp"
 #include <ostream>
 #include <cstring>
 #include <vector>
@@ -10,7 +9,6 @@
 
 
 void Server::ft_start(int size, int *fd) {
-	std::vector<Header> headers;
 
 
 	int kq = kqueue();
