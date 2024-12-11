@@ -4,14 +4,14 @@ CC = c++
 
 FLAG =  -g -fsanitize=address -std=c++98
 
-OBJ = main.o Delete.o Server.o File_Parsing.o Request.o
+OBJ = main.o Delete.o Server.o File_Parsing.o Request.o Header.o
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) $(FLAG) -o $@
 
-%.o: %.cpp Request.hpp Delete.hpp Server.hpp File_Parsing.hpp DynamicStruct.hpp
+%.o: %.cpp Request.hpp Delete.hpp Server.hpp File_Parsing.hpp DynamicStruct.hpp Header.hpp
 	$(CC) $(FLAG) -c $< -o $@
 
 clean:

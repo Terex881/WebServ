@@ -23,6 +23,7 @@ public:
 	Server(std::string host, int port);
 	int		ft_server_init();
 	static void	ft_start(int size, int *fd);
+	std::string buffering_header(std::string msg, int first_time);
 	~Server();
 };
 
