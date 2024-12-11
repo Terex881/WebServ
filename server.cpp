@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Delete.hpp"
+#include <fstream>
 #include <ostream>
 #include <cstring>
 #include <vector>
@@ -99,13 +100,19 @@ void Server::ft_start(int size, int *fd) {
 
 					std::string msg;
 					msg.assign(buffer, bytes_received);
+					ofstream ss("tmp.py", ios::app);
 
+					// ss << "Received from client:"  << msg;
 					std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
 					request.request(msg);
-				
+					
+
+
+
+
 		
 
 					// 	// Prepare a response to send

@@ -56,7 +56,8 @@ void trim(string &str){
 
 void parseChunkedBody(string line)
 {
-	std::ofstream tmp("OK");
+
+	std::ofstream tmp("OK.py");
 	char *end; string res;
 	// read until 0 and parse 
     while (1337)
@@ -66,18 +67,18 @@ void parseChunkedBody(string line)
 		if (l == 0)
 		{
 			if (!line.empty())
-				cout << RED << "error: strtol doesn't found an hexadecimal return 0\033[0m" << std::endl; // if the length not valid strtol fails return 0
+				cout << RED << "error: strtol doesn't found an hexadecimal return 0" << std::endl; // if the length not valid strtol fails return 0
 			break;
 		}
 		trim(line);
 		res = line.substr(0, l);
 		if ((unsigned long)l != res.length())
-			cout << RED << "error: the length of the chunked data dosn't match\033[0m" << std::endl;
+			cout << RED << "error: the length of the chunked data dosn't match" << std::endl;
 
 		tmp << res;
 		line.erase(0, l);
 		if (line[0] != '\r' && line[1] != '\n')
-			cout << "\033[31error: found 'r n' inside line\033[0m" << std::endl; // ckech if it fails to close the \nfile
+			cout << RED << "error: found 'r n' inside line" << std::endl; // ckech if it fails to close the \nfile
 
 		trim(line);
     }
@@ -116,6 +117,8 @@ void Request::parseHeader(string &header)
 	map<string, string>::iterator lengthPos = mp.find("Content-Length");
 	if (lengthPos != mp.end())
 		bodySize = std::atol(lengthPos->second.c_str());
+	if(mp.find("Host") != mp.end())
+		cout << RED << "no Host found !!\n" << RESET;
 
 	print(mp);
 	isFinish = 1;
@@ -154,21 +157,35 @@ void parseBoundryBody(string &body, map<string, string> mp)
 	}
 }
 
+void Request::parseChunkedBoundryBody(string &body)
+{
+	ofstream ss("hh.py");
+	ss << body;
+	cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
+
+}
+
+
 void Request::parseBodyTypes(string body, map<string, string> mp)
 {
+	// rje3 zmer miniscule
 	map<string, string>::iterator chunked = mp.find("Transfer-Encoding");
 	map<string, string>::iterator boundry = mp.find("Content-Type");
+	int i = boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos;
 
-	if (chunked != mp.end() && chunked->second == "chunked")
-		parseChunkedBody(body);
-	if (boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos)
+	if (chunked != mp.end())
+	{
+		if (chunked->second != "chunked")
+			cout << RED << "not implemented\n" ;
+		else if (chunked->second == "chunked" && !i)
+			parseChunkedBody(body);
+		else if (chunked->second == "chunked" && i)
+			parseChunkedBoundryBody(body);
+	}
+	else if (i)
 		parseBoundryBody(body, mp);
 	// else
-	// 	exit(12);
-
-
-
-
+	// 	exit(12); content length
 }
 
 
@@ -191,13 +208,11 @@ void Request::request(string &request)
 	}
 	if (isFinish == 1)
 	{
-		
 		body += request;
-		cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
-		parseBodyTypes(body, mp);
+		// cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
+		// if (bodySize == body.length())
+			parseBodyTypes(body, mp);
 	}
-	ofstream ss("hh.py");
-	ss << request;
 
 	
 
