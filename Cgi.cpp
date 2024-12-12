@@ -38,8 +38,8 @@ bool	Cgi::execute_script()
         	perror("dup2 failed"), exit(1);
 		close(fd[1]);
 
-		const char* php_path = "/usr/bin/php";
-		const char* php_script = "/Users/aibn-che/web-serve/cgi-bin/index.php";
+		// const char* php_path = "/usr/bin/php";
+		// const char* php_script = "/Users/aibn-che/web-serve/cgi-bin/index.php";
 		
 		const char* py_path = "/usr/local/bin/python3";
 		const char* py_script = "/Users/aibn-che/web-serve/cgi-bin/script.py";
@@ -65,7 +65,7 @@ bool	Cgi::execute_script()
 	{
 		content_len = 0;
 		int status;
-		struct timeval timeout;
+		// struct timeval timeout;
 
 		// Make a file descriptor (e.g., a socket) non-blocking, so operations like read or write return immediately if no data is available.
 		int flags = fcntl(fd[0], F_GETFL, 0);

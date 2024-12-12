@@ -126,6 +126,7 @@ void Request::parseHeader(string &header)
 
 void parseBoundryBody(string &body, map<string, string> mp)
 {
+	(void)mp;
 	string fileContent, fileName;
 	size_t contentStartPos, filePos;
 	string CRLF = "\r\n";

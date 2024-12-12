@@ -1,23 +1,25 @@
-NAME = webserv
 
-CC = c++
+MSRCS = Cgi.cpp	Delete.cpp	File_Parsing.cpp Request.cpp	main.cpp	server.cpp
+MOBJS = $(MSRCS:.cpp=.o)
 
-FLAG = #
+HEADER = Cgi.hpp	DynamicStruct.hpp	Request.hpp	Delete.hpp	File_Parsing.hpp	Server.hpp
 
-OBJ = main.o Delete.o Server.o File_Parsing.o Request.o
+CFLAGS =  -std=c++98 -Wall -Wextra -Werror
 
-all: $(NAME)
+NAME =  webserv
 
-$(NAME): $(OBJ)
-	$(CC) $(OBJ) $(FLAG) -o $@
+all : $(NAME)
 
-%.o: %.cpp Request.hpp Delete.hpp Server.hpp File_Parsing.hpp DynamicStruct.hpp
-	$(CC) $(FLAG) -c $< -o $@
+%.o:%.cpp $(HEADER)
+	c++ $(CFLAGS) -c $< -o $@
+
+$(NAME): $(MOBJS)
+	c++ $(CFLAGS) $^ -o $(NAME)
 
 clean:
-	rm -rf $(OBJ)
+	rm -f $(MOBJS)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt *.py *.pdf *jpg *.png *.mp4
+	rm -f $(NAME)
 
-re: fclean all
+re: fclean $(NAME)
