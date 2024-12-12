@@ -102,8 +102,8 @@ void Server::ft_start(int size, int *fd) {
 					msg.assign(buffer, bytes_received);
 					ofstream ss("tmp.py", ios::app);
 
-					// ss << "Received from client:"  << msg;
-					std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
+					ss << "Received from client:"  << msg;
+					// std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah

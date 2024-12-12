@@ -29,7 +29,7 @@ class Request
     public:
         Request();
         void    request(string &body);
-        void    parseBodyTypes(string line, map<string, string> headerMap);
+        void    parseBodyTypes(string body, map<string, string> headerMap);
         void    parseHeader(string &header);
         void    print(map<string, string> &headerMap);
         void    parseChunkedBoundryBody(string &body);

@@ -1,4 +1,9 @@
 #include "Request.hpp"
+#include <codecvt>
+#include <cstddef>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 int Request::isFinish = 0;
 string Request::header;
@@ -43,7 +48,6 @@ void parseFirstLine(string line, map<string, string> &mp)
 	it = mp.find("version");
 	if (it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
-
 }
 
 void trim(string &str){	
@@ -54,37 +58,43 @@ void trim(string &str){
 	str = str.substr(first, last - first + 1);
 }
 
-void parseChunkedBody(string line)
+void parseChunkedBody(string &body)
 {
-
 	std::ofstream tmp("OK.py");
 	char *end; string res;
 	// read until 0 and parse 
-    while (1337)
+	while (1337)
 	{
-		unsigned long l = strtol(line.c_str(), &end, 16);
-		line = end;
+		unsigned long l = strtol(body.c_str(), &end, 16);
+		body = end;
 		if (l == 0)
 		{
-			if (!line.empty())
+			if (!body.empty())
+			{
 				cout << RED << "error: strtol doesn't found an hexadecimal return 0" << std::endl; // if the length not valid strtol fails return 0
+				cout << GREEN << ":" <<body << ":" << endl;
+			}
 			break;
 		}
-		trim(line);
-		res = line.substr(0, l);
-		if ((unsigned long)l != res.length())
+		trim(body);
+
+		res = body.substr(0, l);
+		if (l != res.length())
 			cout << RED << "error: the length of the chunked data dosn't match" << std::endl;
 
 		tmp << res;
-		line.erase(0, l);
-		if (line[0] != '\r' && line[1] != '\n')
-			cout << RED << "error: found 'r n' inside line" << std::endl; // ckech if it fails to close the \nfile
+		body.erase(0, l);
+		if (body[0] != '\r' && body[1] != '\n')
+			cout << RED << "error: found 'r n' inside body" << std::endl; // ckech if it fails to close the \nfile
 
-		trim(line);
-    }
+		trim(body);
+	}	
 }
+
 void Request::parseHeader(string &header)
 {
+	string key, value;
+	size_t colonPos, lineEnd; 
 	size_t pos = header.find("\r\n");
 	string firstLine = header.substr(0, pos);
 	// check if first line has space in start and print error 
@@ -93,21 +103,19 @@ void Request::parseHeader(string &header)
 
 	while(!header.empty())
 	{
-		size_t colonPos = header.find(":");
+		colonPos = header.find(":");
 		if(colonPos == string::npos || std::isspace(header[colonPos - 1]) || std:: isspace(header[0]))
 		{
 			cout << RED << "foud space or doesn't find :";
 			break;
 		}
-
-		size_t lineEnd = header.find("\r\n");
+		lineEnd = header.find("\r\n");
 		if(lineEnd == string::npos)
 			lineEnd = header.length();
-
-		string key = header.substr(0, colonPos);
+		key = header.substr(0, colonPos);
 		key.erase(0, key.find_first_not_of(" "));
 
-		string value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
+		value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
 		value.erase(0, value.find_first_not_of(" "));
 
 		mp[key] = value;
@@ -120,13 +128,12 @@ void Request::parseHeader(string &header)
 	if(mp.find("Host") != mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
-	print(mp);
+	// print(mp);
 	isFinish = 1;
 }
 
-void parseBoundryBody(string &body, map<string, string> mp)
+void parseBoundryBody(string &body)
 {
-	(void)mp;
 	string fileContent, fileName;
 	size_t contentStartPos, filePos;
 	string CRLF = "\r\n";
@@ -160,16 +167,50 @@ void parseBoundryBody(string &body, map<string, string> mp)
 
 void Request::parseChunkedBoundryBody(string &body)
 {
-	ofstream ss("hh.py");
-	ss << body;
-	cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
+	
+	std::ofstream tmp("OK.png");
+	char *end; string res;
+	// read until 0 and parse 
+	string salah;
+	// trim(body);
+	while (1337)
+	{
+		unsigned long l = strtol(body.c_str(), &end, 16);
+		body = end;
+		body.erase(0, 2);
+		if (l == 0)
+		{
+			if (!body.empty())
+			{
+				cout << RED << "error: strtol doesn't found an hexadecimal return 0" << std::endl; // if the length not valid strtol fails return 0
+				cout << GREEN << ":" <<(int)body[body.length()-1] << ":" << endl;
+			}
+			break;
+		}
+		// trim(body);
 
+		res = body.substr(0, l);
+		// if (l != res.length())
+		// 	cout << RED << "error: the length of the chunked data dosn't match" << std::endl;
+
+		salah += res;
+		body.erase(0, l + 2);
+		// if (body[0] != '\r' && body[1] != '\n')
+		// 	cout << RED << "error: found 'r n' inside body" << std::endl; // ckech if it fails to close the \nfile
+
+		// trim(body);
+	}
+	cout << YELLOW << salah;
+	// tmp << salah;
+	parseBoundryBody(salah);
 }
 
 
 void Request::parseBodyTypes(string body, map<string, string> mp)
 {
 	// rje3 zmer miniscule
+	ofstream ss("hh.py");
+	ss << body;
 	map<string, string>::iterator chunked = mp.find("Transfer-Encoding");
 	map<string, string>::iterator boundry = mp.find("Content-Type");
 	int i = boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos;
@@ -184,16 +225,13 @@ void Request::parseBodyTypes(string body, map<string, string> mp)
 			parseChunkedBoundryBody(body);
 	}
 	else if (i)
-		parseBoundryBody(body, mp);
+		parseBoundryBody(body);
 	// else
 	// 	exit(12); content length
 }
 
-
-
 void Request::request(string &request)
 {
-	
 	if (!isFinish)
 	{
 		size_t pos = request.find("\r\n\r\n");
@@ -201,7 +239,6 @@ void Request::request(string &request)
 		{
 			header += request.substr(0, pos);
 			request.erase(0, pos + 4);
-			// cout << YELLOW << ":" << request << ":" << endl;
 			parseHeader(header);
 		}
 		else
@@ -209,18 +246,11 @@ void Request::request(string &request)
 	}
 	if (isFinish == 1)
 	{
+
 		body += request;
 		// cout << RED << bodySize << "    " << YELLOW << body.length() << endl;
-		// if (bodySize == body.length())
-			parseBodyTypes(body, mp);
+		
+		parseBodyTypes(body, mp);
 	}
-
-	
-
-	
-	
-	
-
-
 	
 }
