@@ -2,7 +2,7 @@ NAME = webserv
 
 CC = c++
 
-# FLAG = -Wall -Wextra -Werror -std=c++98
+FLAG = -Wall -Wextra -Werror -std=c++98
 
 OBJ = main.o Delete.o Server.o File_Parsing.o Request.o Cgi.o
 

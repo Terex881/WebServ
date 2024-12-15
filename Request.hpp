@@ -13,29 +13,26 @@ using namespace std;
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
 
-// void parseRequest(string str);
-
-
 class Request
 {
-    private:
-        std::map<string, string> mp;
-        size_t bodySize;
-        static int isFinish;
-    	static string header;
-    	static string body;
+	private:
+		std::map<string, string> mp;
+		size_t bodySize;
+		static int isFinish;
+		static string header;
+		static string body;
+		
 
-
-    public:
-        Request();
-        void    request(string &body);
-        void    parseBodyTypes(string body, map<string, string> headerMap);
-        void    parseHeader(string &header);
-        void    print(map<string, string> &headerMap);
-        void    parseChunkedBoundryBody(string &body);
-
-
+	public:
+		Request();
+		void    request(string &body);
+		void    parseBodyTypes(string body, map<string, string> headerMap);
+		void    parseHeader(string &header);
+		void    print(map<string, string> &headerMap);
+		void    parseChunkedBoundryBody(string &body);
+		void    parseFirstLine(string line, map<string, string> &mp);
+		void    parseBoundryBody(string &body);
+		void    parseChunkedBody(string &body);
 
 
 };
-// add const 
