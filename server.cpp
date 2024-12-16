@@ -1,23 +1,36 @@
 #include "Server.hpp"
 #include "Delete.hpp"
-#include <fstream>
 #include <ostream>
 #include <cstring>
 #include <vector>
-#include "Request.hpp"
+#include "./Response.hpp"
+
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
 
+typedef struct
+{
+	int fd;
+	struct sockaddr_in addr;
+	int is_server;
+	int is_client;
+	string request;
+	size_t	bytes_sent;
+	std::ifstream *file;
+} connection_info;
 
 void Server::ft_start(int size, int *fd) {
 
+	std::ofstream outputFile("output_video", std::ios::binary); 
 
-	Request request;
 	int kq = kqueue();
 	if (kq == -1) {
 		std::cerr << "kqueue failed" << std::endl;
 		exit(1);
 	}
+
+	connection_info connections[MAX_CLIENTS];
+	memset(connections, 0, sizeof(connections));
 
 	// Set up events for each server listening socket
 	struct kevent event;
@@ -43,6 +56,7 @@ void Server::ft_start(int size, int *fd) {
 
 		for (int i = 0; i < n; ++i) {
 			bool is_new_connection = false;
+			connection_info *data = (connection_info *)events[i].udata;
 
 			// Check if the event corresponds to one of the server's listening sockets
 			for (int j = 0; j < size; ++j) {
@@ -76,6 +90,7 @@ void Server::ft_start(int size, int *fd) {
 			}
 
 			// If it's not a new connection, it's a client sending data
+			std::string msg;
 			if (!is_new_connection && events[i].filter == EVFILT_READ) {
 				int client_socket = events[i].ident;
 				char buffer[BUFFER_SIZE] = {0};
@@ -94,74 +109,133 @@ void Server::ft_start(int size, int *fd) {
 							break;
 						}
 					}
-				} else {
+				} else{
 					// Handle incoming message (echo or any other processing)
-
-
-					std::string msg;
-					msg.assign(buffer, bytes_received);
-					ofstream ss("tmp.py", ios::app);
-					ss << "Received from client:"  << msg;
 					
-					// std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
+
+					msg.assign(buffer, bytes_received);
+
+					std::cout << "Received from client: " << msg<< std::endl;
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
-					request.request(msg);
-					
+					string sas = msg;
+					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
+					size_t	first_pos = sas.find(' ');
 
+					if (first_pos != string::npos)
+					{
+						size_t	second_pos = sas.find(' ', first_pos + 1);
+						sas = sas.substr(first_pos + 1, second_pos - first_pos - 1);
+					}
 
+					std::cout << "---------++++++++++++++ |||| RequestT |||| +++***********---------------" << std::endl;
+					std::cout << msg << std::endl;
+					std::cout << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
 
+					std::cout << sas << std::endl;
+					connections[client_socket].request = sas;
+					connections[client_socket].fd = client_socket;
+					connections[client_socket].file = new std::ifstream("."+sas, std::ios::binary);
+					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
-		
-
+					// connections[client_socket].file = new std::ifstream("."+sas, std::ios::in);
 					// 	// Prepare a response to send
 					// 	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nHello world";
 					// 	client_buffers[client_socket] = response;
 
 					// 	// Add a write event to the kqueue
-					// 	EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-					// 	kevent(kq, &event, 1, NULL, 0, NULL);
+					EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &connections[client_socket]);
+					kevent(kq, &event, 1, NULL, 0, NULL);
 					// } else
 					//  if (msg.find("GET") != std::string::npos) {
 					// 	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world3";
 					// 	send(client_socket, response.c_str(), response.size(), 0);
 					// }
 				}
-			} else if (events[i].filter == EVFILT_WRITE) {
+			}
+			else if (events[i].filter == EVFILT_WRITE)
+			{
 				int client_socket = events[i].ident;
-				std::string &response = client_buffers[client_socket];
-				int bytes_sent = send(client_socket, response.c_str(), response.length(), 0);
-				if (bytes_sent < 0) {
+
+				std::cout << "*** FD = " << client_socket << "***" << std::endl;
+				std::cout << "URL : " << data->request << std::endl;
+				string wer = data->request;
+				Response res(200, 10, Response::GetMimeType(data->request), "OK", "."+wer, "GET", connections[client_socket].file, client_socket, data->request);
+
+				// std::string ttt1 =
+				// "HTTP/1.1 200 OK\r\n"
+				// "Content-Type: text/html\r\n"
+				// "Content-Length: 13\r\n"
+				// "\r\n";
+				// std::string ttt = "Hello, World!";
+
+				// std::string response = res.Res_get_chunk();
+				std::stringstream response;
+				res.Res_get_chunk(response);
+				std::string responseStr = response.str();
+				const char *bfff = responseStr.data();
+				(void)bfff;
+				std::cout << "\n\n\n---------++++++++++++++Responset+++***********---------------" << std::endl;
+				// std::cout << responseStr << std::endl;
+				
+				// outputFile.write(responseStr.data(), responseStr.length());
+
+				std::cout << "response Length = " << responseStr.length() << "\n"; 
+
+				// Careful sending
+				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
+
+
+				std::cout << "** Bytes_sent = " << bytes_sent << std::endl; // 18446744073709551615
+				std::cout << "---------++++++++++++++Response+++***********---------------\n\n\n\n\n\n" << std::endl;
+
+				if (bytes_sent < 0 || bytes_sent == SIZE_MAX)
+				{
 					std::cerr << "send failed" << std::endl;
 					close(client_socket);
 					EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
 					// Remove from the client list
-					for (int j = 0; j < MAX_CLIENTS; ++j) {
-						if (client_sockets[j] == client_socket) {
+					for (int j = 0; j < MAX_CLIENTS; ++j)
+					{
+						if (client_sockets[j] == client_socket)
+						{
 							client_sockets[j] = 0;
 							break;
 						}
 					}
-				} else {
-					// Remove the write event after sending the response
-					EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-					kevent(kq, &event, 1, NULL, 0, NULL);
+					exit(1);
+				}
+				else {
+						// std::cout << "------------- Sent ---------------" << std::endl;
+						std::cout << "\n\n\n---------++++++++++++++Sent t+++***********---------------" << std::endl;
+						data->bytes_sent += bytes_sent;
 
-					// Close the client connection after serving
-					close(client_socket);
-					EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-					kevent(kq, &event, 1, NULL, 0, NULL);
+						std::cout << "-- Total Read -- " << data->bytes_sent <<  std::endl;
+						std::cout << "-- current Read -- " << bytes_sent <<  std::endl;
+						std::cout << "###0000##### file_size = " <<  res.Res_Size << " ######0000####  " << res.bytesRead << std::endl;
 
-					// Remove from the client list
-					for (int j = 0; j < MAX_CLIENTS; ++j) {
-						if (client_sockets[j] == client_socket) {
-							client_sockets[j] = 0;
-							break;
+						if (data->bytes_sent >= res.Res_Size || res.end)
+						{
+							std::cout << "------------- End ---------------" << std::endl;
+							// const char* final_marker = "\r\n0\r\n\r\n";  // For HTTP chunked transfer
+							// send(client_socket, final_marker, strlen(final_marker), 0);
+							EV_SET(&event, data->fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+							kevent(kq, &event, 1, NULL, 0, NULL);
+							// EV_SET(&event, data->fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+							// kevent(kq, &event, 1, NULL, 0, NULL);
 						}
-					}
+						std::cout << "---------++++++++++++++Sent+++***********---------------\n\n\n\n\n\n" << std::endl;
+
+						// Remove write event
+						// close(client_socket);
+						// EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+						// kevent(kq, &event, 1, NULL, 0, NULL);
+
+						// EV_SET(&event, client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+						// kevent(kq, &event, 1, NULL, 0, NULL);
 				}
 			}
 		}
@@ -173,49 +247,8 @@ void Server::ft_start(int size, int *fd) {
 	}
 }
 
-int Server::ft_server_init() {
-
-    if (this->port < 1024 || this->port > 65535) {
-        std::cout << "Error port number\n";
-        exit(1);
-    }
-
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0) {
-        std::cout << "socket failed" << std::endl;
-        exit(1);
-    }
-
-    // Enable SO_REUSEADDR to allow quick reuse of the port
-    int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
-        close(server_fd);
-        exit(1);
-    }
-
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(this->host.c_str()); // by default Binding to localhost
-    server_addr.sin_port = htons(this->port); // by default Port 8080
-
-    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-        std::cout << "bind failed" << std::endl;
-        close(server_fd);
-        exit(1);
-    }
-
-    std::cout << "Server is listening on " << this->host << ":" << this->port << std::endl;
-    if (listen(server_fd, MAX_CLIENTS) == -1) {
-        std::cout << "listen failed" << std::endl;
-        close(server_fd);
-        exit(1);
-    }
-
-    return (server_fd);
-}
-
-Server::Server(std::string host, int port) {
+Server::Server(std::string host, int port)
+{
 	this->host = host;
 	this->port = port;
 }
@@ -227,4 +260,53 @@ Server::Server() {
 																																									
 Server::~Server() {
 	std::cout << "good bye...\n";
+}
+
+
+
+
+int Server::ft_server_init() {
+
+	if (this->port < 1024 || this->port > 65535) {
+		std::cout << "Error port number\n";
+		exit(1);
+	}
+
+	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_fd < 0) {
+		std::cout << "socket failed" << std::endl;
+		exit(1);
+	}
+	fcntl(server_fd, F_SETFL, O_NONBLOCK);
+	// Enable SO_REUSEADDR to allow quick reuse of the port
+	int opt = 1;
+	
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+		std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+		close(server_fd);
+		exit(1);
+	}
+
+	int sendbuf_size = 256 * 1024;  // 256KB
+	setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &sendbuf_size, sizeof(sendbuf_size));
+
+	struct sockaddr_in server_addr;
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = inet_addr(this->host.c_str()); // by default Binding to localhost
+	server_addr.sin_port = htons(this->port); // by default Port 8080
+
+	if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+		std::cout << "bind failed" << std::endl;
+		close(server_fd);
+		exit(1);
+	}
+
+	std::cout << "Server is listening on " << this->host << ":" << this->port << std::endl;
+	if (listen(server_fd, MAX_CLIENTS) == -1) {
+		std::cout << "listen failed" << std::endl;
+		close(server_fd);
+		exit(1);
+	}
+
+	return (server_fd);
 }

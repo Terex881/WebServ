@@ -4,7 +4,9 @@ CC = c++
 
 FLAG = -Wall -Wextra -Werror -std=c++98
 
-OBJ = main.o Delete.o Server.o File_Parsing.o Request.o Cgi.o
+        
+
+OBJ = main.o Delete.o server.o File_Parsing.o Request.o Cgi.o Response.o
 
 all: $(NAME)
 
