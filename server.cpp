@@ -206,7 +206,7 @@ void Server::ft_start(int size, int *fd) {
 							break;
 						}
 					}
-					exit(1);
+					// exit(1);
 				}
 				else {
 						// std::cout << "------------- Sent ---------------" << std::endl;
@@ -217,7 +217,7 @@ void Server::ft_start(int size, int *fd) {
 						std::cout << "-- current Read -- " << bytes_sent <<  std::endl;
 						std::cout << "###0000##### file_size = " <<  res.Res_Size << " ######0000####  " << res.bytesRead << std::endl;
 
-						if (data->bytes_sent >= res.Res_Size || res.end)
+						if ((size_t)res.bytesRead >= res.Res_Size || res.end)
 						{
 							std::cout << "------------- End ---------------" << std::endl;
 							// const char* final_marker = "\r\n0\r\n\r\n";  // For HTTP chunked transfer

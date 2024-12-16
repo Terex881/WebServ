@@ -75,14 +75,13 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 				header = 
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
-					"Content-Length: 9"
+					"Content-Length: 9\r\n"
 					"\r\n"
 					"Not Found";
 				body = "";
 				responseStream.write(header.c_str(), header.length());
-				end = 1;
+				this->end = 1;
 				return	;
-
 			}
 			else
 			{
@@ -104,7 +103,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					outputFile.write(header.data(), header.length());
 					this->sent_head[idx] = 1;
 					this->bytesRead = 0;
-			
+
 					responseStream.write(header.c_str(), header.length());
 					return	;
 				}
@@ -130,6 +129,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
 						this->file->close();
+						this->end = 1;
 						sent_head[idx] = 0;
 					}
 					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
@@ -156,11 +156,10 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 			header =
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
-					"Content-Length: 9"
+					"Content-Length: 9\r\n"
 					"\r\n"
 					"Not Found";
 			responseStream.write(header.c_str(), header.length());
-			end = 1;
 			return	;
 		}
 		// close(socket);
