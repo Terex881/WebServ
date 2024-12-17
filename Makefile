@@ -1,23 +1,26 @@
-NAME = request
+NAME = webserv
 
 CC = c++
 
-FLAG =  -g -fsanitize=address -std=c++98
+# FLAG = -Wall -Wextra -Werror -std=c++98
 
-OBJ = main.o Request.o
+OBJ = 	main.o Delete.o server.o File_Parsing.o  Cgi.o Response.o\
+		RequestParser/parseBoundry.o RequestParser/parseChunked.o RequestParser/Request.o
+
+HEADERS = Delete.hpp Server.hpp File_Parsing.hpp DynamicStruct.hpp Cgi.hpp RequestParser/Request.hpp
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) $(FLAG) -o $@
 
-%.o: %.cpp Request.hpp
+%.o: %.cpp $(HEADERS)
 	$(CC) $(FLAG) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt resume.py profile.jpg file*
+	rm -rf $(NAME) rm file_to_read.txt *.py *.pdf *jpg *.png *.mp4
 
 re: fclean all

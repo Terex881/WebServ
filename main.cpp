@@ -1,56 +1,47 @@
-#include "Request.hpp"
+#include "Server.hpp"
 
-int main()
+#include "File_Parsing.hpp"
+
+
+
+int main(int argc, char **argv)
 {
-	try {
-		string str= "POST /upload HTTP/1.1\r\n"
-					"Host: example.com\r\n"
-					"Content-Type :	 application/json\r\n"
-					"Transfer-Encoding: chunked\r\n"
-					"\r\n"
-        			"8\r\n"
-        			"Mozilla \r\n"
-        			"F\r\n"
-        			"Dezvejoper Net \r\n"
-        			"C\r\n"
-        			"work Example\r\n"
-        			"0\r\n"
-        			"\r\n";
-		string str1= "POST /contac_form.php HTTP/1.1\r\n"
-					"Host: developer.mozilla.org\r\n"
-					"Content-Length: 12\r\n"
-					"Content-Type: applicationx-ww;w-form-urlencoded\r\n"
-					"\r\n"
-					"ncame=Jj%20U\r\n";
-					//---------------------------------------------------
-		string str2=	"POST /profile/upload HTTP/1.1\r\n"
-						"Host: myapp.com\r\n"
-						"Content-Type: multipart/form-data; boundary=----FormBoundary123456\r\n"
-						"\r\n"
-						"------FormBoundary123456\r\n"
-						"Content-Disposition: form-data; name=\"user_id\"\r\n"
-						"\r\n"
-						"1234\r\n"
-						"------FormBoundary123456\r\n"
-						"Content-Disposition: form-data; name=\"full_name\"\r\n"
-						"\r\n"
-						"John Doe\r\n"
-						"------FormBoundary123456\r\n"
-						"Content-Disposition: form-data; name=\"profile_picture\"; filename=\"profile.jpg\"\r\n"
-						"Content-Type: image/jpeg\r\n"
-						"\r\n"
-						"(binary image data would be here)\r\n"
-						"------FormBoundary123456\r\n"
-						"Content-Disposition: form-data; name=\"resume\"; filename=\"resume.py\"\r\n"
-						"Content-Type: application/pdf\r\n"
-						"\r\n"
-						"(binary PDF data would be here)\r\n"
-						"------FormBoundary123456--\r\n";
-		Request request(str2);
-	} catch (const std::exception &e) {
-		cout << e.what() << endl;
-	}
+	// try{
+		signal(SIGPIPE, SIG_IGN);
+	///////////////////////////////////////
+		if (argc != 2)
+			return 0;
+		char *end = NULL;
+		File_Parsing p(argv[1]);
+
+		int size = p.servers_count;
+		Server* server[size];
+		int fd[size];
+		int i = 0;
+
+		// Initialize servers
+		for (vector<dt>::iterator it = p.host_port.begin(); it != p.host_port.end(); it++)
+		{
+			server[i++] = new Server(it->key, std::strtod(it->val.c_str(), &end));
+			if (*end)
+				return 1;
+		}
+		i = 0;
+		while (i < size)
+		{
+			// Initialize each server and get their listening socket fd
+			fd[i] = server[i]->ft_server_init();
+			i++;
+		}
+
+		Server::ft_start(size, fd);
+	// }
+	// catch(const std::exception &e)
+	// {
+	//     std::cout << e.what() << std::endl;
+	// }
+
+
+
 	return 0;
 }
-
-
