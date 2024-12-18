@@ -16,7 +16,6 @@ typedef struct
 	int is_client;
 	string request;
 	size_t	bytes_sent;
-	size_t 	retry_count;
 	std::ifstream *file;
 } connection_info;
 
@@ -156,7 +155,6 @@ void Server::ft_start(int size, int *fd) {
 					outputFile << sas << std::endl;
 					connections[client_socket].request = sas;
 					connections[client_socket].fd = client_socket;
-					connections[client_socket].retry_count = 0;
 					connections[client_socket].file = new std::ifstream("."+sas, std::ios::binary);
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
@@ -209,13 +207,7 @@ void Server::ft_start(int size, int *fd) {
 					// Log specific error
 					std::cerr << "Send error: " << strerror(errno) 
 					<< " (errno: " << errno << ")" << std::endl;
-					if (data->retry_count <= 1)
-					{
-						data->retry_count++;
-						sleep(2);
-						continue;
-					}
-					
+
 					std::cerr << "send failed" << std::endl;
 					clearSocketBuffer(client_socket);
 					close(client_socket);
@@ -236,7 +228,6 @@ void Server::ft_start(int size, int *fd) {
 				{
 						outputFile << "\n\n\n---------++++++++++++++Sent t+++***********---------------" << std::endl;
 						data->bytes_sent += bytes_sent;
-						data->retry_count = 0;
 						outputFile << "-- Total Read -- " << data->bytes_sent <<  std::endl;
 						outputFile << "-- current Read -- " << bytes_sent <<  std::endl;
 						outputFile << "###0000##### file_size = " <<  res.Res_Size << " ######0000####  " << res.bytesRead << std::endl;
