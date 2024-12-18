@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <sstream>
+#include <vector>
 
 using std::string;
 #define MAX_CLIENTS 128

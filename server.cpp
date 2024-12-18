@@ -16,8 +16,27 @@ typedef struct
 	int is_client;
 	string request;
 	size_t	bytes_sent;
+	size_t 	retry_count;
 	std::ifstream *file;
 } connection_info;
+
+// Function to clear socket's incoming buffer
+void clearSocketBuffer(int socket) {
+    char buffer[1024];
+    ssize_t bytes_read;
+
+    // Set socket to non-blocking mode temporarily
+    int flags = fcntl(socket, F_GETFL, 0);
+    fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+
+    // Read and discard all pending data
+    while ((bytes_read = recv(socket, buffer, sizeof(buffer), 0)) > 0) {
+        // Discard the data
+    }
+
+    // Restore original socket flags
+    fcntl(socket, F_SETFL, flags);
+}
 
 void Server::ft_start(int size, int *fd) {
 
@@ -91,7 +110,8 @@ void Server::ft_start(int size, int *fd) {
 
 			// If it's not a new connection, it's a client sending data
 			std::string msg;
-			if (!is_new_connection && events[i].filter == EVFILT_READ) {
+			if (!is_new_connection && events[i].filter == EVFILT_READ)
+			{
 				int client_socket = events[i].ident;
 				char buffer[BUFFER_SIZE] = {0};
 				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
@@ -115,7 +135,7 @@ void Server::ft_start(int size, int *fd) {
 
 					msg.assign(buffer, bytes_received);
 
-					std::cout << "Received from client: " << msg<< std::endl;
+					outputFile << "Received from client: " << msg<< std::endl;
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
@@ -129,13 +149,14 @@ void Server::ft_start(int size, int *fd) {
 						sas = sas.substr(first_pos + 1, second_pos - first_pos - 1);
 					}
 
-					std::cout << "---------++++++++++++++ |||| RequestT |||| +++***********---------------" << std::endl;
-					std::cout << msg << std::endl;
-					std::cout << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
+					outputFile << "---------++++++++++++++ |||| RequestT |||| +++***********---------------" << std::endl;
+					outputFile << msg << std::endl;
+					outputFile << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
 
-					std::cout << sas << std::endl;
+					outputFile << sas << std::endl;
 					connections[client_socket].request = sas;
 					connections[client_socket].fd = client_socket;
+					connections[client_socket].retry_count = 0;
 					connections[client_socket].file = new std::ifstream("."+sas, std::ios::binary);
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
@@ -158,41 +179,45 @@ void Server::ft_start(int size, int *fd) {
 			{
 				int client_socket = events[i].ident;
 
-				std::cout << "*** FD = " << client_socket << "***" << std::endl;
-				std::cout << "URL : " << data->request << std::endl;
+				outputFile << "*** FD = " << client_socket << "***" << std::endl;
+				outputFile << "URL : " << data->request << std::endl;
 				string wer = data->request;
 				Response res(200, 10, Response::GetMimeType(data->request), "OK", "."+wer, "GET", connections[client_socket].file, client_socket, data->request);
 
-				// std::string ttt1 =
-				// "HTTP/1.1 200 OK\r\n"
-				// "Content-Type: text/html\r\n"
-				// "Content-Length: 13\r\n"
-				// "\r\n";
-				// std::string ttt = "Hello, World!";
 
-				// std::string response = res.Res_get_chunk();
 				std::stringstream response;
 				res.Res_get_chunk(response);
 				std::string responseStr = response.str();
 				const char *bfff = responseStr.data();
 				(void)bfff;
-				std::cout << "\n\n\n---------++++++++++++++Responset+++***********---------------" << std::endl;
-				// std::cout << responseStr << std::endl;
+				outputFile << "\n\n\n---------++++++++++++++Responset+++***********---------------" << std::endl;
+				// outputFile << responseStr << std::endl;
 				
 				// outputFile.write(responseStr.data(), responseStr.length());
 
-				std::cout << "response Length = " << responseStr.length() << "\n"; 
+				outputFile << "response Length = " << responseStr.length() << "\n"; 
 
 				// Careful sending
 				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
 
 
-				std::cout << "** Bytes_sent = " << bytes_sent << std::endl; // 18446744073709551615
-				std::cout << "---------++++++++++++++Response+++***********---------------\n\n\n\n\n\n" << std::endl;
+				outputFile << "** Bytes_sent = " << bytes_sent << std::endl; // 18446744073709551615
+				outputFile << "---------++++++++++++++Response+++***********---------------\n\n\n\n\n\n" << std::endl;
 
 				if (bytes_sent < 0 || bytes_sent == SIZE_MAX)
 				{
+					// Log specific error
+					std::cerr << "Send error: " << strerror(errno) 
+					<< " (errno: " << errno << ")" << std::endl;
+					if (data->retry_count <= 1)
+					{
+						data->retry_count++;
+						sleep(2);
+						continue;
+					}
+					
 					std::cerr << "send failed" << std::endl;
+					clearSocketBuffer(client_socket);
 					close(client_socket);
 					EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
@@ -206,36 +231,27 @@ void Server::ft_start(int size, int *fd) {
 							break;
 						}
 					}
-					// exit(1);
 				}
-				else {
-						// std::cout << "------------- Sent ---------------" << std::endl;
-						std::cout << "\n\n\n---------++++++++++++++Sent t+++***********---------------" << std::endl;
+				else
+				{
+						outputFile << "\n\n\n---------++++++++++++++Sent t+++***********---------------" << std::endl;
 						data->bytes_sent += bytes_sent;
-
-						std::cout << "-- Total Read -- " << data->bytes_sent <<  std::endl;
-						std::cout << "-- current Read -- " << bytes_sent <<  std::endl;
-						std::cout << "###0000##### file_size = " <<  res.Res_Size << " ######0000####  " << res.bytesRead << std::endl;
+						data->retry_count = 0;
+						outputFile << "-- Total Read -- " << data->bytes_sent <<  std::endl;
+						outputFile << "-- current Read -- " << bytes_sent <<  std::endl;
+						outputFile << "###0000##### file_size = " <<  res.Res_Size << " ######0000####  " << res.bytesRead << std::endl;
 
 						if ((size_t)res.bytesRead >= res.Res_Size || res.end)
 						{
-							std::cout << "------------- End ---------------" << std::endl;
-							// const char* final_marker = "\r\n0\r\n\r\n";  // For HTTP chunked transfer
-							// send(client_socket, final_marker, strlen(final_marker), 0);
+							clearSocketBuffer(client_socket);
+
+							outputFile << "------------- End ---------------" << std::endl;
+							close(client_socket);
 							EV_SET(&event, data->fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
-							// EV_SET(&event, data->fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-							// kevent(kq, &event, 1, NULL, 0, NULL);
+						
 						}
-						std::cout << "---------++++++++++++++Sent+++***********---------------\n\n\n\n\n\n" << std::endl;
-
-						// Remove write event
-						// close(client_socket);
-						// EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-						// kevent(kq, &event, 1, NULL, 0, NULL);
-
-						// EV_SET(&event, client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-						// kevent(kq, &event, 1, NULL, 0, NULL);
+						outputFile << "---------++++++++++++++Sent+++***********---------------\n\n\n\n\n\n" << std::endl;
 				}
 			}
 		}

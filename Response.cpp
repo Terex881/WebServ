@@ -59,17 +59,19 @@ Response::Response(size_t status_code, size_t content_length, string content_typ
 void	Response::Res_get_chunk(std::stringstream &responseStream)
 {
 	// char buffer[Chunk_Size]; // 8192
+	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
+
 	if (Method == "GET")
 	{
-			std::cout << " -------------------==========1===============     ------------------- " << std::endl;
-			std::cout << " Working _ Path " << Working_Path.c_str() << std::endl;
+		// std::cout << " -------------------==========1===============     ------------------- " << std::endl;
+		std::cout << " Working _ Path " << Working_Path.c_str() << std::endl;
 		if (isFile(Working_Path))
 		{
-			std::cout << " -------------------===========2==============     ------------------- " << std::endl;
+			// std::cout << " -------------------===========2==============     ------------------- " << std::endl;
 			// std::ifstream file(Working_Path, std::ios::binary);
-			if (!(file)->is_open())
+			if (!(file)->is_open())   ////////////// SEGFAULT
 			{
 				std::cout << "Not Open " << std::endl;
 				header = 
@@ -79,6 +81,8 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					"\r\n"
 					"Not Found";
 				body = "";
+				// first = "";
+				// buffer.assign(header.begin(), header.end());
 				responseStream.write(header.c_str(), header.length());
 				this->end = 1;
 				return	;
@@ -93,14 +97,17 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					header =
 						"HTTP/1.1 200 OK\r\n"
 						"Content-Type: " + Content_Type + "\r\n"
-						"Content-Length: " + std::to_string(file_size) + "\r\n"
-						"Accept-Ranges: bytes\r\n"
-						"Connection: close\r\n"
+						"Transfer-Encoding: chunked\r\n"
+						"Connection: keep-alive\r\n"
 						"\r\n";
-
+						// "Content-Length: " + std::to_string(file_size) + "\r\n"
+						// "Accept-Ranges: bytes\r\n"
+						// "Connection: close\r\n"
+					// buffer.assign(header.begin(), header.end());
 						// "Keep-Alive: timeout=3, max=10\r\n"
-					std::ofstream outputFile("output_video", std::ios::binary); 
-					outputFile.write(header.data(), header.length());
+					// std::ofstream outputFile("output_video", std::ios::binary); 
+					// outputFile.write(header.data(), header.length());
+					// first = "fff";
 					this->sent_head[idx] = 1;
 					this->bytesRead = 0;
 
@@ -109,28 +116,45 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 				}
 				else
 				{
-					std::cout << "________________ Reading Body _________" << std::endl;
-
+					// std::cout << "________________ Reading Body _________" << std::endl;
 					// memset(buffer, '\0', sizeof(buffer));
-					(*file).read(buffer, Chunk_Size); // Read a chunk
+					(*file).read(buffer.data(), Chunk_Size); // Read a chunk
 					this->current_read = (*file).gcount();
 					std::cout << " bytesRead = " << current_read <<" --- " << std::endl;
 					if (current_read == 0)
 					{
+						file->close();
+						delete file;
+						file = NULL;
+						sent_head[idx] = 0;
+						// first = "";
+						// this->bytesRead = 0;
+						// string s = "0\r\n\r\n";
+						// buffer.assign(s.begin(), s.end());
+						responseStream.str(""); // Clear previous content
+						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
-						memset(buffer, '\0', sizeof(buffer));
-
-						responseStream.write(buffer, current_read);
+						responseStream.write("0\r\n\r\n", 6);
 						return ;  // End of file or read error
 					}
-					buffer[current_read] = '\0';
-					responseStream.write(buffer, current_read);
+					// buffer[current_read] = '\0';
+					responseStream << std::hex << current_read << "\r\n";
+					responseStream.write(buffer.data(), current_read);
+					responseStream << "\r\n";
+
 					this->bytesRead += current_read;
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
-						this->file->close();
+						// responseStream.str(""); // Clear previous content
+						// responseStream.clear();
+						responseStream.write("0\r\n\r\n", 6);
+						file->close();
+						delete file;
+						file = NULL;
+						
 						this->end = 1;
 						sent_head[idx] = 0;
+						// first = "";
 					}
 					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
 					std::cout << "===== ==== bytes_read " << current_read << std::endl;
@@ -138,12 +162,17 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					return ;
 				}
 
+					// std::stringstream chunk;
+					// chunk << std::hex << bytes_read << "\r\n";
+					// chunk.write(buffer.data(), bytes_read);
+					// chunk << "\r\n";
+
 				// the main issue is with IO, i have a single socket (represent a single server), and this single server
 				// might get a lot of request, so the main question is, how can i handle mutiple requests ?
 				
-				std::cout << buffer << std::endl; // line 112
+				// std::cout << buffer.data() << std::endl; // line 112
 				// std::cout << ";;;;;;;;;;;;;;"<< buffer.c_str().length() << ";;;;;;;;;;;;;;;;;;;;" << std::endl;
-				std::cout << " enddddd " << std::endl;
+				// std::cout << " enddddd " << std::endl;
 				// file.close();
 			}
 		}
@@ -159,6 +188,8 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					"Content-Length: 9\r\n"
 					"\r\n"
 					"Not Found";
+			// this->bytesRead = 0;
+			// first = "";
 			responseStream.write(header.c_str(), header.length());
 			return	;
 		}
@@ -166,6 +197,117 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 	}
 	
 }
+
+// void	Response::Res_get_chunk(std::stringstream &responseStream)
+// {
+// 	// char buffer[Chunk_Size]; // 8192
+// 	responseStream.str(""); // Clear previous content
+// 	responseStream.clear(); // Clear any error flags
+// 	if (Method == "GET")
+// 	{
+// 			std::cout << " -------------------==========1===============     ------------------- " << std::endl;
+// 			std::cout << " Working _ Path " << Working_Path.c_str() << std::endl;
+// 		if (isFile(Working_Path))
+// 		{
+// 			std::cout << " -------------------===========2==============     ------------------- " << std::endl;
+// 			// std::ifstream file(Working_Path, std::ios::binary);
+// 			if (!(file)->is_open())
+// 			{
+// 				std::cout << "Not Open " << std::endl;
+// 				header = 
+// 					"HTTP/1.1 404 Not Found\r\n"
+// 					"Content-Type: text/plain\r\n"
+// 					"Content-Length: 9\r\n"
+// 					"\r\n"
+// 					"Not Found";
+// 				body = "";
+// 				responseStream.write(header.c_str(), header.length());
+// 				this->end = 1;
+// 				return	;
+// 			}
+// 			else
+// 			{
+// 				if (!sent_head[idx])
+// 				{
+// 					size_t file_size = Calculate_File_Size(*file);
+// 					this->Res_Size = file_size;
+// 					std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
+// 					header =
+// 						"HTTP/1.1 200 OK\r\n"
+// 						"Content-Type: " + Content_Type + "\r\n"
+// 						"Content-Length: " + std::to_string(file_size) + "\r\n"
+// 						"Accept-Ranges: bytes\r\n"
+// 						"Connection: close\r\n"
+// 						"\r\n";
+
+// 						// "Keep-Alive: timeout=3, max=10\r\n"
+// 					std::ofstream outputFile("output_video", std::ios::binary); 
+// 					outputFile.write(header.data(), header.length());
+// 					this->sent_head[idx] = 1;
+// 					this->bytesRead = 0;
+
+// 					responseStream.write(header.c_str(), header.length());
+// 					return	;
+// 				}
+// 				else
+// 				{
+// 					std::cout << "________________ Reading Body _________" << std::endl;
+
+// 					// memset(buffer, '\0', sizeof(buffer));
+// 					(*file).read(buffer, Chunk_Size); // Read a chunk
+// 					this->current_read = (*file).gcount();
+// 					std::cout << " bytesRead = " << current_read <<" --- " << std::endl;
+// 					if (current_read == 0)
+// 					{
+// 						std::cerr << "End of file or read error!" << std::endl;
+// 						memset(buffer, '\0', sizeof(buffer));
+
+// 						responseStream.write(buffer, current_read);
+// 						return ;  // End of file or read error
+// 					}
+// 					buffer[current_read] = '\0';
+// 					responseStream.write(buffer, current_read);
+// 					this->bytesRead += current_read;
+// 					if ((size_t)this->bytesRead >= this->Res_Size)
+// 					{
+// 						this->file->close();
+// 						this->end = 1;
+// 						sent_head[idx] = 0;
+// 					}
+// 					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
+// 					std::cout << "===== ==== bytes_read " << current_read << std::endl;
+// 					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
+// 					return ;
+// 				}
+
+// 				// the main issue is with IO, i have a single socket (represent a single server), and this single server
+// 				// might get a lot of request, so the main question is, how can i handle mutiple requests ?
+				
+// 				std::cout << buffer << std::endl; // line 112
+// 				// std::cout << ";;;;;;;;;;;;;;"<< buffer.c_str().length() << ";;;;;;;;;;;;;;;;;;;;" << std::endl;
+// 				std::cout << " enddddd " << std::endl;
+// 				// file.close();
+// 			}
+// 		}
+// 		// else if (isDirectory(Working_Path))
+// 		// {
+
+// 		// }
+// 		else
+// 		{
+// 			header =
+// 					"HTTP/1.1 404 Not Found\r\n"
+// 					"Content-Type: text/plain\r\n"
+// 					"Content-Length: 9\r\n"
+// 					"\r\n"
+// 					"Not Found";
+// 			responseStream.write(header.c_str(), header.length());
+// 			return	;
+// 		}
+// 		// close(socket);
+// 	}
+	
+// }
 
 bool	Response::isDirectory(const std::string& path)
 {
