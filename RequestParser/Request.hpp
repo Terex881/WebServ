@@ -13,20 +13,23 @@ using namespace std;
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
 
+#define CRLF "\r\n"
+#define DCRLF "\r\n\r\n"
+
+
 class Request
 {
 	private:
 		std::map<string, string>	mp;
 		size_t						bodySize;
-		static						int isFinish;
+		static						int FINISHED;
 		static						string header;
-		static						string body;
 		string						boundry;
 		string						endBoundry;
-		static int							CHUNKED;
-		static int							CHUNKED_BOUNDARY;
-		static int							BOUNDARY;
-		static int							CONTENT_LENGTH;
+		static int					CHUNKED;
+		static int					CHUNKED_BOUNDARY;
+		static int					BOUNDARY;
+		static int					CONTENT_LENGTH;
 
 	public:
 		ofstream outFile;
@@ -42,6 +45,5 @@ class Request
 		void	parseBoundryBody(string &body);
 		void	parseChunkedBody(string &body);
 		void	fillData(std::map<string, string> mp); // for fill data
-		void getFileName(string &str);
-
+		void	getFileName(string &body);
 };

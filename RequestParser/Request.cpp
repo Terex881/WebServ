@@ -1,17 +1,16 @@
 #include "./Request.hpp"
 
-int		Request::isFinish = 0;
 string	Request::header;
-string	Request::body;
-int		Request::CHUNKED = 0;
-int		Request::CHUNKED_BOUNDARY = 0;
-int		Request::BOUNDARY = 0;
-int		Request::CONTENT_LENGTH = 0;
+int		Request::FINISHED			= 0;
+int		Request::CHUNKED			= 0;
+int		Request::CHUNKED_BOUNDARY	= 0;
+int		Request::BOUNDARY			= 0;
+int		Request::CONTENT_LENGTH		= 0;
 
 Request::Request()
 {
 	bodySize = 0;
-	isFinish = 0;
+	// FINISHED = 0;
 	boundry = "";
 	endBoundry = "";
 }
@@ -19,13 +18,12 @@ Request::Request()
 
 Request::~Request()
 {
-	// if (outFile.is_open())
-		// outFile.close();
+
 }
 
 void Request::fillData(std::map<string, string> mp)
 {
-	isFinish = 1;
+	FINISHED = 1;
 
 	map<string, string>::iterator lengthPos = mp.find("Content-Length");
 	map<string, string>::iterator boundry = mp.find("Content-Type");
@@ -54,8 +52,8 @@ void Request::fillData(std::map<string, string> mp)
 		else if (chunked->second == "chunked" && BOUNDARY)
 			CHUNKED_BOUNDARY = 1;
 	}
-
 }
+
 
 void Request::print(map<string, string> &mp)
 {
@@ -66,7 +64,7 @@ void Request::print(map<string, string> &mp)
 
 void Request::request(string &request)
 {
-	if (!isFinish)
+	if (!FINISHED)
 	{
 		size_t pos = request.find("\r\n\r\n");
 		if (pos != string::npos)
@@ -78,6 +76,6 @@ void Request::request(string &request)
 		else
 			header.append(request);
 	}
-	if (isFinish)
+	if (FINISHED)
 		parseBodyTypes(request);
 }
