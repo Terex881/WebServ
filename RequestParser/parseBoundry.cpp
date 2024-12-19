@@ -1,127 +1,110 @@
 #include "./Request.hpp"
 #include <fstream>
 
-void Request::getFileName(string &body)
+void Request::writeFile(string &body, int start, size_t end)
 {
-	string first = body.substr(0, body.find(CRLF));
-	body.erase(0, first.length());
-	if (first.find("; filename=\"") != string::npos)
+	string content = body.substr(start, end);
+	if (outFile.is_open())
+		outFile.write(content.c_str(), content.length()); outFile.flush();
+	body.erase(0, content.length());
+}
+
+void Request::openFile(string fileName)
+{
+	if (!outFile.is_open()){
+		outFile.open(fileName, ios::binary);
+		if (!outFile.is_open())
+			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
+	}
+}
+
+int Request::getFileName(string &body, string &fileName)
+{
+	string first = body.substr(0, body.find(CRLF) + 2);
+	size_t filePos = first.find(FILE_NAME);
+
+	if (filePos != std::string::npos)
 	{
+		first.erase(0, filePos + 12);
 		size_t end = first.rfind("\"\r\n");
 		size_t endV = first.rfind("\"; ");
 		if (end != string::npos)
-			first.erase(end, first.length());
+			fileName = first.substr(0, end);
 		else if (endV != string::npos)
-			first.erase(endV, first.length());
+			fileName = first.substr(0, endV);
+		cout << RED << fileName << endl;
+		return (1);
 	}
 	else
 	{
-		string sub = body.substr(body.find(DCRLF), body.find(boundry));
-		cout << sub << endl;
-
+		// check multi and boundri
+		// ofstream ss("X.py", ios::app);
+		// ss << sub << endl;
+		// ss << "\n\n---------------------\n\n";
+		
+		string sub  = body.substr(0, body.find(boundry));
+		body.erase(0, sub.length());
+		return (0);
 	}
-
-
 }
-
-
-size_t getEndPosition(string &body)
+void Request::isBoundary(string &body)
 {
+	ofstream ss("OK.py", ios::app);
+	size_t filePos = 0, contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
+	string fileContent, fileName, rest;
+
+	writeFile(body, 0, boundryPos); outFile.close();
+
 	
+	body.erase(0, boundryPos + boundry.length());
+	
+	if (getFileName(body, fileName))
+	{
+		body.erase(0, body.find(DCRLF) + 4);
 
+		boundryPos = body.find(this->boundry);
+		endboundryPos = body.find(this->endBoundry);
+
+		if (boundryPos != std::string::npos)
+			contentEndtPos = boundryPos;
+		else if ( endboundryPos != std::string::npos )
+			contentEndtPos = endboundryPos;
+		else
+			contentEndtPos = body.length();
+
+		openFile(fileName);
+		writeFile(body, 0, contentEndtPos);
+	}
 }
-
 
 void Request::parseBoundryBody(string &body)
 {
-	size_t contentStartPos = 0, filePos = 0, contentEndtPos = 0;
-	string fileContent, fileName, rest;
-
 	size_t boundryPos = body.find(this->boundry);
 	size_t endboundryPos = body.find(this->endBoundry);
-	// while(!body.empty())
+	
+	while(!body.empty())
 	{
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
-			contentStartPos = 0;
-			contentEndtPos = body.length();
+			writeFile(body, 0, body.length());
 		}
 		if (boundryPos != string::npos)
 		{
-			rest = body.substr(0, boundryPos);
-			if (outFile.is_open()) 	outFile.write(rest.c_str(), rest.length()); outFile.flush(); outFile.close(); // checl close here
-			body.erase(0, boundryPos + boundry.length());
-			
-			getFileName(body);
-			// body.erase(0, body.find(DCRLF));
-
-
-
+			isBoundary(body);
 		}
+		else if (endboundryPos != string::npos)
+		{
+			writeFile(body, 0, endboundryPos);
+		}
+		cout << "__\n";
 	}
-	
 }
-
-// void Request::parseBoundryBody(string &body)
-// {
-// 	size_t contentStartPos = 0, filePos = 0, contentEndtPos = 0;
-// 	string CRLF = "\r\n";
-// 	string fileContent, fileName,rest;
-
-// 	size_t boundryPos = body.find(this->boundry);
-// 	size_t endboundryPos = body.find(this->endBoundry);
-// 	if (boundryPos != string::npos && endboundryPos == string::npos)
-// 	{	
-// 		rest = body.substr(0, boundryPos);
-// 		if (outFile.is_open()) 	outFile.write(rest.c_str(), rest.length()); outFile.flush();
-
-// 		body.erase(0, boundryPos + this->boundry.length());
-		
-// 		// filePos = body.find("filename=\"");
-
-// 		string firstLine = body.substr(0, body.find(CRLF));
-// 		filePos = firstLine.rfind("; filename=\"");
-// 		if (filePos == string::npos)
-// 			storeKeyVal(body);
-// 		else
-// 		{
-// 			if (outFile.is_open()) outFile.close();
-
-// 			body.erase(0, filePos + 12);
-			
-// 			fileName = body.substr(0, body.find(CRLF) + 2); // check if filename hold "
-// 			getFileName(fileName);
-			
-// 			contentStartPos = body.find(CRLF + CRLF) + 4;
-
-// 			boundryPos = body.find(this->boundry);
-// 			if (boundryPos != std::string::npos)
-// 				contentEndtPos = boundryPos - contentStartPos;
-// 			else
-// 				contentEndtPos = body.length() - contentStartPos;
-// 	  		if (!outFile.is_open())
-				// outFile.open(fileName, ios::binary);
-// 		}
-// 	}
-// 	else
-// 	{
-// 		if (boundryPos != string::npos)
-// 			contentEndtPos = boundryPos;
-// 		else if (endboundryPos != std::string::npos)
-// 			contentEndtPos = endboundryPos;
-// 		else
-// 			contentEndtPos = body.length();
-// 	}
-
-// 	fileContent = body.substr(contentStartPos, contentEndtPos);
-// 	outFile.write(fileContent.c_str(), fileContent.length()); outFile.flush();
-// }
 
 void Request::parseBodyTypes(string body)
 {
 	ofstream ss("Z.py", ios::app);
 	ss << body;
-	ss << "\n------------------------------------------------------------------\n";
+	ss << "\n\n------------------------------------------------------------------\n\n";
 
 	if (CHUNKED)
 		parseChunkedBody(body);

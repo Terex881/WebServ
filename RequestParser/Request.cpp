@@ -1,6 +1,7 @@
 #include "./Request.hpp"
 
 string	Request::header;
+// string	Request::body;
 int		Request::FINISHED			= 0;
 int		Request::CHUNKED			= 0;
 int		Request::CHUNKED_BOUNDARY	= 0;
@@ -13,6 +14,7 @@ Request::Request()
 	// FINISHED = 0;
 	boundry = "";
 	endBoundry = "";
+	
 }
 
 
@@ -77,5 +79,9 @@ void Request::request(string &request)
 			header.append(request);
 	}
 	if (FINISHED)
+	{
+		// body.append(request);
+		
 		parseBodyTypes(request);
+	}
 }

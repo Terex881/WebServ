@@ -15,6 +15,7 @@ using namespace std;
 
 #define CRLF "\r\n"
 #define DCRLF "\r\n\r\n"
+#define FILE_NAME "; filename=\""
 
 
 class Request
@@ -30,6 +31,7 @@ class Request
 		static int					CHUNKED_BOUNDARY;
 		static int					BOUNDARY;
 		static int					CONTENT_LENGTH;
+		// static string						body;
 
 	public:
 		ofstream outFile;
@@ -45,5 +47,9 @@ class Request
 		void	parseBoundryBody(string &body);
 		void	parseChunkedBody(string &body);
 		void	fillData(std::map<string, string> mp); // for fill data
-		void	getFileName(string &body);
+		int		getFileName(string &body,  string &fileName);
+		
+		void 	writeFile(string &str, int start, size_t end);
+		void	openFile(string fileName);
+		void	isBoundary(string &body);
 };
