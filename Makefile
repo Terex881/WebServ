@@ -25,6 +25,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm file_to_read.txt *.py *.pdf *jpg *.png *.mp4
+	rm -rf $(NAME) rm file_to_read.txt *.py *.pdf *jpg *.png *.mp4 *txt
 
 re: fclean all

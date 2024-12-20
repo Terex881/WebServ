@@ -112,8 +112,11 @@ void Server::ft_start(int size, int *fd) {
 
 					// 	//salah
 					request.request(msg);
-					if (Request::REQUEST_FINISH)
+					if (request.getStat() == 2)
+					{
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;;
+						
+					}
 
 					
 					

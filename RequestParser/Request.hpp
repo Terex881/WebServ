@@ -1,11 +1,9 @@
 #pragma once
-#include <cstddef>
+
 #include <iostream>
-#include <sstream>
 #include <map>
 #include <string>
 #include <fstream>
-#include <utility>
 #include <vector>
 
 using namespace std;
@@ -23,38 +21,41 @@ using namespace std;
 class Request
 {
 	private:
-		std::map<string, string>	mp;
-		size_t						bodySize;
-		static						int FINISHED;
-		static						string header;
-		string						boundry;
-		string						endBoundry;
-		static int					CHUNKED;
-		static int					CHUNKED_BOUNDARY;
-		static int					BOUNDARY;
-		static int					CONTENT_LENGTH;
-		ofstream					outFile;
 		std::vector<std::pair<string, string> >	Vec;
+		std::map<string, string>				mp;
+		size_t									bodySize;
+		string									header;
+		string									boundry;
+		string									endBoundry;
+		static int								TYPE;
+		ofstream								outFile;
+		static int								REQUEST_IS_FINISH;
+		static unsigned long	length;
+		static unsigned long	restLength;
 		
 
 	public:
-		static int					REQUEST_FINISH;
 		Request();
 		~Request();
 
 		void	request(string &body);
-		void	parseBodyTypes(string body);
+		void	parseBodyTypes(string &body);
 		void	parseHeader(string &header);
 		void	print(map<string, string> &headerMap);
+		
+		void	printV(vector<pair<string, string> > &mp);
+		
 		void	parseChunkedBoundryBody(string &body);
+
 		void	parseFirstLine(string line, map<string, string> &mp);
 		void	parseBoundryBody(string &body);
 		void	parseChunkedBody(string &body);
-		void	fillData(std::map<string, string> mp); // for fill data
+		void	fillData(const std::map<string, string> &mp); // for fill data
 		int		getFileName(string &body,  string &fileName);
 		
 		void 	writeFile(string &body, int start, size_t end, size_t len);
 		void	openFile(string fileName);
 		void	isBoundary(string &body);
 		void	getQweryString(string &body);
+		int		getStat() const;
 };

@@ -1,5 +1,6 @@
 #include "./Request.hpp"
 #include <cstddef>
+#include <cstdlib>
 #include <fstream>
 #include <utility>
 
@@ -37,12 +38,12 @@ void Request::getQweryString(string &body)
 		contentEndtPos = body.length();
 	
 	val = body.substr(0, contentEndtPos);
-	// Vec.push_back(make_pair(key, val));
+	Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
 
 	ofstream ss("X.py", ios::app);
-	ss << key << "          " << val << endl;
-	ss << "\n\n----------------------------------------------------------\n\n";
+	// ss << key << "          " << val << endl;
+	// ss << "\n\n----------------------------------------------------------\n\n";
 	// cout << ":" << RED << key << ":            :" << GREEN <<  val << ":" << RESET <<  endl;
 	
 
@@ -116,29 +117,24 @@ void	Request::parseBoundryBody(string &body)
 		else if (endboundryPos != string::npos)
 		{
 			writeFile(body, 0, endboundryPos, endBoundry.length());
-			REQUEST_FINISH = 1;
+			// printV(Vec);
+			REQUEST_IS_FINISH = 2;
 		}
 	}
 }
 
-void	Request::parseBodyTypes(string body)
+void	Request::parseBodyTypes(string &body)
 {
 	ofstream ss("Z.py", ios::app);
 	ss << body;
 	ss << "\n\n------------------------------------------------------------------\n\n";
-
-	if (CHUNKED)
-		parseChunkedBody(body);
-	else if (CHUNKED_BOUNDARY)
+	
+	switch (TYPE)
 	{
-		parseChunkedBoundryBody(body);
-		exit(1);
+		case (0): parseBoundryBody(body); break;
+		case (1): parseChunkedBody(body); break;
+		case (2): parseChunkedBoundryBody(body); break;
+		default: exit(12);
 	}
-	else if (BOUNDARY)
-	{
-		parseBoundryBody(body);
-		// exit(1);
-	}
-	else
-		exit(12);
+	
 }

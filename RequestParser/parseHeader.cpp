@@ -34,6 +34,7 @@ void Request::parseHeader(string &header)
 	size_t colonPos, lineEnd; 
 	size_t pos = header.find("\r\n");
 	string firstLine = header.substr(0, pos);
+
 	// check if first line has space in start and print error 
 	header.erase(0, pos + 2);
 	parseFirstLine(firstLine, mp);
@@ -55,12 +56,14 @@ void Request::parseHeader(string &header)
 		value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
 		value.erase(0, value.find_first_not_of(" "));
 
+      	std::transform(key.begin(), key.end(), key.begin(), ::tolower); // check this 
+		if (key == "transfer-encoding") // check other 
+        	std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
+		
 		mp[key] = value;
 		
 		header.erase(0, lineEnd + 2);
 	}
-	FINISHED = 1;
-
-	fillData(mp);
 	// print(mp);
+	fillData(mp);
 }
