@@ -12,3 +12,5 @@ Example of INVALID: Content-Type : application/json --> 400 bad request
 
 
 // chck on host if exist
+
+make characters lowercase

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 using namespace std;
 
@@ -31,10 +33,12 @@ class Request
 		static int					CHUNKED_BOUNDARY;
 		static int					BOUNDARY;
 		static int					CONTENT_LENGTH;
-		// static string						body;
+		ofstream					outFile;
+		std::vector<std::pair<string, string> >	Vec;
+		
 
 	public:
-		ofstream outFile;
+		static int					REQUEST_FINISH;
 		Request();
 		~Request();
 
@@ -49,7 +53,8 @@ class Request
 		void	fillData(std::map<string, string> mp); // for fill data
 		int		getFileName(string &body,  string &fileName);
 		
-		void 	writeFile(string &str, int start, size_t end);
+		void 	writeFile(string &body, int start, size_t end, size_t len);
 		void	openFile(string fileName);
 		void	isBoundary(string &body);
+		void	getQweryString(string &body);
 };

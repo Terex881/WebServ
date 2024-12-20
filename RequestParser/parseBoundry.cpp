@@ -1,11 +1,14 @@
 #include "./Request.hpp"
+#include <cstddef>
+#include <fstream>
+#include <utility>
 
-void	Request::writeFile(string &body, int start, size_t end)
+void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);
 	if (outFile.is_open())
 		outFile.write(content.c_str(), content.length()); outFile.flush();
-	body.erase(0, content.length());
+	body.erase(0, content.length() + len);
 }
 
 void	Request::openFile(string fileName)
@@ -15,6 +18,34 @@ void	Request::openFile(string fileName)
 		if (!outFile.is_open())
 			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
 	}
+}
+
+void Request::getQweryString(string &body)
+{
+	string key, val;
+	size_t contentEndtPos  = 0, namePos = body.find("; name=\"");
+	
+	body.erase(0, namePos + 8);
+	key = body.substr(0, body.find(CRLF) - 1);
+	body.erase(0, body.find(DCRLF) + 4);
+	
+	if (body.find(CRLF) != std::string::npos)
+		contentEndtPos = body.find(CRLF);
+	else if (body.find(endBoundry) != std::string::npos)
+		contentEndtPos = body.find(endBoundry);
+	else
+		contentEndtPos = body.length();
+	
+	val = body.substr(0, contentEndtPos);
+	// Vec.push_back(make_pair(key, val));
+	body.erase(0, val.length());
+
+	ofstream ss("X.py", ios::app);
+	ss << key << "          " << val << endl;
+	ss << "\n\n----------------------------------------------------------\n\n";
+	// cout << ":" << RED << key << ":            :" << GREEN <<  val << ":" << RESET <<  endl;
+	
+
 }
 
 int	Request::getFileName(string &body, string &fileName)
@@ -35,8 +66,7 @@ int	Request::getFileName(string &body, string &fileName)
 	}
 	else
 	{	
-		string sub  = body.substr(0, body.find(boundry));
-		body.erase(0, sub.length());
+		getQweryString(body);
 		return (0);
 	}
 }
@@ -46,7 +76,7 @@ void	Request::isBoundary(string &body)
 	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
 	string	fileName;
 
-	writeFile(body, 0, boundryPos); outFile.close();
+	writeFile(body, 0, boundryPos, 0); outFile.close();
 	body.erase(0, boundry.length());
 
 	if (getFileName(body, fileName))
@@ -64,7 +94,7 @@ void	Request::isBoundary(string &body)
 			contentEndtPos = body.length();
 
 		openFile(fileName);
-		writeFile(body, 0, contentEndtPos);
+		writeFile(body, 0, contentEndtPos, 0);
 	}
 }
 
@@ -77,7 +107,7 @@ void	Request::parseBoundryBody(string &body)
 	{
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
-			writeFile(body, 0, body.length());
+			writeFile(body, 0, body.length(), 0);
 		}
 		if (boundryPos != string::npos)
 		{
@@ -85,17 +115,17 @@ void	Request::parseBoundryBody(string &body)
 		}
 		else if (endboundryPos != string::npos)
 		{
-			writeFile(body, 0, endboundryPos);
-			body.erase(0, endBoundry.length());	
+			writeFile(body, 0, endboundryPos, endBoundry.length());
+			REQUEST_FINISH = 1;
 		}
 	}
 }
 
 void	Request::parseBodyTypes(string body)
 {
-	// ofstream ss("Z.py", ios::app);
-	// ss << body;
-	// ss << "\n\n------------------------------------------------------------------\n\n";
+	ofstream ss("Z.py", ios::app);
+	ss << body;
+	ss << "\n\n------------------------------------------------------------------\n\n";
 
 	if (CHUNKED)
 		parseChunkedBody(body);

@@ -7,6 +7,7 @@ int		Request::CHUNKED			= 0;
 int		Request::CHUNKED_BOUNDARY	= 0;
 int		Request::BOUNDARY			= 0;
 int		Request::CONTENT_LENGTH		= 0;
+int		Request::REQUEST_FINISH		= 0;
 
 Request::Request()
 {
@@ -66,6 +67,7 @@ void Request::print(map<string, string> &mp)
 
 void Request::request(string &request)
 {
+	
 	if (!FINISHED)
 	{
 		size_t pos = request.find("\r\n\r\n");
