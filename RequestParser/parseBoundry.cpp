@@ -1,7 +1,6 @@
 #include "./Request.hpp"
-#include <fstream>
 
-void Request::writeFile(string &body, int start, size_t end)
+void	Request::writeFile(string &body, int start, size_t end)
 {
 	string content = body.substr(start, end);
 	if (outFile.is_open())
@@ -9,7 +8,7 @@ void Request::writeFile(string &body, int start, size_t end)
 	body.erase(0, content.length());
 }
 
-void Request::openFile(string fileName)
+void	Request::openFile(string fileName)
 {
 	if (!outFile.is_open()){
 		outFile.open(fileName, ios::binary);
@@ -18,7 +17,7 @@ void Request::openFile(string fileName)
 	}
 }
 
-int Request::getFileName(string &body, string &fileName)
+int	Request::getFileName(string &body, string &fileName)
 {
 	string first = body.substr(0, body.find(CRLF) + 2);
 	size_t filePos = first.find(FILE_NAME);
@@ -32,32 +31,24 @@ int Request::getFileName(string &body, string &fileName)
 			fileName = first.substr(0, end);
 		else if (endV != string::npos)
 			fileName = first.substr(0, endV);
-		cout << RED << fileName << endl;
 		return (1);
 	}
 	else
-	{
-		// check multi and boundri
-		// ofstream ss("X.py", ios::app);
-		// ss << sub << endl;
-		// ss << "\n\n---------------------\n\n";
-		
+	{	
 		string sub  = body.substr(0, body.find(boundry));
 		body.erase(0, sub.length());
 		return (0);
 	}
 }
-void Request::isBoundary(string &body)
+
+void	Request::isBoundary(string &body)
 {
-	ofstream ss("OK.py", ios::app);
-	size_t filePos = 0, contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
-	string fileContent, fileName, rest;
+	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
+	string	fileName;
 
 	writeFile(body, 0, boundryPos); outFile.close();
+	body.erase(0, boundry.length());
 
-	
-	body.erase(0, boundryPos + boundry.length());
-	
 	if (getFileName(body, fileName))
 	{
 		body.erase(0, body.find(DCRLF) + 4);
@@ -77,7 +68,7 @@ void Request::isBoundary(string &body)
 	}
 }
 
-void Request::parseBoundryBody(string &body)
+void	Request::parseBoundryBody(string &body)
 {
 	size_t boundryPos = body.find(this->boundry);
 	size_t endboundryPos = body.find(this->endBoundry);
@@ -95,16 +86,16 @@ void Request::parseBoundryBody(string &body)
 		else if (endboundryPos != string::npos)
 		{
 			writeFile(body, 0, endboundryPos);
+			body.erase(0, endBoundry.length());	
 		}
-		cout << "__\n";
 	}
 }
 
-void Request::parseBodyTypes(string body)
+void	Request::parseBodyTypes(string body)
 {
-	ofstream ss("Z.py", ios::app);
-	ss << body;
-	ss << "\n\n------------------------------------------------------------------\n\n";
+	// ofstream ss("Z.py", ios::app);
+	// ss << body;
+	// ss << "\n\n------------------------------------------------------------------\n\n";
 
 	if (CHUNKED)
 		parseChunkedBody(body);
