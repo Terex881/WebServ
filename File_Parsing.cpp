@@ -162,6 +162,8 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 
 			if (key != "http" && key != "servers" && key != "location")
 				(*file).close(), exit(1);
+			if ((key == "location" && parent != "servers") || (key == "servers" && parent != "http"))
+				(*file).close(), exit(1);
 			child = recursive_push(file, key, open_bracket, close_bracket);
 			if (key == "location")
 				child.values["path"] = words[1];
