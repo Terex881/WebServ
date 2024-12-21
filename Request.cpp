@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
 unsigned long	Request::length				= 0;
+unsigned long	Request::restlength				= 0;
 int				Request::TYPE				= 0;
 int				Request::REQUEST_IS_FINISH	= 0;
 
@@ -39,10 +40,10 @@ void Request::request(string &request)
 		{
 			header += request.substr(0, pos); // chof kifach
 			parseHeader(header);
-			if (!TYPE)
-				request.erase(0, pos + 2);
-			else
-				request.erase(0, pos + 4);
+			// if (!TYPE)
+				// request.erase(0, pos + 2);
+			// else
+			request.erase(0, pos + 4);
 
 		}
 		else

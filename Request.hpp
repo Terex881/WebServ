@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <string>
@@ -29,6 +30,7 @@ class Request
 		static int								TYPE;
 		ofstream								outFile;
 		static unsigned long	length;
+		static unsigned long	restlength;
 		
 		string extention;
 		size_t									bodySize;

@@ -114,7 +114,7 @@ void Server::ft_start(int size, int *fd) {
 					request.request(msg);
 					if (request.getStat() == 2)
 					{
-						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;;
+						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						
 					}
 

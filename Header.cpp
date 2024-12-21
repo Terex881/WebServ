@@ -74,11 +74,15 @@ const string Request::getExtention(std::map<string, string> mp)
 	std::map<string, string>::iterator it = mp.find("content-type");
 	if (it != mp.end())
 	{
-		return  it->second.substr(it->second.find("/") + 1, it->second.length());
-		// return res;
+		string str = it->second.substr(it->second.find("/") + 1, it->second.length());
+		if(str == "octet-stream")
+			return "py";
+		return str;
+
 
 	}
-	cout << RED << "Bad request\n" ;
+	else
+		cout << RED << "Bad request\n" ;
 	return ""; // check this 
 }
 
@@ -107,7 +111,7 @@ void Request::fillData(const std::map<string, string> &mp)
 	if (bol)
 	{
 		string sep = boundry->second.substr(boundry->second.rfind("boundary=") + 9 , boundry->second.length());
-		this->boundry		= "\r\n--" + sep + "\r\n";
+		this->boundry		= "--" + sep + "\r\n";
 		this->endBoundry	= "\r\n--" + sep + "--\r\n";
 		TYPE = 0;
 	}
@@ -118,6 +122,9 @@ void Request::fillData(const std::map<string, string> &mp)
 		else if (chunked->second == "chunked" && !bol)
 			TYPE = 1;
 		else if (chunked->second == "chunked" && bol)
+		{
 			TYPE = 2;
+		}
 	}
+
 }
