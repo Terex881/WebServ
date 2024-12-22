@@ -1,8 +1,4 @@
 #include "./Request.hpp"
-#include <cstddef>
-#include <cstdlib>
-#include <fstream>
-#include <utility>
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -23,11 +19,8 @@ void	Request::openFile(string fileName)
 	}
 }
 
-void Request::getQweryString(string &body)
+void	Request::getQweryString(string &body)
 {
-	// ofstream ss("X.py");
-	// ss << body;
-	// ss << "\n------------------------------------------------------------------\n";
 	string key, val;
 	size_t contentEndtPos  = 0, namePos = body.find("; name=\"");
 	
@@ -66,8 +59,6 @@ int	Request::getFileName(string &body, string &fileName)
 	}
 	else
 	{
-		// cout << "\n\n-------------------------------------------+\n\n";
-		// cout << RED << body << RESET << endl;
 		getQweryString(body);
 		return (0);
 	}
@@ -98,8 +89,6 @@ void	Request::isBoundary(string &body)
 
 		openFile(fileName);
 		writeFile(body, 0, contentEndtPos, 0);
-		// body.erase(0, contentEndtPos);
-
 	}
 }
 
@@ -112,20 +101,15 @@ void	Request::parseBoundryBody(string &body)
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
 			writeFile(body, 0, body.length(), 0);
-			// body.erase(0, body.length());
-
 		}
 		if (boundryPos != string::npos)
 		{
 			isBoundary(body);
 		}
-		else if (endboundryPos != string::npos)
+		if (endboundryPos != string::npos)
 		{
-			
-			writeFile(body, 0, endboundryPos, 0);
-			body.erase(0, endBoundry.length());
-			
-			// printV(Vec);
+			writeFile(body, 0, endboundryPos, endBoundry.length());
+			printV(Vec);
 			REQUEST_IS_FINISH = 2;
 		}
 	}
