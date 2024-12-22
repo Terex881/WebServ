@@ -4,6 +4,7 @@ unsigned long	Request::length				= 0;
 unsigned long	Request::restlength				= 0;
 int				Request::TYPE				= 0;
 int				Request::REQUEST_IS_FINISH	= 0;
+int				Request::IF_FILENAME	= 0;
 
 Request::Request()
 {
@@ -31,6 +32,24 @@ void Request::printV(vector<pair<string, string> > &mp)
 		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
 }
 
+
+void	Request::parseBodyTypes(string &body)
+{
+	ofstream ss("Z.py", ios::app);
+	ss << body;
+	ss << "\n------------------------------------------------------------------\n";
+	switch (TYPE)
+	{
+		case (0): parseBoundryBody(body); break;
+		case (1): parseChunkedBody(body); break;
+		case (2): parseChunkedBoundryBody(body); break;
+		default: exit(12);
+	}
+	
+}
+
+
+
 void Request::request(string &request)
 {
 	if (!REQUEST_IS_FINISH)
@@ -40,9 +59,6 @@ void Request::request(string &request)
 		{
 			header += request.substr(0, pos); // chof kifach
 			parseHeader(header);
-			// if (!TYPE)
-				// request.erase(0, pos + 2);
-			// else
 			request.erase(0, pos + 4);
 
 		}

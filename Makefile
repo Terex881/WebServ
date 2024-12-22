@@ -5,7 +5,7 @@ CC = c++
 FLAG = -Wall -Wextra -Werror -std=c++98
 
 OBJ = 	static/main.o  static/Server.o static/File_Parsing.o \
-		parseBoundry.o parseChunked.o Request.o Header.o
+		Boundary.o Chunked.o Request.o Header.o ChunkedBoundary.o
 
 HEADERS = Server.hpp File_Parsing.hpp DynamicStruct.hpp  Request.hpp
 

@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <atomic>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -35,6 +36,8 @@ class Request
 		string extention;
 		size_t									bodySize;
 		static int								REQUEST_IS_FINISH;
+		static int								IF_FILENAME;
+		string salah;
 		
 
 	public:
@@ -51,14 +54,21 @@ class Request
 		void	parseHeader(string &header);
 		void	parseFirstLine(string line, map<string, string> &mp);
 		void	parseBoundryBody(string &body);
+		void	parseBoundryBodyA(string &body);
 		void	parseChunkedBody(string &body);
 		void	fillData(const std::map<string, string> &mp); // for fill data
 		int		getFileName(string &body,  string &fileName);
+		int		getFileNameA(string &body,  string &fileName);
 		
 		void 	writeFile(string &body, int start, size_t end, size_t len);
+		void 	writeFileA(string &body, int start, size_t end, size_t len);
 		void	openFile(string fileName);
+		void	openFileA(string fileName);
 		void	isBoundary(string &body);
+		void	isBoundaryA(string &body);
 		void	getQweryString(string &body);
+		void	getQweryStringA(string &body, int flag);
+
 		int		getStat() const;
 		const string getExtention(std::map<string, string> mp);
 };
