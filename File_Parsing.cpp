@@ -155,9 +155,9 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			if (words.size() < 2 || words.size() > 3)
 				(*file).close(), exit(1);
 			// checking keys format {}
-			if ((words.size() == 3 && words[2] != "{"))
+			if (key == "location" && (words.size() != 3 || words[2] != "{"))
 				(*file).close(), exit(1);
-			if (words.size() == 2 && words[1].find("/") != string::npos)
+			if ((key == "http" || key == "servers") && words[1] != "{")
 				(*file).close(), exit(1);
 
 			if (key != "http" && key != "servers" && key != "location")
