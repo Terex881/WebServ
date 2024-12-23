@@ -10,7 +10,7 @@
 
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 5120 //4096
 
 
 void Server::ft_start(int size, int *fd) {
