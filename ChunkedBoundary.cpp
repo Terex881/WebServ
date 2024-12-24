@@ -23,6 +23,8 @@ void	Request::getQweryStringA(string &body, int flag)
 	key = body.substr(0, body.find(CRLF) - 1);
 	body.erase(0, body.find(DCRLF) + 4);
 
+	
+
 	if (body.find(CRLF) != std::string::npos)
 		contentEndtPos = body.find(CRLF);
 	else if (body.find(endBoundry) != std::string::npos)
@@ -32,8 +34,7 @@ void	Request::getQweryStringA(string &body, int flag)
 	val = body.substr(0, contentEndtPos);
 	Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
-	// cout << RED << ":" << key << ":  :" << GREEN << val << ":" << RESET << endl;
-
+	
 }
 
 void	Request::openFileA(string fileName)
@@ -70,7 +71,7 @@ int	Request::getFileNameA(string &body, string &fileName)
 		{
 			IF_FILENAME = 33;
 			
-			throw invalid_argument("HELLO");
+			throw "HELLO";
 		}
 		getQweryStringA(body, 1);
 		return (0);
@@ -109,43 +110,38 @@ void	Request::isBoundaryA(string &body)
 
 void	Request::parseBoundryBodyA(string &body)
 {
-	ofstream ss("X.py", ios::app);
 	salah += body;
-	ss << salah ;
-	ss << "\n--------------------------------------------\n";
-
+	
 	size_t boundryPos = salah.find(this->boundry);
 	size_t endboundryPos = salah.find(this->endBoundry);
 	try {
-	
-	while(!salah.empty())
+		while(!salah.empty())
+		{
+			if (IF_FILENAME == 33)
+			{
+				getQweryStringA(salah, 0);
+				IF_FILENAME = 0;
+				return;              
+			}
+			if (boundryPos == string::npos && endboundryPos == string::npos)
+			{
+				if (salah == CRLF && TYPE == 2) salah.erase(0, 2);
+				else writeFileA(salah, 0, salah.length(), 0);
+			}
+			if (boundryPos != string::npos)
+			{
+				isBoundaryA(salah);
+			}
+			if (endboundryPos != string::npos)
+			{
+				writeFileA(salah, 0, endboundryPos, salah.length());
+				printV(Vec);
+				REQUEST_IS_FINISH = 2;
+			}
+		}
+	} catch (const char *c)
 	{
-		if (IF_FILENAME == 33)
-		{
-			getQweryStringA(salah, 0);
-			IF_FILENAME = 0;
-			return;              
-		}
-		if (boundryPos == string::npos && endboundryPos == string::npos)
-		{
-			if (salah == CRLF && TYPE == 2) salah.erase(0, 2);
-			else writeFileA(salah, 0, salah.length(), 0);
-		}
-		if (boundryPos != string::npos)
-		{
-			isBoundaryA(salah);
-		}
-		if (endboundryPos != string::npos)
-		{
-			writeFileA(salah, 0, endboundryPos, endBoundry.length());
-			printV(Vec);
-			REQUEST_IS_FINISH = 2;
-		}
-	}
-	} catch (const std::exception &e) {
-		// cout << RED << salah << endl;
 		return;
-	
 	};
 
 }
@@ -162,12 +158,7 @@ void Request::parseChunkedBoundryBody(string &body)
 
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
-			{
-				cout << RED << "error: no length founded\n" << RESET;
-				cout << YELLOW << ":" << body << ":" << RESET << endl;
-				exit(8);
-			}
-
+				return;
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);
 

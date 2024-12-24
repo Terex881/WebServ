@@ -1,5 +1,6 @@
 #include "./Request.hpp"
 
+
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);

@@ -38,11 +38,12 @@ void	Request::parseBodyTypes(string &body)
 	ofstream ss("Z.py", ios::app);
 	ss << body;
 	ss << "\n------------------------------------------------------------------\n";
+	newStr += body;
 	switch (TYPE)
 	{
-		case (0): parseBoundryBody(body); break;
-		case (1): parseChunkedBody(body); break;
-		case (2): parseChunkedBoundryBody(body); break;
+		case (0): parseBoundryBody(newStr); break;
+		case (1): parseChunkedBody(newStr); break;
+		case (2): parseChunkedBoundryBody(newStr); break;
 		default: exit(12);
 	}
 	

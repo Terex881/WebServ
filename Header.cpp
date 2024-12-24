@@ -1,4 +1,5 @@
-#include "Request.hpp"
+#include "./Request.hpp"
+
 
 void Request::parseFirstLine(string line, map<string, string> &mp)
 {
@@ -78,8 +79,6 @@ const string Request::getExtention(std::map<string, string> mp)
 		if(str == "octet-stream")
 			return "py";
 		return str;
-
-
 	}
 	else
 		cout << RED << "Bad request\n" ;
