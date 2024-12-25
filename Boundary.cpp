@@ -74,15 +74,14 @@ void	Request::isBoundary(string &body)
 	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
 	string	fileName;
 
-	
 	if (boundryPos != 0)
 	{
-		writeFile(body, 0, boundryPos -2 , 2); outFile.close();
+		writeFile(body, 0, boundryPos -2 , 2 + boundry.length()); outFile.close();
 	}
 	else
-		writeFile(body, 0, boundryPos, 0); outFile.close();
+		writeFile(body, 0, boundryPos, boundry.length()); outFile.close();
 
-	body.erase(0, boundry.length());
+	// body.erase(0, boundry.length());
 	if (getFileName(body, fileName))
 	{
 		body.erase(0, body.find(DCRLF) + 4);
@@ -110,7 +109,8 @@ void	Request::parseBoundryBody(string &body)
 		size_t endboundryPos = body.find(this->endBoundry);
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
-			writeFile(body, 0, body.length(), 0);
+			if (body == CRLF && TYPE == 2) body.erase(0, 2);
+			else writeFile(body, 0, body.length(), 0);
 		}
 		if (boundryPos != string::npos)
 		{
@@ -119,7 +119,6 @@ void	Request::parseBoundryBody(string &body)
 		else if (endboundryPos != string::npos)
 		{
 			writeFile(body, 0, endboundryPos, endBoundry.length());
-			printV(Vec);
 			REQUEST_IS_FINISH = 2;
 		}
 	}

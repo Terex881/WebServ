@@ -24,19 +24,17 @@ using namespace std;
 class Request  
 {
 	private:
-		string extention;
+		string 									extention;
 		string									boundry;
 		string									endBoundry;
-		std::vector<std::pair<string, string> >	Vec;
 		std::map<string, string>				mp;
 		size_t									bodySize;
 		static int								REQUEST_IS_FINISH;
-		static int								TYPE;
+		int								TYPE;
 		
 		string									header;
 		ofstream								outFile;
 		static unsigned long	length;
-		static unsigned long	restlength;
 		
 		static int								IF_FILENAME;
 		string salah;
@@ -56,18 +54,12 @@ class Request
 		void			printV(vector<pair<string, string> > &mp);
 		void			parseChunkedBoundryBody(string &body);
 		void			parseBoundryBody(string &body);
-		void			parseBoundryBodyA(string &body);
 		void			parseChunkedBody(string &body);
 		int				getFileName(string &body,  string &fileName);
-		int				getFileNameA(string &body,  string &fileName);
 		void 			writeFile(string &body, int start, size_t end, size_t len);
-		void 			writeFileA(string &body, int start, size_t end, size_t len);
 		void			openFile(string fileName);
-		void			openFileA(string fileName);
 		void			isBoundary(string &body);
-		void			isBoundaryA(string &body);
 		void			getQweryString(string &body);
-		void			getQweryStringA(string &body);
 
 		int				getStat() const;
 };

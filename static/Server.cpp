@@ -117,8 +117,7 @@ void Server::ft_start(int size, int *fd) {
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						
 					}
-					static int j;
-					cout << "----- " << j++ << " ----" << endl;
+					
 					
 					
 

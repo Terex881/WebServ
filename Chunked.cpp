@@ -14,7 +14,10 @@ void Request::parseChunkedBody(string &body)
 		{
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
+			{
 				cout << RED << "error: no length founded\n" << RESET;
+				return;
+			}
 			
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);

@@ -1,8 +1,7 @@
 #include "Request.hpp"
 
 unsigned long	Request::length				= 0;
-unsigned long	Request::restlength				= 0;
-int				Request::TYPE				= 0;
+// int				Request::TYPE				= 0;
 int				Request::REQUEST_IS_FINISH	= 0;
 int				Request::IF_FILENAME	= 0;
 
