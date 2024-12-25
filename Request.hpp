@@ -67,7 +67,7 @@ class Request
 		void			isBoundary(string &body);
 		void			isBoundaryA(string &body);
 		void			getQweryString(string &body);
-		void			getQweryStringA(string &body, int flag);
+		void			getQweryStringA(string &body);
 
 		int				getStat() const;
 };

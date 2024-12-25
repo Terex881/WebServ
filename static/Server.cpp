@@ -10,7 +10,7 @@
 
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE 5120 //4096
+#define BUFFER_SIZE 8192 //5120 //4096
 
 
 void Server::ft_start(int size, int *fd) {
@@ -117,7 +117,8 @@ void Server::ft_start(int size, int *fd) {
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						
 					}
-
+					static int j;
+					cout << "----- " << j++ << " ----" << endl;
 					
 					
 

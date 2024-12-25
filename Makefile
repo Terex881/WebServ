@@ -14,8 +14,8 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) $(FLAG) -o $@
 
-run: re clean
-	./$(NAME) ./static/file.conf
+# run: re clean
+# 	./$(NAME) ./static/file.conf
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(FLAG) -c $< -o $@

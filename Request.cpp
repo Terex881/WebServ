@@ -53,6 +53,7 @@ void	Request::parseBodyTypes(string &body)
 
 void Request::request(string &request)
 {
+
 	if (!REQUEST_IS_FINISH)
 	{
 		size_t pos = request.find("\r\n\r\n");
