@@ -7,7 +7,7 @@
 
 void Request::parseChunkedBody(string &body)
 {
-	openFile("ok." + extention);
+	openFile(".Zip/ok." + extention);
 	size_t 			hexPos;
 	string 			subBody;
 	static u_long	length = 0;

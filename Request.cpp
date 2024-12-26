@@ -33,9 +33,9 @@ void Request::printV(vector<pair<string, string> > &mp)
 void	Request::parseBodyTypes(string &body)
 {
 	newStr += body;
-	ofstream ss("Z.py", ios::app);
-	ss << newStr;
-	ss << "\n------------------------------------------------------------------\n";
+	// ofstream ss("Z.py", ios::app);
+	// ss << newStr;
+	// ss << "\n------------------------------------------------------------------\n";
 	// cout << RED << TYPE << endl;
 	switch (TYPE)
 	{

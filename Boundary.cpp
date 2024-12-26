@@ -1,6 +1,4 @@
 #include "./Request.hpp"
-#include <fstream>
-
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -38,16 +36,12 @@ void	Request::getQweryString(string &body)
 	// subBody = body.substr(0, contentEndtPos);
 
 	static int i = 0;
-	openFile("File" + to_string(i) + ".txt");	i++;
+	openFile(".Zip/File" + to_string(i) + ".txt");	i++;
 	writeFile(body, 0, contentEndtPos, 0);
 }
 
 int	Request::getFileName(string &body, string &fileName)
 {
-	// cout << RED << ":" << body << ":" << RESET << endl;
-	// cout << YELLOW << ":" << tmp << ":" << RESET << endl;
-	// cout << GREEN << ":" << first << ":" << RESET << endl;
-
 	string tmp = body.substr(body.find(boundry) + boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
@@ -69,11 +63,8 @@ int	Request::getFileName(string &body, string &fileName)
 		return (1);
 	}
 	else
-	{
 		getQweryString(body);
-
-	}
-	return (-1);
+	return -1;
 }
 
 bool	Request::isBoundary(string &body)
@@ -99,13 +90,14 @@ bool	Request::isBoundary(string &body)
 		else
 			contentEndtPos = body.length();
 
-		openFile(fileName);
+		openFile(".Zip/" + fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
-	if (!i)
+	else if (!i)
 		return 0;
 	return 1;
 }
+// 6.3.45
 
 void	Request::parseBoundryBody(string &body)
 {
