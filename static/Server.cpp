@@ -1,13 +1,5 @@
 #include "Server.hpp"
-
-#include <fstream>
-#include <ostream>
-#include <cstring>
-#include <vector>
-
-
 #include "../Request.hpp"
-
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 8192 //5120 //4096

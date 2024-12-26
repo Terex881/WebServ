@@ -1,16 +1,13 @@
 #include "./Request.hpp"
 #include <fstream>
-#include <string>
 
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);
-
 	if (outFile.is_open())
 		outFile.write(content.c_str(), content.length()); outFile.flush();
 	body.erase(0, end + len);
-	// body.erase(0, content.length() + len);
 }
 
 void	Request::openFile(string fileName)
@@ -26,7 +23,6 @@ void	Request::getQweryString(string &body)
 {
 	string subBody;
 	size_t contentEndtPos  = 0;
-
 	body.erase(0, body.find(DCRLF) + 4);
 
 	size_t boundryPos = body.find(this->boundry);
@@ -39,7 +35,7 @@ void	Request::getQweryString(string &body)
 	else
 		contentEndtPos = body.length();
 
-	subBody = body.substr(0, contentEndtPos);
+	// subBody = body.substr(0, contentEndtPos);
 
 	static int i = 0;
 	openFile("File" + to_string(i) + ".txt");	i++;
@@ -48,9 +44,19 @@ void	Request::getQweryString(string &body)
 
 int	Request::getFileName(string &body, string &fileName)
 {
-	string first = body.substr(0, body.find(CRLF) + 2);
-	size_t filePos = first.find(FILE_NAME);
+	// cout << RED << ":" << body << ":" << RESET << endl;
+	// cout << YELLOW << ":" << tmp << ":" << RESET << endl;
+	// cout << GREEN << ":" << first << ":" << RESET << endl;
 
+	string tmp = body.substr(body.find(boundry) + boundry.length(), body.length());
+	string first = tmp.substr(0, tmp.find(CRLF) + 2);
+
+	if (first.find("\"\r\n") == string::npos)
+	{
+		cout << RED << "error: no CRLF founded\n" << RESET;
+		return 0;
+	}
+	size_t filePos = first.find(FILE_NAME);
 	if (filePos != std::string::npos)
 	{
 		first.erase(0, filePos + 12);
@@ -65,27 +71,24 @@ int	Request::getFileName(string &body, string &fileName)
 	else
 	{
 		getQweryString(body);
-		return (0);
+
 	}
+	return (-1);
 }
 
-void	Request::isBoundary(string &body)
+bool	Request::isBoundary(string &body)
 {
 	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
 	string	fileName;
 
-	if (boundryPos != 0)
-	{
-		writeFile(body, 0, boundryPos -2 , 2 + boundry.length()); outFile.close();
-	}
-	else
-		writeFile(body, 0, boundryPos, boundry.length()); outFile.close();
-
-	// body.erase(0, boundry.length());
-	if (getFileName(body, fileName))
+	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
+	else writeFile(body, 0, boundryPos, 0);
+	outFile.close();
+	
+	int i = getFileName(body, fileName);
+	if (i == 1)
 	{
 		body.erase(0, body.find(DCRLF) + 4);
-
 		boundryPos = body.find(this->boundry);
 		endboundryPos = body.find(this->endBoundry);
 
@@ -99,14 +102,18 @@ void	Request::isBoundary(string &body)
 		openFile(fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
+	if (!i)
+		return 0;
+	return 1;
 }
 
 void	Request::parseBoundryBody(string &body)
 {
+	size_t boundryPos, endboundryPos;
+		endboundryPos = body.find(endBoundry);
 	while(!body.empty())
 	{
-		size_t boundryPos = body.find(this->boundry);
-		size_t endboundryPos = body.find(this->endBoundry);
+		boundryPos = body.find(boundry);
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
 			if (body == CRLF && TYPE == 2) body.erase(0, 2);
@@ -114,10 +121,11 @@ void	Request::parseBoundryBody(string &body)
 		}
 		if (boundryPos != string::npos)
 		{
-			isBoundary(body);
+			if (!isBoundary(body)) return;
 		}
 		else if (endboundryPos != string::npos)
 		{
+			endboundryPos = body.find(endBoundry);	
 			writeFile(body, 0, endboundryPos, endBoundry.length());
 			REQUEST_IS_FINISH = 2;
 		}

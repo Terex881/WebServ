@@ -1,12 +1,16 @@
 #include "./Request.hpp"
+#include <exception>
+#include <fstream>
+#include <sys/types.h>
 
 
 
 void Request::parseChunkedBody(string &body)
 {
 	openFile("ok." + extention);
-	size_t hexPos;
-	string subBody;
+	size_t 			hexPos;
+	string 			subBody;
+	static u_long	length = 0;
 
 	while(!body.empty())
 	{
@@ -43,4 +47,16 @@ void Request::parseChunkedBody(string &body)
 		if (!length)
 			body.erase(0, 2);	
 	}
+}
+
+
+void Request::parseBodyLength(string &body)
+{
+	
+	openFile("ok." + extention);
+
+	static u_long length = 0;
+	length += body.length();
+	cout << RED << length << endl;
+	writeFile(body, 0, body.length(), 0);
 }

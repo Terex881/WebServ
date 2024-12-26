@@ -4,7 +4,7 @@ void Request::parseChunkedBoundryBody(string &body)
 {
 	size_t hexPos;
 	string subBody;
-
+	static u_long	length = 0;
 	while(!body.empty())
 	{
 		if (length == 0)		
@@ -25,7 +25,6 @@ void Request::parseChunkedBoundryBody(string &body)
 				return;
 			}
 		}
-
 		subBody = body.substr(0, length);
 		length -= subBody.length();
 

@@ -106,6 +106,8 @@ void Request::fillData(const std::map<string, string> &mp)
 
 	
 	
+	TYPE = 3;
+	
 	bool bol = boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
@@ -125,5 +127,4 @@ void Request::fillData(const std::map<string, string> &mp)
 			TYPE = 2;
 		}
 	}
-
 }
