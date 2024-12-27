@@ -31,35 +31,32 @@ void Request::printV(vector<pair<string, string> > &mp)
 
 void	Request::parseBodyTypes(string &body)
 {
-	newStr += body;
-	// ofstream ss("Z.py", ios::app);
-	// ss << newStr;
-	// ss << "\n------------------------------------------------------------------\n";
-	// cout << RED << TYPE << endl;
+	// newStr += body;
+	newStr.append(body.c_str(), body.length());
+
+	// TEST.write(newStr.c_str(), newStr.length()); TEST.flush();
+	// TEST.write("\n--------------------------------------------\n", 46); TEST.flush();
+	
 	switch (TYPE)
 	{
 		case (0):parseBoundryBody(newStr); break;
 		case (1): parseChunkedBody(newStr); break;
 		case (2): parseChunkedBoundryBody(newStr); break;
-		case (3): parseBodyLength(newStr);break;
+		case (3): parseBodyLength(newStr); break;
 	}
 }
 
-
-
 void Request::request(string &request)
 {
-	// static int i;
-	// cout << "===" << i++ << "===" << endl;
 	if (!getStat())
 	{
 		size_t pos = request.find("\r\n\r\n");
 		if (pos != string::npos)
 		{
-			header += request.substr(0, pos); // chof kifach
+			// header += request.substr(0, pos); // chof kifach
+			header.append(request.c_str(), 0, pos);
 			parseHeader(header);
 			request.erase(0, pos + 4);
-
 		}
 		else
 			header.append(request);
@@ -67,3 +64,5 @@ void Request::request(string &request)
 	if (getStat() == 1)
 		parseBodyTypes(request);
 }
+// 6.44.30
+// 6.49.20 --> for 2.40 GO

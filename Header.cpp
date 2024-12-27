@@ -133,5 +133,3 @@ void Request::fillData(const std::map<string, string> &mp)
 		TEST.open("Z.py", ios::app|ios::binary);
 	}
 }
-// 9.25.50
-// 9.29.30

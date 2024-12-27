@@ -49,8 +49,25 @@ void Request::parseBodyLength(string &body)
 	
 	openFile("Zip/ok." + extention);
 
-	static u_long length = 0;
-	length += body.length();
-	cout << RED << length << endl;
+	// static u_long length = 0;
+	bodySize -= body.length();
+	if (!bodySize)
+		REQUEST_IS_FINISH = 2;
+	cout << RED << bodySize << endl;
 	writeFile(body, 0, body.length(), 0);
 }
+
+
+
+// void Request::parseBodyLength(string &body)
+// {
+	
+// 	openFile("Zip/ok." + extention);
+
+// 	// static u_long length = 0;
+// 	string subBody = body.substr(0, bodySize);
+
+// 	bodySize -= subBody.length();
+
+// 	writeFile(body, 0, body.length(), 0);
+// }

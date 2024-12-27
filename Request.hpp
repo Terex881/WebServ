@@ -55,4 +55,6 @@ class Request
 		void			parseChunkedBody(string &body);
 		void			parseBodyLength(string &body);
 		void			parseChunkedBoundryBody(string &body);
+
+		bool myFind(string &body);
 };
