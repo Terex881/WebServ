@@ -1,13 +1,8 @@
 #include "./Request.hpp"
-#include <exception>
-#include <fstream>
-#include <sys/types.h>
-
-
 
 void Request::parseChunkedBody(string &body)
 {
-	openFile(".Zip/ok." + extention);
+	openFile("Zip/ok." + extention);
 	size_t 			hexPos;
 	string 			subBody;
 	static u_long	length = 0;
@@ -49,11 +44,10 @@ void Request::parseChunkedBody(string &body)
 	}
 }
 
-
 void Request::parseBodyLength(string &body)
 {
 	
-	openFile("ok." + extention);
+	openFile("Zip/ok." + extention);
 
 	static u_long length = 0;
 	length += body.length();

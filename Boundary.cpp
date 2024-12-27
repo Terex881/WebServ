@@ -1,4 +1,5 @@
 #include "./Request.hpp"
+#include <fstream>
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -36,7 +37,7 @@ void	Request::getQweryString(string &body)
 	// subBody = body.substr(0, contentEndtPos);
 
 	static int i = 0;
-	openFile(".Zip/File" + to_string(i) + ".txt");	i++;
+	openFile("Zip/File" + to_string(i) + ".txt");	i++;
 	writeFile(body, 0, contentEndtPos, 0);
 }
 
@@ -90,19 +91,21 @@ bool	Request::isBoundary(string &body)
 		else
 			contentEndtPos = body.length();
 
-		openFile(".Zip/" + fileName);
+		openFile("Zip/" + fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)
 		return 0;
 	return 1;
 }
-// 6.3.45
 
 void	Request::parseBoundryBody(string &body)
 {
+	// ofstream dd("z.py");
+	// dd << body;
+	// dd << "\n----------------------\n";
 	size_t boundryPos, endboundryPos;
-		endboundryPos = body.find(endBoundry);
+	endboundryPos = body.find(endBoundry);
 	while(!body.empty())
 	{
 		boundryPos = body.find(boundry);
@@ -121,5 +124,7 @@ void	Request::parseBoundryBody(string &body)
 			writeFile(body, 0, endboundryPos, endBoundry.length());
 			REQUEST_IS_FINISH = 2;
 		}
+		// cout << GREEN << "PP\n";
+
 	}
 }

@@ -83,6 +83,7 @@ const string Request::getExtention(std::map<string, string> mp)
 	else
 		cout << RED << "Bad request\n" ;
 	return ""; // check this 
+	// GET NAME FROM TIME
 }
 
 
@@ -127,4 +128,10 @@ void Request::fillData(const std::map<string, string> &mp)
 			TYPE = 2;
 		}
 	}
+	if (TEST.is_open())
+	{
+		TEST.open("Z.py", ios::app|ios::binary);
+	}
 }
+// 9.25.50
+// 9.29.30

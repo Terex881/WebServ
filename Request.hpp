@@ -28,6 +28,7 @@ class Request
 		int										TYPE;
 		string									header;
 		ofstream								outFile;
+		ofstream								TEST;
 
 		string newStr;
 		

@@ -3,8 +3,8 @@
 Request::Request()
 {
 	bodySize = 0;
-	boundry = "";
-	endBoundry = "";
+	// boundry = "";
+	// endBoundry = "";
 	REQUEST_IS_FINISH = 0;
 }
 
@@ -29,7 +29,6 @@ void Request::printV(vector<pair<string, string> > &mp)
 		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
 }
 
-
 void	Request::parseBodyTypes(string &body)
 {
 	newStr += body;
@@ -44,13 +43,14 @@ void	Request::parseBodyTypes(string &body)
 		case (2): parseChunkedBoundryBody(newStr); break;
 		case (3): parseBodyLength(newStr);break;
 	}
-	
 }
 
 
 
 void Request::request(string &request)
 {
+	// static int i;
+	// cout << "===" << i++ << "===" << endl;
 	if (!getStat())
 	{
 		size_t pos = request.find("\r\n\r\n");
