@@ -103,7 +103,7 @@ void Request::fillData(const std::map<string, string> &mp)
 	if (boundry != mp.end())
 		extention = getExtention(mp);
 	else
-		cout << RED << "no type founded" << endl;;
+		cout << RED << "no type founded" << endl;
 
 	
 	
@@ -128,7 +128,7 @@ void Request::fillData(const std::map<string, string> &mp)
 			TYPE = 2;
 		}
 	}
-	if (TEST.is_open())
+	if (!TEST.is_open())
 	{
 		TEST.open("Z.py", ios::app|ios::binary);
 	}

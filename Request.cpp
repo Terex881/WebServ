@@ -26,7 +26,11 @@ void Request::print(map<string, string> &mp)
 void Request::printV(vector<pair<string, string> > &mp)
 {
 	for(vector<pair<string, string> >::iterator it = mp.begin(); it!=mp.end(); it++)
+	{
 		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
+		cout << "\n--------------------------------------------\n";
+
+	}
 }
 
 void	Request::parseBodyTypes(string &body)
@@ -34,9 +38,6 @@ void	Request::parseBodyTypes(string &body)
 	// newStr += body;
 	newStr.append(body.c_str(), body.length());
 
-	// TEST.write(newStr.c_str(), newStr.length()); TEST.flush();
-	// TEST.write("\n--------------------------------------------\n", 46); TEST.flush();
-	
 	switch (TYPE)
 	{
 		case (0):parseBoundryBody(newStr); break;
@@ -66,3 +67,6 @@ void Request::request(string &request)
 }
 // 6.44.30
 // 6.49.20 --> for 2.40 GO
+
+// 12.18.20
+// 

@@ -1,5 +1,4 @@
 #include "./Request.hpp"
-#include <fstream>
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -11,7 +10,8 @@ void	Request::writeFile(string &body, int start, size_t end, size_t len)
 
 void	Request::openFile(string fileName)
 {
-	if (!outFile.is_open()){
+	if (!outFile.is_open())
+	{
 		outFile.open(fileName, ios::binary | ios::app);
 		if (!outFile.is_open())
 			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
@@ -20,33 +20,58 @@ void	Request::openFile(string fileName)
 
 void	Request::getQweryString(string &body)
 {
-	string subBody;
-	size_t contentEndtPos  = 0;
+	string key, val;
+	size_t contentEndtPos = 0, namePos = body.find("; name=\"");
+
+	// if (namePos == string::npos)
+	// 	return;
+	
+	body.erase(0, namePos + 8);
+	key = body.substr(0, body.find(CRLF) - 1);
 	body.erase(0, body.find(DCRLF) + 4);
-
-	size_t boundryPos = body.find(this->boundry);
-	size_t endboundryPos = body.find(this->endBoundry); // chnage
-
-	if (boundryPos != std::string::npos)
-		contentEndtPos = boundryPos;
-	else if (endboundryPos != std::string::npos)
-		contentEndtPos = endboundryPos;
+	if (body.find(CRLF) != std::string::npos)
+		contentEndtPos = body.find(CRLF);
+	else if (body.find(endBoundry) != std::string::npos)
+		contentEndtPos = body.find(endBoundry);
 	else
 		contentEndtPos = body.length();
-
-	// subBody = body.substr(0, contentEndtPos);
-
-	static int i = 0;
-	openFile("Zip/File" + to_string(i) + ".txt");	i++;
-	writeFile(body, 0, contentEndtPos, 0);
+	val = body.substr(0, contentEndtPos);
+	Vec.push_back(make_pair(key, val));
+	body.erase(0, val.length());
+	// cout << RED << ":" << key << ":  :" << GREEN << val << ":" << RESET << endl;
 }
+// {
+// 	string subBody;
+// 	size_t contentEndtPos  = 0;
+// 	body.erase(0, body.find(DCRLF) + 4);
+
+// 	size_t boundryPos = body.find(this->boundry);
+// 	size_t endboundryPos = body.find(this->endBoundry);
+
+// 	if (boundryPos != std::string::npos)
+// 		contentEndtPos = boundryPos;
+// 	else if (endboundryPos != std::string::npos)
+// 		contentEndtPos = endboundryPos;
+// 	else
+// 		contentEndtPos = body.length();
+
+// 	subBody = body.substr(0, contentEndtPos);
+
+// 	Vec.push_back(make_pair("", subBody));
+
+
+
+// 	static int i = 0;
+// 	openFile("Zip/File" + to_string(i) + ".txt");	i++;
+// 	writeFile(body, 0, contentEndtPos, 0);
+// }
 
 int	Request::getFileName(string &body, string &fileName)
 {
 	string tmp = body.substr(body.find(boundry) + boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
-	if (first.find("\"\r\n") == string::npos)
+	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
 	{
 		cout << RED << "error: no CRLF founded\n" << RESET;
 		return 0;
@@ -64,7 +89,13 @@ int	Request::getFileName(string &body, string &fileName)
 		return (1);
 	}
 	else
+	{
+		if (tmp.find(this->boundry) == string::npos && tmp.find(this->endBoundry) == string::npos) // add endboundry
+		{
+			return 0;
+		}
 		getQweryString(body);
+	}
 	return -1;
 }
 
@@ -101,9 +132,10 @@ bool	Request::isBoundary(string &body)
 
 void	Request::parseBoundryBody(string &body)
 {
-	// ofstream dd("z.py");
-	// dd << body;
-	// dd << "\n----------------------\n";
+
+	TEST.write(newStr.c_str(), newStr.length()); TEST.flush();
+	TEST.write("\n--------------------------------------------\n", 46); TEST.flush();
+	
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(endBoundry);
 	while(!body.empty())
@@ -122,6 +154,7 @@ void	Request::parseBoundryBody(string &body)
 		{
 			endboundryPos = body.find(endBoundry);	
 			writeFile(body, 0, endboundryPos, endBoundry.length());
+			printV(Vec);
 			REQUEST_IS_FINISH = 2;
 		}
 		// cout << GREEN << "PP\n";

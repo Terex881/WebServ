@@ -13,18 +13,20 @@ void Request::parseChunkedBoundryBody(string &body)
 			/* check if not 0 to avoid reallocat for nothing */
 			if (strPos != 0)
 			{
-				/* get string before hexadecimal and erase it and write the str to file*/
+				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());;
 				if (str != CRLF)
 					parseBoundryBody(str);
 			}
+			/* */
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
 			{
 				cout << RED << "error: no length founded\n" << RESET;
 				return;
 			}
+			/* get decimal number and erase hex + crlf and if length 0 erase 0 and rnrnr of crlf*/
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);
 			if (!length)

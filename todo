@@ -16,6 +16,14 @@ Example of INVALID: Content-Type : application/json --> 400 bad request
 make characters lowercase
 
 
+======> 3.2.2 http URL
+
 
 check NULL in extention of a file
 
+
+check half boundry 
+key value to map pr vect
+check extention function
+handl query strigs
+handl cgi bodies

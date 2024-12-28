@@ -23,6 +23,7 @@ class Request
 		string									boundry;
 		string									endBoundry;
 		std::map<string, string>				mp;
+		std::vector<std::pair<string, string> >				Vec;
 		size_t									bodySize;
 		int										REQUEST_IS_FINISH;
 		int										TYPE;

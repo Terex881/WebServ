@@ -2,7 +2,7 @@
 #include "../Request.hpp"
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE 8192 //5120 //4096
+#define BUFFER_SIZE  8192 //5120 //4096
 
 
 void Server::ft_start(int size, int *fd) {
