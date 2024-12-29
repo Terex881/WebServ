@@ -66,7 +66,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 	if (Method == "GET")
 	{
 		// std::cout << " -------------------==========1===============     ------------------- " << std::endl;
-		std::cout << " Working _ Path " << Working_Path.c_str() << std::endl;
+		// std::cout << " Working _ Path " << Working_Path.c_str() << std::endl;
 		if (isFile(Working_Path))
 		{
 			// std::cout << " -------------------===========2==============     ------------------- " << std::endl;
@@ -120,7 +120,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					// memset(buffer, '\0', sizeof(buffer));
 					(*file).read(buffer.data(), Chunk_Size); // Read a chunk
 					this->current_read = (*file).gcount();
-					std::cout << " bytesRead = " << current_read <<" --- " << std::endl;
+					// std::cout << " bytesRead = " << current_read <<" --- " << std::endl;
 					if (current_read == 0)
 					{
 						file->close();
@@ -156,9 +156,9 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 						sent_head[idx] = 0;
 						// first = "";
 					}
-					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
-					std::cout << "===== ==== bytes_read " << current_read << std::endl;
-					std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
+					// std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
+					// std::cout << "===== ==== bytes_read " << current_read << std::endl;
+					// std::cout << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" << std::endl;
 					return ;
 				}
 

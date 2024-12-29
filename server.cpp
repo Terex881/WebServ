@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include "./Response.hpp"
+#include "RequestParser/Request.hpp"
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
@@ -39,14 +40,14 @@ void clearSocketBuffer(int socket) {
 
 void Server::ft_start(int size, int *fd) {
 
-	std::ofstream outputFile("output_video", std::ios::binary); 
+	std::ofstream outputFile("output_video.py", std::ios::binary); 
 
 	int kq = kqueue();
 	if (kq == -1) {
 		std::cerr << "kqueue failed" << std::endl;
 		exit(1);
 	}
-
+	Request R1;
 	connection_info connections[MAX_CLIENTS];
 	memset(connections, 0, sizeof(connections));
 
@@ -138,6 +139,7 @@ void Server::ft_start(int size, int *fd) {
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
+					R1.request(msg);
 					string sas = msg;
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 					size_t	first_pos = sas.find(' ');
@@ -153,9 +155,10 @@ void Server::ft_start(int size, int *fd) {
 					outputFile << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
 
 					outputFile << sas << std::endl;
-					connections[client_socket].request = sas;
+					connections[client_socket].request = R1.getElement("path");
+					// cout << YELLOW << "_____>" << R1.getElement("path") << ":&&&&&&&&" << RESET << endl;
 					connections[client_socket].fd = client_socket;
-					connections[client_socket].file = new std::ifstream("."+sas, std::ios::binary);
+					connections[client_socket].file = new std::ifstream("."+R1.getElement("path"), std::ios::binary);
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
 					// connections[client_socket].file = new std::ifstream("."+sas, std::ios::in);

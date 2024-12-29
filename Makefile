@@ -6,8 +6,9 @@ FLAG = -Wall -Wextra -Werror -std=c++98
 
         
 
-OBJ = main.o Delete.o server.o File_Parsing.o  Cgi.o Response.o\
-RequestParser/parseBoundry.o RequestParser/parseChunked.o RequestParser/Request.o
+OBJ = main.o Delete.o Server.o File_Parsing.o  Cgi.o Response.o\
+RequestParser/parseBoundry.o RequestParser/parseChunked.o RequestParser/Request.o \
+RequestParser/ChunkedBoundary.o RequestParser/Header.o
 
 all: $(NAME)
 

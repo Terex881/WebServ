@@ -1,23 +1,30 @@
-#include "./Request.hpp"
-
-int Request::isFinish = 0;
-string Request::header;
-string Request::body;
+#include "Request.hpp"
+#include <string>
 
 Request::Request()
 {
 	bodySize = 0;
-	isFinish = 0;
-	boundry = "";
-	endBoundry = "";
+	// boundry = "";
+	// endBoundry = "";
+	REQUEST_IS_FINISH = 0;
 }
 
 
-Request::~Request()
+
+int Request::getStat() const
 {
-	// if (outFile.is_open())
-		// outFile.close();
+	return REQUEST_IS_FINISH;
 }
+
+string Request::getElement(const string & element) const
+{
+	string res;
+	map<string, string>::const_iterator it = mp.find(element);
+	if (it != mp.end())
+		res = it->second;
+	return res;
+}
+
 
 void Request::print(map<string, string> &mp)
 {
@@ -25,24 +32,50 @@ void Request::print(map<string, string> &mp)
 		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
 }
 
+void Request::printV(vector<pair<string, string> > &mp)
+{
+	for(vector<pair<string, string> >::iterator it = mp.begin(); it!=mp.end(); it++)
+	{
+		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
+		cout << "\n--------------------------------------------\n";
+
+	}
+}
+
+void	Request::parseBodyTypes(string &body)
+{
+	// newStr += body;
+	newStr.append(body.c_str(), body.length());
+
+	switch (TYPE)
+	{
+		case (0):parseBoundryBody(newStr); break;
+		case (1): parseChunkedBody(newStr); break;
+		case (2): parseChunkedBoundryBody(newStr); break;
+		case (3): parseBodyLength(newStr); break;
+	}
+}
 
 void Request::request(string &request)
 {
-	if (!isFinish)
+	if (!getStat())
 	{
 		size_t pos = request.find("\r\n\r\n");
 		if (pos != string::npos)
 		{
-			header += request.substr(0, pos);
-			request.erase(0, pos + 4);
+			// header += request.substr(0, pos); // chof kifach
+			header.append(request.c_str(), 0, pos);
 			parseHeader(header);
+			request.erase(0, pos + 4);
 		}
 		else
 			header.append(request);
 	}
-	if (isFinish == 1)
-	{
-		body.append(request);
-		parseBodyTypes(request, mp);
-	}
+	if (getStat() == 1)
+		parseBodyTypes(request);
 }
+// 6.44.30
+// 6.49.20 --> for 2.40 GO
+
+// 12.18.20
+// 

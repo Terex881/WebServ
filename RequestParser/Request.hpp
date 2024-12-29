@@ -1,40 +1,65 @@
 #pragma once
-#include <cstddef>
+
 #include <iostream>
-#include <sstream>
 #include <map>
 #include <string>
 #include <fstream>
-
-using namespace std;
+#include <vector>
 
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
+#define CRLF "\r\n"
+#define DCRLF "\r\n\r\n"
+#define FILE_NAME "; filename=\""
 
-class Request
+using namespace std;
+
+class Request  
 {
 	private:
-		std::map<string, string> mp;
-		size_t bodySize;
-		static int isFinish;
-		static string header;
-		static string body;
-		string boundry;
-		string endBoundry;
-		
-	public:
-		ofstream outFile;
-		Request();
-		~Request();
-		void	request(string &body);
-		void	parseBodyTypes(string body, map<string, string> headerMap);
-		void	parseHeader(string &header);
-		void	print(map<string, string> &headerMap);
-		void	parseChunkedBoundryBody(string &body);
-		void	parseFirstLine(string line, map<string, string> &mp);
-		void	parseBoundryBody(string &body);
-		void	parseChunkedBody(string &body);
+		string 									extention;
+		string									boundry;
+		string									endBoundry;
+		std::map<string, string>				mp;
+		std::vector<std::pair<string, string> >				Vec;
+		size_t									bodySize;
+		int										REQUEST_IS_FINISH;
+		int										TYPE;
+		string									header;
+		string									queryString;
+		ofstream								outFile;
+		ofstream								TEST;
 
+		string newStr;
+		
+
+	public:
+		Request();
+		void			parseHeader(string &header);
+		void			fillData(const std::map<string, string> &mp); // for fill data
+		const string	getExtention(std::map<string, string> mp);
+
+		void			request(string &body);
+		int				getFileName(string &body,  string &fileName);
+		void 			writeFile(string &body, int start, size_t end, size_t len);
+		void			openFile(string fileName);
+		bool			isBoundary(string &body);
+		void			getQweryString(string &body);
+		int				getStat() const;
+
+		void			parseFirstLine(string &line, map<string, string> &mp);
+		void			parseBodyTypes(string &body);
+		void			parseBoundryBody(string &body);
+		void			parseChunkedBody(string &body);
+		void			parseBodyLength(string &body);
+		void			parseChunkedBoundryBody(string &body);
+
+		bool myFind(string &body);
+		void parseUrl(string &str);
+		string getElement(const string & element) const;
+
+		void			print(map<string, string> &headerMap);
+		void			printV(vector<pair<string, string> > &mp);
 };
