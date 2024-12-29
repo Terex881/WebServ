@@ -28,6 +28,7 @@ class Request
 		int										REQUEST_IS_FINISH;
 		int										TYPE;
 		string									header;
+		string									queryString;
 		ofstream								outFile;
 		ofstream								TEST;
 
@@ -41,8 +42,6 @@ class Request
 		const string	getExtention(std::map<string, string> mp);
 
 		void			request(string &body);
-		void			print(map<string, string> &headerMap);
-		void			printV(vector<pair<string, string> > &mp);
 		int				getFileName(string &body,  string &fileName);
 		void 			writeFile(string &body, int start, size_t end, size_t len);
 		void			openFile(string fileName);
@@ -50,7 +49,7 @@ class Request
 		void			getQweryString(string &body);
 		int				getStat() const;
 
-		void			parseFirstLine(string line, map<string, string> &mp);
+		void			parseFirstLine(string &line, map<string, string> &mp);
 		void			parseBodyTypes(string &body);
 		void			parseBoundryBody(string &body);
 		void			parseChunkedBody(string &body);
@@ -58,4 +57,8 @@ class Request
 		void			parseChunkedBoundryBody(string &body);
 
 		bool myFind(string &body);
+
+
+		void			print(map<string, string> &headerMap);
+		void			printV(vector<pair<string, string> > &mp);
 };

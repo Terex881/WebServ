@@ -1,14 +1,22 @@
 #include "./Request.hpp"
 
-
-void Request::parseFirstLine(string line, map<string, string> &mp)
+void parseUrl(string &str)
 {
-	string word;
-	string key;
-	int i = 0;
-	if (std::count(line.begin(),line.end(), ' ') != 2)
-		cout << RED << "erro: found 2 spaces in the first line" << std::endl;
+	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
+		cout << RED << "bad URL" << std::endl;
 
+
+
+}
+
+void Request::parseFirstLine(string &line, map<string, string> &mp)
+{
+	string word, key;
+	int i = 0;
+	// if (std::count(line.begin(),line.end(), ' ') != 2)
+	// 	cout << RED << "erro: found 2 spaces in the first line" << std::endl;
+	if (isspace(line[0]))
+		cout << RED << "foud space in the begening";
 	while(line.length() > 0)
 	{
 		word = line.substr(0, line.find(" ")); line.erase(0, word.length());
@@ -20,9 +28,9 @@ void Request::parseFirstLine(string line, map<string, string> &mp)
 	if (it->second != "POST" && it->second != "GET" && it->second != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
 
-	it = mp.find("path");// check other characters
-	if (it->second.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
-		cout << RED << "bad URL" << std::endl;
+	// it = mp.find("path");// check other characters
+	if ((it = mp.find("path")) != mp.end())
+		parseUrl(it->second);
 
 	it = mp.find("version");
 	if (it->second != "HTTP/1.1")
@@ -33,7 +41,7 @@ void Request::parseHeader(string &header)
 {
 	string key, value;
 	size_t colonPos, lineEnd; 
-	size_t pos = header.find("\r\n");
+	size_t pos = header.find(CRLF);
 	string firstLine = header.substr(0, pos);
 
 	// check if first line has space in start and print error 
@@ -48,7 +56,7 @@ void Request::parseHeader(string &header)
 			cout << RED << "foud space or doesn't find :";
 			break;
 		}
-		lineEnd = header.find("\r\n");
+		lineEnd = header.find(CRLF);
 		if(lineEnd == string::npos)
 			lineEnd = header.length();
 		key = header.substr(0, colonPos);
