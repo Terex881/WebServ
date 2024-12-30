@@ -1,18 +1,37 @@
 #include "Request.hpp"
+#include "Body.hpp"
+#include "Header.hpp"
 
-Request::Request()
+
+string									Request::boundry;
+string									Request::endBoundry;
+string 									Request::extention;
+size_t									Request::bodySize = 0;
+int										Request::TYPE = 0;
+int										Request::REQUEST_IS_FINISH = 0;
+string									Request::header;
+
+
+Request::Request() : header_obj(NULL), body_obj(NULL)
 {
-	bodySize = 0;
-	// boundry = "";
-	// endBoundry = "";
-	REQUEST_IS_FINISH = 0;
+	// bodySize = 0;
+	// REQUEST_IS_FINISH = 0;
+	// TYPE = 0;
 }
-
-
+Request::~Request()
+{
+	delete header_obj;
+	delete body_obj;
+}
 
 int Request::getStat() const
 {
 	return REQUEST_IS_FINISH;
+}
+
+int Request::getType() const
+{
+	return TYPE;
 }
 
 
@@ -29,44 +48,29 @@ void Request::printV(vector<pair<string, string> > &mp)
 	{
 		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
 		cout << "\n--------------------------------------------\n";
-
 	}
 }
 
-void	Request::parseBodyTypes(string &body)
-{
-	// newStr += body;
-	newStr.append(body.c_str(), body.length());
-
-	switch (TYPE)
-	{
-		case (0):parseBoundryBody(newStr); break;
-		case (1): parseChunkedBody(newStr); break;
-		case (2): parseChunkedBoundryBody(newStr); break;
-		case (3): parseBodyLength(newStr); break;
-	}
-}
 
 void Request::request(string &request)
 {
+	body_obj = new Body();
+	header_obj = new Header();
+
 	if (!getStat())
 	{
-		size_t pos = request.find("\r\n\r\n");
+		size_t pos = request.find(DCRLF);
 		if (pos != string::npos)
 		{
-			// header += request.substr(0, pos); // chof kifach
 			header.append(request.c_str(), 0, pos);
-			parseHeader(header);
+			header_obj->parseHeader(header, this);
 			request.erase(0, pos + 4);
 		}
 		else
 			header.append(request);
 	}
 	if (getStat() == 1)
-		parseBodyTypes(request);
+	{
+		body_obj->parseBodyTypes(request, this);
+	}
 }
-// 6.44.30
-// 6.49.20 --> for 2.40 GO
-
-// 12.18.20
-// 

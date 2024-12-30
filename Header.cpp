@@ -1,43 +1,41 @@
-#include "./Request.hpp"
+#include "./Header.hpp"
+#include "Request.hpp"
 
 void parseUrl(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 		cout << RED << "bad URL" << std::endl;
 
-
-
 }
 
-void Request::parseFirstLine(string &line, map<string, string> &mp)
+void Header::parseFirstLine(string line)
 {
-	string word, key;
-	int i = 0;
-	// if (std::count(line.begin(),line.end(), ' ') != 2)
-	// 	cout << RED << "erro: found 2 spaces in the first line" << std::endl;
+	string word, key;	int i = 0;
+
 	if (isspace(line[0]))
 		cout << RED << "foud space in the begening";
+
 	while(line.length() > 0)
 	{
 		word = line.substr(0, line.find(" ")); line.erase(0, word.length());
 		key = (i == 0) ? "method" : (i == 1) ? "path" : "version";
-		mp[key] = word; i++;
+		bigMap[key] = word; i++;
 		line.erase(0, 1);
 	}
-	map<string, string>::iterator it = mp.find("method");
+	map<string, string>::iterator it = bigMap.find("method");
 	if (it->second != "POST" && it->second != "GET" && it->second != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
 
 	// it = mp.find("path");// check other characters
-	if ((it = mp.find("path")) != mp.end())
+	if ((it = bigMap.find("path")) != bigMap.end())
 		parseUrl(it->second);
 
-	it = mp.find("version");
-	if (it->second != "HTTP/1.1")
+	it = bigMap.find("version");
+	if (it != bigMap.end() && it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
 }
 
-void Request::parseHeader(string &header)
+void Header::parseHeader(string &header, Request* req)
 {
 	string key, value;
 	size_t colonPos, lineEnd; 
@@ -46,7 +44,7 @@ void Request::parseHeader(string &header)
 
 	// check if first line has space in start and print error 
 	header.erase(0, pos + 2);
-	parseFirstLine(firstLine, mp);
+	parseFirstLine(firstLine);
 
 	while(!header.empty())
 	{
@@ -69,16 +67,17 @@ void Request::parseHeader(string &header)
 		if (key == "transfer-encoding") // check other 
         	std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 		
-		mp[key] = value;
+		bigMap[key] = value;
 		
 		header.erase(0, lineEnd + 2);
 	}
-	// print(mp);
-	fillData(mp);
+	// print(bigMap);
+	fillData(bigMap, req);
+	req->setStat(1);
 }
 
 
-const string Request::getExtention(std::map<string, string> mp)
+const string Header::getExtention(std::map<string, string> mp)
 {
 	std::map<string, string>::iterator it = mp.find("content-type");
 	if (it != mp.end())
@@ -95,12 +94,10 @@ const string Request::getExtention(std::map<string, string> mp)
 }
 
 
-void Request::fillData(const std::map<string, string> &mp)
+void Header::fillData(const std::map<string, string> &mp, Request *req)
 {
-	REQUEST_IS_FINISH = 1;
-
 	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
-	map<string, string>::const_iterator	boundry = mp.find("content-type");
+	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	
 	if (lengthPos != mp.end())
@@ -108,36 +105,31 @@ void Request::fillData(const std::map<string, string> &mp)
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
-	if (boundry != mp.end())
+	if (multiPart != mp.end())
 		extention = getExtention(mp);
 	else
 		cout << RED << "no type founded" << endl;
 
+	req->setType(3);
 	
-	
-	TYPE = 3;
-	
-	bool bol = boundry != mp.end() && boundry->second.find("multipart/form-data;") != std::string::npos;
+	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
-		string sep = boundry->second.substr(boundry->second.rfind("boundary=") + 9 , boundry->second.length());
-		this->boundry		= "--" + sep + "\r\n";
-		this->endBoundry	= "\r\n--" + sep + "--\r\n";
-		TYPE = 0;
+		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
+		boundry		= "--" + sep + "\r\n";
+		endBoundry	= "\r\n--" + sep + "--\r\n";
+		req->setType(0);
 	}
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			TYPE = 1;
+			req->setType(1);
 		else if (chunked->second == "chunked" && bol)
 		{
-			TYPE = 2;
+			req->setType(2);
 		}
 	}
-	if (!TEST.is_open())
-	{
-		TEST.open("Z.py", ios::app|ios::binary);
-	}
+	// cout << YELLOW << "Before:" << req->getType() << endl;
 }

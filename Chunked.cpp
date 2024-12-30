@@ -1,11 +1,12 @@
-#include "./Request.hpp"
+#include "./Body.hpp"
 
-void Request::parseChunkedBody(string &body)
+void Body::parseChunkedBody(string &body)
 {
 	openFile("Zip/ok." + extention);
 	size_t 			hexPos;
 	string 			subBody;
 	static u_long	length = 0;
+	exit(100);
 
 	while(!body.empty())
 	{
@@ -44,7 +45,7 @@ void Request::parseChunkedBody(string &body)
 	}
 }
 
-void Request::parseBodyLength(string &body)
+void Body::parseBodyLength(string &body)
 {
 	
 	openFile("Zip/ok." + extention);
@@ -59,7 +60,7 @@ void Request::parseBodyLength(string &body)
 
 
 
-// void Request::parseBodyLength(string &body)
+// void Body::parseBodyLength(string &body)
 // {
 	
 // 	openFile("Zip/ok." + extention);

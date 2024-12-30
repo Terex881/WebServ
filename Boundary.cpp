@@ -1,14 +1,22 @@
-#include "./Request.hpp"
+#include "./Body.hpp"
+#include "Request.hpp"
+#include <fstream>
 
-void	Request::writeFile(string &body, int start, size_t end, size_t len)
+void	Body::writeFile(string &body, int start, size_t end, size_t len)
 {
+	ofstream ss("Y.py", ios::app);
+
 	string content = body.substr(start, end);
 	if (outFile.is_open())
+	{
 		outFile.write(content.c_str(), content.length()); outFile.flush();
+	}
+
+	ss << content;
 	body.erase(0, end + len);
 }
 
-void	Request::openFile(string fileName)
+void	Body::openFile(string fileName)
 {
 	if (!outFile.is_open())
 	{
@@ -18,14 +26,11 @@ void	Request::openFile(string fileName)
 	}
 }
 
-void	Request::getQweryString(string &body)
+void	Body::getQweryString(string &body)
 {
 	string key, val;
 	size_t contentEndtPos = 0, namePos = body.find("; name=\"");
 
-	// if (namePos == string::npos)
-	// 	return;
-	
 	body.erase(0, namePos + 8);
 	key = body.substr(0, body.find(CRLF) - 1);
 	body.erase(0, body.find(DCRLF) + 4);
@@ -38,35 +43,9 @@ void	Request::getQweryString(string &body)
 	val = body.substr(0, contentEndtPos);
 	Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
-	// cout << RED << ":" << key << ":  :" << GREEN << val << ":" << RESET << endl;
 }
-// {
-// 	string subBody;
-// 	size_t contentEndtPos  = 0;
-// 	body.erase(0, body.find(DCRLF) + 4);
 
-// 	size_t boundryPos = body.find(this->boundry);
-// 	size_t endboundryPos = body.find(this->endBoundry);
-
-// 	if (boundryPos != std::string::npos)
-// 		contentEndtPos = boundryPos;
-// 	else if (endboundryPos != std::string::npos)
-// 		contentEndtPos = endboundryPos;
-// 	else
-// 		contentEndtPos = body.length();
-
-// 	subBody = body.substr(0, contentEndtPos);
-
-// 	Vec.push_back(make_pair("", subBody));
-
-
-
-// 	static int i = 0;
-// 	openFile("Zip/File" + to_string(i) + ".txt");	i++;
-// 	writeFile(body, 0, contentEndtPos, 0);
-// }
-
-int	Request::getFileName(string &body, string &fileName)
+int	Body::getFileName(string &body, string &fileName)
 {
 	string tmp = body.substr(body.find(boundry) + boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
@@ -99,7 +78,7 @@ int	Request::getFileName(string &body, string &fileName)
 	return -1;
 }
 
-bool	Request::isBoundary(string &body)
+bool	Body::isBoundary(string &body)
 {
 	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(this->boundry);
 	string	fileName;
@@ -130,12 +109,16 @@ bool	Request::isBoundary(string &body)
 	return 1;
 }
 
-void	Request::parseBoundryBody(string &body)
+void	Body::parseBoundryBody(string &body)
 {
+	ofstream ss("Z.py", ios::app);
+	ss << body;
+	ss << "\n--------------------------------------------\n";
 
-	TEST.write(newStr.c_str(), newStr.length()); TEST.flush();
-	TEST.write("\n--------------------------------------------\n", 46); TEST.flush();
-	
+	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+	// cout << BLUE << "->>>" << boundry << RESET << endl;
+	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(endBoundry);
 	while(!body.empty())
@@ -154,10 +137,33 @@ void	Request::parseBoundryBody(string &body)
 		{
 			endboundryPos = body.find(endBoundry);	
 			writeFile(body, 0, endboundryPos, endBoundry.length());
-			printV(Vec);
+			// printV(Vec);
 			REQUEST_IS_FINISH = 2;
 		}
-		// cout << GREEN << "PP\n";
-
 	}
 }
+// {
+// 	string subBody;
+// 	size_t contentEndtPos  = 0;
+// 	body.erase(0, body.find(DCRLF) + 4);
+
+// 	size_t boundryPos = body.find(this->boundry);
+// 	size_t endboundryPos = body.find(this->endBoundry);
+
+// 	if (boundryPos != std::string::npos)
+// 		contentEndtPos = boundryPos;
+// 	else if (endboundryPos != std::string::npos)
+// 		contentEndtPos = endboundryPos;
+// 	else
+// 		contentEndtPos = body.length();
+
+// 	subBody = body.substr(0, contentEndtPos);
+
+// 	Vec.push_back(make_pair("", subBody));
+
+
+
+// 	static int i = 0;
+// 	openFile("Zip/File" + to_string(i) + ".txt");	i++;
+// 	writeFile(body, 0, contentEndtPos, 0);
+// }

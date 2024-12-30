@@ -1,6 +1,6 @@
-#include "Request.hpp"
+#include "Body.hpp"
 
-void Request::parseChunkedBoundryBody(string &body)
+void Body::parseChunkedBoundryBody(string &body)
 {
 	size_t hexPos, strPos;
 	string subBody, str;
