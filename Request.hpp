@@ -17,38 +17,47 @@
 #define FILE_NAME "; filename=\""
 
 using namespace std;
+
+
 class Header;
 class Body;
 
-
-class Request  
+class Request
 {
 	protected:
-		static string									boundry;
-		static string									endBoundry;
-		static string 									extention;
-		static size_t									bodySize;
-		static int										TYPE;
-		static int										REQUEST_IS_FINISH;
-		static string									header;
+		string					boundry;
+		string					endBoundry;
+		string					extention;
+		size_t					bodySize;
+		int						TYPE;
+		int						REQUEST_IS_FINISH;
+		string					header;
 
-		Body*		body_obj;
-		Header* 	header_obj;
+		Body* body_obj;
+		Header* header_obj;
+
 	public:
+
 		Request();
 		~Request();
 
-		void			request(string &body);
-		int				getStat() const;
-		int				getType() const;
-		void				setStat(int stat)
+		void request(string &body);
+		int getStat() const;
+		int getType() const;
+		void setStat(int stat)
 		{
 			REQUEST_IS_FINISH = stat;
 		}
-		void				setType(int stat)
+		void setType(int stat)
 		{
 			TYPE = stat;
-		}	
-		void			print(map<string, string> &headerMap);
-		void			printV(vector<pair<string, string> > &mp);
+		}
+		void print(map<string, string> &headerMap);
+		void printV(vector<pair<string, string> > &mp);
+
+		Body* getBody();
+		Header* getHeader();
 };
+
+#include "Body.hpp"
+#include "Header.hpp"

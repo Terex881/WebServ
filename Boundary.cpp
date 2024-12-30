@@ -1,6 +1,4 @@
 #include "./Body.hpp"
-#include "Request.hpp"
-#include <fstream>
 
 void	Body::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -115,9 +113,9 @@ void	Body::parseBoundryBody(string &body)
 	ss << body;
 	ss << "\n--------------------------------------------\n";
 
-	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-	// cout << BLUE << "->>>" << boundry << RESET << endl;
-	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+	cout << BLUE << "->>>" << boundry << RESET << endl;
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(endBoundry);
@@ -137,7 +135,7 @@ void	Body::parseBoundryBody(string &body)
 		{
 			endboundryPos = body.find(endBoundry);	
 			writeFile(body, 0, endboundryPos, endBoundry.length());
-			// printV(Vec);
+			printV(Vec);
 			REQUEST_IS_FINISH = 2;
 		}
 	}

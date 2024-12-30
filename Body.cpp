@@ -6,6 +6,7 @@ void	Body::parseBodyTypes(string &body, Request *r)
 
 	// cout << BLUE << "in body:" << r->getType() << RESET << endl;
 
+
 	switch (r->getType())
 	{
 		case (0):parseBoundryBody(newStr); break;

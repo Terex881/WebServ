@@ -8,7 +8,10 @@
 void Server::ft_start(int size, int *fd) {
 
 
-	Request request;
+	Request *request = new Request();
+	// Body *body_obj = request.getBody();
+	// Header *header_obj = request.getHeader();
+
 	int kq = kqueue();
 	if (kq == -1) {
 		std::cerr << "kqueue failed" << std::endl;
@@ -103,8 +106,8 @@ void Server::ft_start(int size, int *fd) {
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
-					request.request(msg);
-					if (request.getStat() == 2)
+					request->request(msg);
+					if (request->getStat() == 2)
 					{
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						

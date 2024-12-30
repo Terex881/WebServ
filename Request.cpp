@@ -2,27 +2,44 @@
 #include "Body.hpp"
 #include "Header.hpp"
 
+// string									Request::boundry;
+// string									Request::endBoundry;
+// string 									Request::extention;
+// size_t									Request::bodySize = 0;
+// int										Request::TYPE = 0;
+// int										Request::REQUEST_IS_FINISH = 0;
+// string									Request::header;
 
-string									Request::boundry;
-string									Request::endBoundry;
-string 									Request::extention;
-size_t									Request::bodySize = 0;
-int										Request::TYPE = 0;
-int										Request::REQUEST_IS_FINISH = 0;
-string									Request::header;
 
-
-Request::Request() : header_obj(NULL), body_obj(NULL)
+Request::Request() : body_obj(getBody()), header_obj(getHeader())
 {
-	// bodySize = 0;
-	// REQUEST_IS_FINISH = 0;
-	// TYPE = 0;
+	bodySize = 0;
+	REQUEST_IS_FINISH = 0;
+	TYPE = 0;
+	cout << YELLOW << "OKKK\n" << RESET << endl;
 }
+
 Request::~Request()
 {
-	delete header_obj;
 	delete body_obj;
+	delete header_obj;
 }
+
+Body* Request::getBody()
+{
+	if (!body_obj)
+		body_obj = new Body();
+	return body_obj;
+}
+
+Header* Request::getHeader()
+{
+	if (!header_obj)
+		header_obj = new Header();
+	return header_obj;
+}
+
+
 
 int Request::getStat() const
 {
@@ -33,8 +50,6 @@ int Request::getType() const
 {
 	return TYPE;
 }
-
-
 
 void Request::print(map<string, string> &mp)
 {
@@ -54,9 +69,10 @@ void Request::printV(vector<pair<string, string> > &mp)
 
 void Request::request(string &request)
 {
-	body_obj = new Body();
-	header_obj = new Header();
-
+	header_obj = getHeader();
+	body_obj = getBody();
+	cout << header_obj << endl;
+	exit(2);
 	if (!getStat())
 	{
 		size_t pos = request.find(DCRLF);
