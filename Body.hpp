@@ -2,12 +2,13 @@
 
 #include "Request.hpp"
 
-class Body : public Request
+class Body :  public Request
 {
 	private:
-		ofstream outFile;
+		static ofstream outFile;
 		std::vector<std::pair<string, string> > Vec;
 		string newStr;
+
 
 		void openFile(string fileName);
 		bool isBoundary(string &body);
@@ -20,10 +21,6 @@ class Body : public Request
 		int getFileName(string &body, string &fileName);
 
 	public:
-		void parseBodyTypes(string &body, Request *r);
-
-		Body()
-		{
-			body_obj = NULL;
-		}
+		void parseBodyTypes(string &body);
+		Request *atay_tkhwa;
 };

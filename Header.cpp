@@ -34,7 +34,7 @@ void Header::parseFirstLine(string line)
 		cout << RED << "error: invalid version" << std::endl;
 }
 
-void Header::parseHeader(string &header, Request* req)
+void Header::parseHeader(string &header)
 {
 	string key, value;
 	size_t colonPos, lineEnd; 
@@ -71,8 +71,8 @@ void Header::parseHeader(string &header, Request* req)
 		header.erase(0, lineEnd + 2);
 	}
 	// print(bigMap);
-	fillData(bigMap, req);
-	req->setStat(1);
+	fillData(bigMap);
+	ataty->setStat(1);
 }
 
 
@@ -93,42 +93,44 @@ const string Header::getExtention(std::map<string, string> mp)
 }
 
 
-void Header::fillData(const std::map<string, string> &mp, Request *req)
+void Header::fillData(const std::map<string, string> &mp)
 {
 	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	
 	if (lengthPos != mp.end())
-		bodySize = std::atol(lengthPos->second.c_str());
+		ataty->setSize(std::atol(lengthPos->second.c_str()));
+		// this->bodySize = std::atol(lengthPos->second.c_str());
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
 	if (multiPart != mp.end())
-		extention = getExtention(mp);
+		ataty->setEx(getExtention(mp));
+		// this->extention = getExtention(mp);
 	else
 		cout << RED << "no type founded" << endl;
 
-	req->setType(3);
+	ataty->setType(3);
 	
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
-		boundry		= "--" + sep + "\r\n";
-		endBoundry	= "\r\n--" + sep + "--\r\n";
-		req->setType(0);
+		ataty->setB("--" + sep + "\r\n");
+		ataty->setEndB("\r\n--" + sep + "--\r\n");
+		ataty->setType(0);
 	}
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			req->setType(1);
+			ataty->setType(1);
 		else if (chunked->second == "chunked" && bol)
 		{
-			req->setType(2);
+			ataty->setType(2);
 		}
 	}
-	// cout << YELLOW << "Before:" << req->getType() << endl;
+	// cout << YELLOW << "Before:" << ataty->getType() << endl;
 }

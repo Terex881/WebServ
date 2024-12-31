@@ -11,7 +11,7 @@
 // string									Request::header;
 
 
-Request::Request() : body_obj(getBody()), header_obj(getHeader())
+Request::Request() : body_obj(NULL), header_obj(NULL)
 {
 	bodySize = 0;
 	REQUEST_IS_FINISH = 0;
@@ -21,8 +21,8 @@ Request::Request() : body_obj(getBody()), header_obj(getHeader())
 
 Request::~Request()
 {
-	delete body_obj;
-	delete header_obj;
+	delete body_obj; body_obj = NULL;
+	delete header_obj; header_obj = NULL;
 }
 
 Body* Request::getBody()
@@ -38,8 +38,6 @@ Header* Request::getHeader()
 		header_obj = new Header();
 	return header_obj;
 }
-
-
 
 int Request::getStat() const
 {
@@ -67,19 +65,19 @@ void Request::printV(vector<pair<string, string> > &mp)
 }
 
 
+
 void Request::request(string &request)
-{
-	header_obj = getHeader();
-	body_obj = getBody();
-	cout << header_obj << endl;
-	exit(2);
+{	
+	body_obj->atay_tkhwa = this;
+	header_obj->ataty = this;
+
 	if (!getStat())
 	{
 		size_t pos = request.find(DCRLF);
 		if (pos != string::npos)
 		{
 			header.append(request.c_str(), 0, pos);
-			header_obj->parseHeader(header, this);
+			header_obj->parseHeader(header);
 			request.erase(0, pos + 4);
 		}
 		else
@@ -87,6 +85,50 @@ void Request::request(string &request)
 	}
 	if (getStat() == 1)
 	{
-		body_obj->parseBodyTypes(request, this);
+		body_obj->parseBodyTypes(request);
 	}
+}
+
+
+
+void Request::setStat(int stat)
+{
+	REQUEST_IS_FINISH = stat;
+}
+void Request::setType(int stat)
+{
+	TYPE = stat;
+}
+void Request::setB(string _B)
+{
+	boundry = _B;
+}
+void Request::setEndB(string _B)
+{
+	endBoundry = _B;
+}
+void Request::setEx(string _Ex)
+{
+	extention = _Ex;
+}
+void Request::setSize(size_t _s)
+{
+	bodySize = _s;
+}
+
+string Request:: getB() const
+{
+	return boundry;
+}
+string Request:: getEndB() const
+{
+	return endBoundry;
+}
+string Request:: getEx() const
+{
+	return extention;
+}
+size_t Request:: getSize() const
+{
+	return bodySize;
 }

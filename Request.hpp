@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <string>
@@ -44,14 +45,20 @@ class Request
 		void request(string &body);
 		int getStat() const;
 		int getType() const;
-		void setStat(int stat)
-		{
-			REQUEST_IS_FINISH = stat;
-		}
-		void setType(int stat)
-		{
-			TYPE = stat;
-		}
+		string getB() const;
+		string getEndB() const;
+		string getEx() const;
+		size_t getSize() const;
+		
+		void setStat(int _stat);
+		void setType(int _stat);
+		void setB(string _B) ;
+		void setEndB(string _Eb) ;
+		void setEx(string _Ex) ;
+		void setSize(size_t _Size) ;
+		
+
+
 		void print(map<string, string> &headerMap);
 		void printV(vector<pair<string, string> > &mp);
 
