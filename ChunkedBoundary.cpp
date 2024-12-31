@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 16:55:05 by sdemnati         ###   ########.fr       */
+/*   Updated: 2024/12/31 17:55:35 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,15 +47,10 @@ void Body::parseChunkedBoundryBody(string &body)
 			}
 		}
 		subBody = body.substr(0, length);
-		buffer.append(subBody.c_str());
+		buffer.append(subBody.c_str(), subBody.length());
 		length -= subBody.length();
 
 		body.erase(0, subBody.length());
 		parseBoundryBody(buffer);
-
-		// if (!length)
-		// {
-		// 	body.erase(0, 2);
-		// }
 	}
 }

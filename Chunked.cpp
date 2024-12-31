@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 15:52:41 by sdemnati         ###   ########.fr       */
+/*   Updated: 2024/12/31 17:59:19 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,11 +65,6 @@ void Body::parseChunkedBody(string &body)
 		subBody = body.substr(0, length);
 		length -= subBody.length();
 		writeFile(body, 0, subBody.length(), 0);
-		// body.erase(0, subBody.length());
-
-		/* the chunk is full and gonna read new chunk*/
-		if (!length)
-			body.erase(0, 2);	
 	}
 }
 
@@ -77,28 +72,10 @@ void Body::parseBodyLength(string &body)
 {
 	openFile("Zip/ok." + atay_tkhwa->getEx());
 
-	// static u_long length = 0;
-	// bodySize -= body.length();
 	size_t tmp = atay_tkhwa->getSize();
 	tmp -= body.length();
 	atay_tkhwa->setSize(tmp);
 	if (!atay_tkhwa->getSize())
 		atay_tkhwa->setStat(2);
-	cout << RED << atay_tkhwa->getSize() << endl;
 	writeFile(body, 0, body.length(), 0);
 }
-
-
-
-// void Body::parseBodyLength(string &body)
-// {
-	
-// 	openFile("Zip/ok." + extention);
-
-// 	// static u_long length = 0;
-// 	string subBody = body.substr(0, bodySize);
-
-// 	bodySize -= subBody.length();
-
-// 	writeFile(body, 0, body.length(), 0);
-// }

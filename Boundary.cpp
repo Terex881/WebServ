@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 16:52:53 by sdemnati         ###   ########.fr       */
+/*   Updated: 2024/12/31 17:22:31 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,12 +118,6 @@ void	Body::parseBoundryBody(string &body)
 	// ss << body;
 	// ss << "\n--------------------------------------------\n";
 
-	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-	// cout << BLUE << "->>>" << atay_tkhwa->getB() << RESET << endl;
-	// cout << GREEN << "->>>" << atay_tkhwa->getEndB() << RESET << endl;
-	// cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(atay_tkhwa->getEndB());
 	while(!body.empty())
@@ -144,32 +138,7 @@ void	Body::parseBoundryBody(string &body)
 			writeFile(body, 0, endboundryPos, atay_tkhwa->getEndB().length());
 			printV(Vec);
 			atay_tkhwa->setStat(2);
-			// REQUEST_IS_FINISH = 2;
 		}
 	}
 }
-// {
-// 	string subBody;
-// 	size_t contentEndtPos  = 0;
-// 	body.erase(0, body.find(DCRLF) + 4);
 
-// 	size_t boundryPos = body.find(getB());
-// 	size_t endboundryPos = body.find(atay_tkhwa->getEndB());
-
-// 	if (boundryPos != std::string::npos)
-// 		contentEndtPos = boundryPos;
-// 	else if (endboundryPos != std::string::npos)
-// 		contentEndtPos = endboundryPos;
-// 	else
-// 		contentEndtPos = body.length();
-
-// 	subBody = body.substr(0, contentEndtPos);
-
-// 	Vec.push_back(make_pair("", subBody));
-
-
-
-// 	static int i = 0;
-// 	openFile("Zip/File" + to_string(i) + ".txt");	i++;
-// 	writeFile(body, 0, contentEndtPos, 0);
-// }

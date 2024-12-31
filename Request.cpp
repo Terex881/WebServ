@@ -6,13 +6,14 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 15:52:53 by sdemnati         ###   ########.fr       */
+/*   Updated: 2024/12/31 17:56:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "Body.hpp"
 #include "Header.hpp"
+#include <fstream>
 
 Request::Request() : body_obj(NULL), header_obj(NULL)
 {
@@ -51,7 +52,7 @@ void Request::printV(vector<pair<string, string> > &mp)
 {
 	for(vector<pair<string, string> >::iterator it = mp.begin(); it!=mp.end(); it++)
 	{
-		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
+		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":";
 		cout << "\n--------------------------------------------\n";
 	}
 }
