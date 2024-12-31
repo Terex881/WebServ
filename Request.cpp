@@ -16,7 +16,6 @@ Request::Request() : body_obj(NULL), header_obj(NULL)
 	bodySize = 0;
 	REQUEST_IS_FINISH = 0;
 	TYPE = 0;
-	cout << YELLOW << "OKKK\n" << RESET << endl;
 }
 
 Request::~Request()
@@ -39,15 +38,6 @@ Header* Request::getHeader()
 	return header_obj;
 }
 
-int Request::getStat() const
-{
-	return REQUEST_IS_FINISH;
-}
-
-int Request::getType() const
-{
-	return TYPE;
-}
 
 void Request::print(map<string, string> &mp)
 {
@@ -91,27 +81,27 @@ void Request::request(string &request)
 
 
 
-void Request::setStat(int stat)
+void Request::setStat(const int &stat)
 {
 	REQUEST_IS_FINISH = stat;
 }
-void Request::setType(int stat)
+void Request::setType(const int &stat)
 {
 	TYPE = stat;
 }
-void Request::setB(string _B)
+void Request::setB(const string &_B)
 {
 	boundry = _B;
 }
-void Request::setEndB(string _B)
+void Request::setEndB(const string &_B)
 {
 	endBoundry = _B;
 }
-void Request::setEx(string _Ex)
+void Request::setEx(const string &_Ex)
 {
 	extention = _Ex;
 }
-void Request::setSize(size_t _s)
+void Request::setSize(const size_t &_s)
 {
 	bodySize = _s;
 }
@@ -131,4 +121,13 @@ string Request:: getEx() const
 size_t Request:: getSize() const
 {
 	return bodySize;
+}
+int Request::getStat() const
+{
+	return REQUEST_IS_FINISH;
+}
+
+int Request::getType() const
+{
+	return TYPE;
 }

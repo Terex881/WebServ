@@ -1,18 +1,30 @@
 #include "./Body.hpp"
-#include <cstddef>
 
 void Body::parseChunkedBody(string &body)
 {
 	openFile("Zip/ok." + atay_tkhwa->getEx());
-	size_t 			hexPos;
-	string 			subBody;
+
+	size_t hexPos, strPos;
+	string subBody, str;
 	static u_long	length = 0;
-	exit(100);
 
 	while(!body.empty())
 	{
 		if (length == 0)
 		{
+			strPos = body.find_first_of("0123456789abcdefABCDEF");	
+			/* check if not 0 to avoid reallocat for nothing */
+			if (strPos != 0)
+			{
+				/* get string before hexadecimal and write it to file and erase it */
+				str = body.substr(0, strPos);
+				body.erase(0, str.length());;
+				if (str != CRLF && str.find_first_of(CRLF) == string::npos)
+				{
+					exit(1);
+					parseBoundryBody(str);
+				}
+			}
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
 			{
@@ -29,10 +41,12 @@ void Body::parseChunkedBody(string &body)
 				body.erase(0, 4);
 				/* if strtol fails will return 0 */
 				if (!body.empty())
+				{
 					cout << RED << "error: strtol fails\n" << RESET;
+
+				}
 				outFile.close();
-				atay_tkhwa->setType(2);
-				// REQUEST_IS_FINISH = 2;
+				atay_tkhwa->setStat(2);
 				return;
 			}
 		}
@@ -49,7 +63,6 @@ void Body::parseChunkedBody(string &body)
 
 void Body::parseBodyLength(string &body)
 {
-	
 	openFile("Zip/ok." + atay_tkhwa->getEx());
 
 	// static u_long length = 0;
@@ -58,8 +71,7 @@ void Body::parseBodyLength(string &body)
 	tmp -= body.length();
 	atay_tkhwa->setSize(tmp);
 	if (!atay_tkhwa->getSize())
-		atay_tkhwa->setType(2);
-		// REQUEST_IS_FINISH = 2;
+		atay_tkhwa->setStat(2);
 	cout << RED << atay_tkhwa->getSize() << endl;
 	writeFile(body, 0, body.length(), 0);
 }

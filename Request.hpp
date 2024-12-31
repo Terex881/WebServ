@@ -50,12 +50,12 @@ class Request
 		string getEx() const;
 		size_t getSize() const;
 		
-		void setStat(int _stat);
-		void setType(int _stat);
-		void setB(string _B) ;
-		void setEndB(string _Eb) ;
-		void setEx(string _Ex) ;
-		void setSize(size_t _Size) ;
+		void setStat(const int &_stat);
+		void setType(const int &_stat);
+		void setB(const string &_B) ;
+		void setEndB(const string &_Eb) ;
+		void setEx(const string &_Ex) ;
+		void setSize(const size_t &_Size) ;
 		
 
 

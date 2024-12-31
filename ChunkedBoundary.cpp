@@ -16,7 +16,7 @@ void Body::parseChunkedBoundryBody(string &body)
 				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());;
-				if (str != CRLF)
+				if (str != CRLF && str.find_first_of(CRLF) == string::npos)
 					parseBoundryBody(str);
 			}
 			/* */

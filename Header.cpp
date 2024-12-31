@@ -1,4 +1,5 @@
 #include "./Header.hpp"
+#include <cstddef>
 
 void parseUrl(string &str)
 {
@@ -72,7 +73,6 @@ void Header::parseHeader(string &header)
 	}
 	// print(bigMap);
 	fillData(bigMap);
-	ataty->setStat(1);
 }
 
 
@@ -99,6 +99,7 @@ void Header::fillData(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	
+	ataty->setStat(1);
 	if (lengthPos != mp.end())
 		ataty->setSize(std::atol(lengthPos->second.c_str()));
 		// this->bodySize = std::atol(lengthPos->second.c_str());

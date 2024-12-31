@@ -62,9 +62,7 @@ int	Body::getFileName(string &body, string &fileName)
 	else
 	{
 		if (tmp.find(atay_tkhwa->getB()) == string::npos && tmp.find(atay_tkhwa->getEndB()) == string::npos) // add endboundry
-		{
 			return 0;
-		}
 		getQweryString(body);
 	}
 	return -1;
