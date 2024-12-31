@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Boundary.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
+/*   Updated: 2024/12/31 16:52:53 by sdemnati         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "./Body.hpp"
 
 void	Body::writeFile(string &body, int start, size_t end, size_t len)
@@ -41,6 +53,7 @@ int	Body::getFileName(string &body, string &fileName)
 {
 	string tmp = body.substr(body.find(atay_tkhwa->getB()) + atay_tkhwa->getB().length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
+	// fix find of "\r\n
 
 	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
 	{

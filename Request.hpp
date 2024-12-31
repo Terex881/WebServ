@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
+/*   Updated: 2024/12/31 15:53:11 by sdemnati         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
-#include <cstddef>
+
 #include <iostream>
 #include <map>
 #include <string>
@@ -19,7 +31,6 @@
 
 using namespace std;
 
-
 class Header;
 class Body;
 
@@ -34,36 +45,36 @@ class Request
 		int						REQUEST_IS_FINISH;
 		string					header;
 
-		Body* body_obj;
-		Header* header_obj;
+		Body*					body_obj;
+		Header*					header_obj;
 
 	public:
 
 		Request();
 		~Request();
 
-		void request(string &body);
-		int getStat() const;
-		int getType() const;
-		string getB() const;
-		string getEndB() const;
-		string getEx() const;
-		size_t getSize() const;
+		void	request(string &body);
+		int		getStat() const;
+		int		getType() const;
+		string	getB() const;
+		string	getEndB() const;
+		string	getEx() const;
+		size_t	getSize() const;
 		
-		void setStat(const int &_stat);
-		void setType(const int &_stat);
-		void setB(const string &_B) ;
-		void setEndB(const string &_Eb) ;
-		void setEx(const string &_Ex) ;
-		void setSize(const size_t &_Size) ;
+		void	setStat(const int &_stat);
+		void	setType(const int &_stat);
+		void	setB(const string &_B) ;
+		void	setEndB(const string &_Eb) ;
+		void	setEx(const string &_Ex) ;
+		void	setSize(const size_t &_Size) ;
 		
 
 
-		void print(map<string, string> &headerMap);
-		void printV(vector<pair<string, string> > &mp);
+		void	print(map<string, string> &headerMap);
+		void	printV(vector<pair<string, string> > &mp);
 
-		Body* getBody();
-		Header* getHeader();
+		Body*	getBody();
+		Header*	getHeader();
 };
 
 #include "Body.hpp"

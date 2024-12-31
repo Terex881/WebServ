@@ -10,6 +10,7 @@ void Server::ft_start(int size, int *fd) {
 	Request request;
 	request.getBody();
 	request.getHeader();
+	
 
 	int kq = kqueue();
 	if (kq == -1) {

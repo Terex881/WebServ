@@ -1,15 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
+/*   Updated: 2024/12/31 15:52:53 by sdemnati         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Request.hpp"
 #include "Body.hpp"
 #include "Header.hpp"
-
-// string									Request::boundry;
-// string									Request::endBoundry;
-// string 									Request::extention;
-// size_t									Request::bodySize = 0;
-// int										Request::TYPE = 0;
-// int										Request::REQUEST_IS_FINISH = 0;
-// string									Request::header;
-
 
 Request::Request() : body_obj(NULL), header_obj(NULL)
 {
@@ -38,7 +41,6 @@ Header* Request::getHeader()
 	return header_obj;
 }
 
-
 void Request::print(map<string, string> &mp)
 {
 	for(map<string, string>::iterator it = mp.begin(); it!=mp.end(); it++)
@@ -54,12 +56,10 @@ void Request::printV(vector<pair<string, string> > &mp)
 	}
 }
 
-
-
 void Request::request(string &request)
 {	
-	body_obj->atay_tkhwa = this;
-	header_obj->ataty = this;
+	body_obj->setAttay(this);
+	header_obj->setAttay(this);
 
 	if (!getStat())
 	{
@@ -74,12 +74,8 @@ void Request::request(string &request)
 			header.append(request);
 	}
 	if (getStat() == 1)
-	{
 		body_obj->parseBodyTypes(request);
-	}
 }
-
-
 
 void Request::setStat(const int &stat)
 {

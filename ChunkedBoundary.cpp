@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ChunkedBoundary.cpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
+/*   Updated: 2024/12/31 16:55:05 by sdemnati         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Body.hpp"
 
 void Body::parseChunkedBoundryBody(string &body)
@@ -31,14 +43,16 @@ void Body::parseChunkedBoundryBody(string &body)
 			body.erase(0, hexPos + 2);
 			if (!length)
 			{
-				body.erase(0, 4);return;
+				body.erase(0, 4);	return;
 			}
 		}
 		subBody = body.substr(0, length);
+		buffer.append(subBody.c_str());
 		length -= subBody.length();
 
 		body.erase(0, subBody.length());
-		parseBoundryBody(subBody);
+		parseBoundryBody(buffer);
+
 		// if (!length)
 		// {
 		// 	body.erase(0, 2);
