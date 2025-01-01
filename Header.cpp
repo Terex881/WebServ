@@ -6,20 +6,19 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 16:05:19 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/01 09:16:40 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./Header.hpp"
-#include <cstddef>
-#include <queue>
+#include "Request.hpp"
 
 void	Header::setAttay(Request *reqPtr)
 {
 	ataty = reqPtr;
 }
 
-void Header::parseUrl(string &str)
+void Header::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 		cout << RED << "bad URL" << std::endl;
@@ -29,32 +28,32 @@ void Header::parseUrl(string &str)
 	{
 		queryStrings = str.substr(QMPos, str.length());
 		str.erase(QMPos);
-		cout << RED << queryStrings << RESET << endl;
 		cout << YELLOW << str <<	RESET << endl;
+		cout << RED << queryStrings << RESET << endl;
 	}
 
 }
 
-void Header::parseFirstLine(string line)
+void Header::parseFirstLine(string &line)
 {
-	string word, key;	int i = 0;
+	string method, uri, httpVersion;
+	map<string, string>::iterator it;
 
 	if (isspace(line[0]))
 		cout << RED << "foud space in the begening\n";
-	while(line.length() > 0)
-	{
-		word = line.substr(0, line.find(" ")); line.erase(0, word.length());
-		key = (i == 0) ? "method" : (i == 1) ? "path" : "version";
-		bigMap[key] = word; i++;
-		line.erase(0, 1);
-	}
-	map<string, string>::iterator it = bigMap.find("method");
-	if (it != bigMap.end() && it->second != "POST" && it->second != "GET" && it->second != "DELETE")
+
+	std::istringstream ss(line);
+	ss >> method >> uri >> httpVersion;
+	
+	bigMap.insert(std::make_pair("method", method));
+	bigMap.insert(std::make_pair("uri", uri));
+	bigMap.insert(std::make_pair("httpVersion", httpVersion));
+	
+	if ((it = bigMap.find("method")) != bigMap.end() && it->second != "POST" && it->second != "GET" && it->second != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
-	if ((it = bigMap.find("path")) != bigMap.end())
-		parseUrl(it->second);
-	it = bigMap.find("version");
-	if (it != bigMap.end() && it->second != "HTTP/1.1")
+	if ((it = bigMap.find("uri")) != bigMap.end())
+		parseUri(it->second);
+	if ((it = bigMap.find("httpVersion")) != bigMap.end() && it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
 }
 
@@ -66,8 +65,10 @@ void Header::parseHeader(string &header)
 	string firstLine = header.substr(0, pos);
 
 	// check if first line has space in start and print error 
-	header.erase(0, pos + 2);
 	parseFirstLine(firstLine);
+	header.erase(0, pos + 2);
+
+
 
 	while(!header.empty())
 	{
@@ -85,16 +86,16 @@ void Header::parseHeader(string &header)
 
 		value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
 		value.erase(0, value.find_first_not_of(" "));
+		
+		std::transform(key.begin(), key.end(), key.begin(), ::tolower); // check this 
+		if (key == "transfer-encoding") // check other
+			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
+		
 
-      	std::transform(key.begin(), key.end(), key.begin(), ::tolower); // check this 
-		if (key == "transfer-encoding") // check other 
-        	std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
-		
-		bigMap[key] = value;
-		
+		bigMap.insert(std::make_pair(key, value));		
 		header.erase(0, lineEnd + 2);
 	}
-	// print(bigMap);
+	print(bigMap);
 	fillData(bigMap);
 }
 

@@ -22,8 +22,21 @@ make characters lowercase
 check NULL in extention of a file
 
 
-check half boundry 
-key value to map pr vect
+check half boundry
+
+key value to map pr vect      --> DONE
 check extention function
 handl query strigs
 handl cgi bodies
+
+
+	////////////////////////
+	// string method, uri, httpVersion;
+	// std::istringstream ss(line);
+	// ss >> method >> uri >> httpVersion;
+	// cout << method << "\n" << uri << "\n" << httpVersion << "\n";
+	// // bigMap.clear();
+	// bigMap["method"] = method;
+	// bigMap["uri"] = uri;
+	// bigMap["httpVersion"] = httpVersion;
+	////////////////////////

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 17:22:31 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/01 13:18:07 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,16 +34,19 @@ void	Body::getQweryString(string &body)
 {
 	string key, val;
 	size_t contentEndtPos = 0, namePos = body.find("; name=\"");
+	size_t crlfPos, endBoundyPos;
 
 	body.erase(0, namePos + 8);
 	key = body.substr(0, body.find(CRLF) - 1);
 	body.erase(0, body.find(DCRLF) + 4);
-	if (body.find(CRLF) != std::string::npos)
-		contentEndtPos = body.find(CRLF);
-	else if (body.find(atay_tkhwa->getEndB()) != std::string::npos)
-		contentEndtPos = body.find(atay_tkhwa->getEndB());
+	
+	if ((crlfPos = body.find(CRLF)) != std::string::npos)
+		contentEndtPos = crlfPos;
+	else if ((endBoundyPos = body.find(atay_tkhwa->getEndB())) != std::string::npos)
+		contentEndtPos = endBoundyPos;
 	else
 		contentEndtPos = body.length();
+	
 	val = body.substr(0, contentEndtPos);
 	Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
@@ -53,7 +56,6 @@ int	Body::getFileName(string &body, string &fileName)
 {
 	string tmp = body.substr(body.find(atay_tkhwa->getB()) + atay_tkhwa->getB().length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
-	// fix find of "\r\n
 
 	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
 	{
@@ -74,7 +76,7 @@ int	Body::getFileName(string &body, string &fileName)
 	}
 	else
 	{
-		if (tmp.find(atay_tkhwa->getB()) == string::npos && tmp.find(atay_tkhwa->getEndB()) == string::npos) // add endboundry
+		if (tmp.find(atay_tkhwa->getB()) == string::npos && tmp.find(atay_tkhwa->getEndB()) == string::npos)
 			return 0;
 		getQweryString(body);
 	}

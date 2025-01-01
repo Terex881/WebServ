@@ -2,7 +2,7 @@ NAME = webserv
 
 CC = c++
 
-FLAG = -Wall -Werror -Wextra #-g -fsanitize=address
+FLAG = -g -fsanitize=address -Wall -Werror -Wextra 
 
 OBJ = 	static/main.o  static/Server.o static/File_Parsing.o \
 		Boundary.o Chunked.o Request.o Header.o ChunkedBoundary.o\

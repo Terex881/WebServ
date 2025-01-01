@@ -6,14 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 17:56:43 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/01 05:58:08 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "Body.hpp"
 #include "Header.hpp"
-#include <fstream>
 
 Request::Request() : body_obj(NULL), header_obj(NULL)
 {

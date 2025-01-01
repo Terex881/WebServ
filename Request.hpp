@@ -6,18 +6,19 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2024/12/31 15:53:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/01 12:05:51 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-
 
 #include <iostream>
 #include <map>
 #include <string>
 #include <fstream>
 #include <vector>
+#include "sstream"
+
 
 #define RED "\033[31m"
 #define BLUE "\033[34m"
@@ -76,6 +77,3 @@ class Request
 		Body*	getBody();
 		Header*	getHeader();
 };
-
-#include "Body.hpp"
-#include "Header.hpp"
