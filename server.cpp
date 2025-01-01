@@ -1,10 +1,11 @@
 #include "Server.hpp"
 #include "Delete.hpp"
+#include <fstream>
 #include <ostream>
 #include <cstring>
 #include <vector>
 #include "./Response.hpp"
-#include "RequestParser/Request.hpp"
+#include "Request/Request.hpp"
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
@@ -42,12 +43,15 @@ void Server::ft_start(int size, int *fd) {
 
 	std::ofstream outputFile("output_video.py", std::ios::binary); 
 
+	Request request;
+	request.getBody();
+	request.getHeader();
+
 	int kq = kqueue();
 	if (kq == -1) {
 		std::cerr << "kqueue failed" << std::endl;
 		exit(1);
 	}
-	Request R1;
 	connection_info connections[MAX_CLIENTS];
 	memset(connections, 0, sizeof(connections));
 
@@ -139,7 +143,11 @@ void Server::ft_start(int size, int *fd) {
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
-					R1.request(msg);
+					// ofstream ss("tmp.py", ios::app);
+					// ss << msg;
+						// ss << "\n[---------------------Done----------------------------]\n";
+					request.request(msg);
+					
 					string sas = msg;
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 					size_t	first_pos = sas.find(' ');
@@ -155,10 +163,11 @@ void Server::ft_start(int size, int *fd) {
 					outputFile << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
 
 					outputFile << sas << std::endl;
-					connections[client_socket].request = R1.getElement("path");
+					connections[client_socket].request = request.getElement("uri");
+					// cout << RED << "---->" << request.getElement("uri")<< endl;
 					// cout << YELLOW << "_____>" << R1.getElement("path") << ":&&&&&&&&" << RESET << endl;
 					connections[client_socket].fd = client_socket;
-					connections[client_socket].file = new std::ifstream("."+R1.getElement("path"), std::ios::binary);
+					connections[client_socket].file = new std::ifstream("."+request.getElement("uri"), std::ios::binary);
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
 					// connections[client_socket].file = new std::ifstream("."+sas, std::ios::in);
@@ -167,8 +176,18 @@ void Server::ft_start(int size, int *fd) {
 					// 	client_buffers[client_socket] = response;
 
 					// 	// Add a write event to the kqueue
-					EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &connections[client_socket]);
-					kevent(kq, &event, 1, NULL, 0, NULL);
+
+
+
+					if (request.getStat() == 2)
+					{
+						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
+						EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &connections[client_socket]);
+						kevent(kq, &event, 1, NULL, 0, NULL);
+					}
+
+
+
 					// } else
 					//  if (msg.find("GET") != std::string::npos) {
 					// 	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world3";
