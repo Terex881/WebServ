@@ -4,7 +4,7 @@
 #include <cstring>
 #include <vector>
 #include "./Response.hpp"
-#include "RequestParser/Request.hpp"
+#include "Request/Request.hpp"
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
