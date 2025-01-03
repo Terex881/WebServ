@@ -22,11 +22,12 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 	}
 	Checking_Hierarchy(obj, &servers, locations);
 	get_host_name();
+	file.close();
 }
 
 File_Parsing::~File_Parsing()
 {
-	file.close();
+	// file.close();
 }
 
 void	trime_line(string &line)

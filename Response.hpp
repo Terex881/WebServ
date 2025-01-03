@@ -28,11 +28,9 @@ class Response
 		int				end;
 		int				idx;
 		static int		sent_head[MAX_CLIENTS];
-		static int sre;
 		std::streamsize	bytesRead;
 		std::streamsize current_read;
 		char			buffer[8192];
-		static	std::stringstream responseSStream;
 
 		string			header;
 		string			body;
