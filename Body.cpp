@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/03 16:09:05 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 18:15:19 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,9 @@
 void	Body::parseBodyTypes(string &body)
 {
 	newStr.append(body.c_str(), body.length());
-
-
-
-	int size = 0;
-	if (newStr.length() > atay_tkhwa->getEndB().length())
-		size = newStr.length() - atay_tkhwa->getEndB().length();
-	
-	string last = newStr.substr(size, newStr.length());
-
-	if ( hasOneMatch(last, atay_tkhwa->getEndB()) && newStr.find(atay_tkhwa->getEndB()) == string::npos )
-	{
-		// ofstream  ss("OK.py", ios::app);
-		// ss << body;
-		// ss << "\n--------------------------------------\n";
+	string last = newStr.substr(std::max(0, (int)(newStr.length() - atay_tkhwa->getEndB().length())));
+	if (hasOneMatch(last, atay_tkhwa->getEndB()) && newStr.find(atay_tkhwa->getEndB()) == string::npos)
 		return;
-	}
 			
 	switch (atay_tkhwa->getType())
 	{
