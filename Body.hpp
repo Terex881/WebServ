@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:35 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 06:38:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 11:17:47 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,4 +36,13 @@ class Body :  public Request
 	public:
 		void parseBodyTypes(string &body);
 		void	setAttay(Request *reqPtr);
+		bool hasOneMatch(const std::string& str1, const std::string& str2)
+		{
+			for (size_t i = 0; i < str2.length(); ++i)
+			{
+				if (str1.find(str2[i]) != string::npos)
+					return 1;
+			}
+			return 0;
+		}
 };

@@ -2,7 +2,7 @@
 #include "../Request.hpp"
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE  8192 //5120 //4096
+#define BUFFER_SIZE 8192 //5120 //4096
 
 
 void Server::ft_start(int size, int *fd) {
@@ -11,6 +11,7 @@ void Server::ft_start(int size, int *fd) {
 	request.getBody();
 	request.getHeader();
 	
+																ofstream ss("tmp.py", ios::app);
 
 	int kq = kqueue();
 	if (kq == -1) {
@@ -99,13 +100,11 @@ void Server::ft_start(int size, int *fd) {
 
 					std::string msg;
 					msg.assign(buffer, bytes_received);
-					// ofstream ss("tmp.py", ios::app);
-					// ss << "Received from client:"  << msg;
-					
-					// std::cout << RED <<  "Received from client: "<< RESET  << msg << std::endl;
-					// if (msg.find("POST") != std::string::npos) {
 
-					// 	//salah
+
+					// ss << "Received from client:"  << msg;
+					// ss << "\n------------------------------------------------------------------------\n" ;
+					
 					request.request(msg);
 					if (request.getStat() == 2)
 					{

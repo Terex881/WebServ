@@ -6,11 +6,12 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 13:18:07 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 16:10:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./Body.hpp"
+#include "Request.hpp"
 
 void	Body::writeFile(string &body, int start, size_t end, size_t len)
 {
@@ -127,6 +128,20 @@ void	Body::parseBoundryBody(string &body)
 		boundryPos = body.find(atay_tkhwa->getB());
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
+			// cout << "OK\n";
+			// int size = 0;
+			// if (body.length() > atay_tkhwa->getEndB().length())
+			// 	size = body.length() - atay_tkhwa->getEndB().length();
+	
+				
+			// string last = body.substr(size, body.length());
+			// if(hasOneMatch(last, atay_tkhwa->getEndB()))
+			// 	return;
+			
+			// ofstream ss("Y.py", ios::app);
+			// ss << last;
+			// ss << "\n\n";
+
 			if (body == CRLF && atay_tkhwa->getType() == 2) body.erase(0, 2);
 			else writeFile(body, 0, body.length(), 0);
 		}

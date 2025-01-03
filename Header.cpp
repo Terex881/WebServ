@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 09:16:40 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 13:18:07 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void Header::parseHeader(string &header)
 		bigMap.insert(std::make_pair(key, value));		
 		header.erase(0, lineEnd + 2);
 	}
-	print(bigMap);
+	// print(bigMap);
 	fillData(bigMap);
 }
 
