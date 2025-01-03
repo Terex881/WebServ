@@ -8,6 +8,7 @@
 void Server::ft_start(int size, int *fd) {
 
 	Request request;
+	
 	request.getBody();
 	request.getHeader();
 	
@@ -106,7 +107,7 @@ void Server::ft_start(int size, int *fd) {
 					// ss << "\n------------------------------------------------------------------------\n" ;
 					
 					request.request(msg);
-					if (request.getStat() == 2)
+					if (request.d.REQUEST_IS_FINISH == 2)
 					{
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						

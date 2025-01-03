@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 12:05:51 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 18:47:09 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,44 +31,45 @@
 #define FILE_NAME "; filename=\""
 
 using namespace std;
-
 class Header;
 class Body;
+
+typedef struct s_Data
+{
+	string					boundry;
+	string					endBoundry;
+	string					extention;
+	string					header;
+	size_t					bodySize;
+	int						TYPE;
+	int						REQUEST_IS_FINISH;
+
+	Body*					body_obj;
+	Header*					header_obj;
+
+	
+} t_Data;
+
 
 class Request
 {
 	protected:
-		string					boundry;
-		string					endBoundry;
-		string					extention;
-		size_t					bodySize;
-		int						TYPE;
-		int						REQUEST_IS_FINISH;
-		string					header;
-
-		Body*					body_obj;
-		Header*					header_obj;
-
+	
 	public:
-
+		t_Data d;
 		Request();
 		~Request();
 
 		void	request(string &body);
-		int		getStat() const;
-		int		getType() const;
-		string	getB() const;
-		string	getEndB() const;
-		string	getEx() const;
-		size_t	getSize() const;
 		
-		void	setStat(const int &_stat);
-		void	setType(const int &_stat);
-		void	setB(const string &_B) ;
-		void	setEndB(const string &_Eb) ;
-		void	setEx(const string &_Ex) ;
-		void	setSize(const size_t &_Size) ;
-		
+		// t_Data	getStat() const
+		// {
+		// 	return d;
+		// }
+		// void	setStat(t_Data	_stat)
+		// {
+		// 	d = _stat;
+		// }
 
 
 		void	print(map<string, string> &headerMap);

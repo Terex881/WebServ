@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/03 17:57:07 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/03 18:46:04 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	Body::getQweryString(string &body)
 	
 	if ((crlfPos = body.find(CRLF)) != std::string::npos)
 		contentEndtPos = crlfPos;
-	else if ((endBoundyPos = body.find(atay_tkhwa->getEndB())) != std::string::npos)
+	else if ((endBoundyPos = body.find(atay_tkhwa->d.endBoundry)) != std::string::npos)
 		contentEndtPos = endBoundyPos;
 	else
 		contentEndtPos = body.length();
@@ -55,7 +55,7 @@ void	Body::getQweryString(string &body)
 
 int	Body::getFileName(string &body, string &fileName)
 {
-	string tmp = body.substr(body.find(atay_tkhwa->getB()) + atay_tkhwa->getB().length(), body.length());
+	string tmp = body.substr(body.find(atay_tkhwa->d.boundry) + atay_tkhwa->d.boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
 	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
@@ -77,7 +77,7 @@ int	Body::getFileName(string &body, string &fileName)
 	}
 	else
 	{
-		if (tmp.find(atay_tkhwa->getB()) == string::npos && tmp.find(atay_tkhwa->getEndB()) == string::npos)
+		if (tmp.find(atay_tkhwa->d.boundry) == string::npos && tmp.find(atay_tkhwa->d.endBoundry) == string::npos)
 			return 0;
 		getQweryString(body);
 	}
@@ -86,7 +86,7 @@ int	Body::getFileName(string &body, string &fileName)
 
 bool	Body::isBoundary(string &body)
 {
-	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(atay_tkhwa->getB());
+	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(atay_tkhwa->d.boundry);
 	string	fileName;
 
 	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
@@ -97,8 +97,8 @@ bool	Body::isBoundary(string &body)
 	if (i == 1)
 	{
 		body.erase(0, body.find(DCRLF) + 4);
-		boundryPos = body.find(atay_tkhwa->getB());
-		endboundryPos = body.find(atay_tkhwa->getEndB());
+		boundryPos = body.find(atay_tkhwa->d.boundry);
+		endboundryPos = body.find(atay_tkhwa->d.endBoundry);
 
 		if (boundryPos != std::string::npos)
 			contentEndtPos = boundryPos;
@@ -122,13 +122,13 @@ void	Body::parseBoundryBody(string &body)
 	// ss << "\n--------------------------------------------\n";
 
 	size_t boundryPos, endboundryPos;
-	endboundryPos = body.find(atay_tkhwa->getEndB());
+	endboundryPos = body.find(atay_tkhwa->d.endBoundry);
 	while(!body.empty())
 	{
-		boundryPos = body.find(atay_tkhwa->getB());
+		boundryPos = body.find(atay_tkhwa->d.boundry);
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
-			if (body == CRLF && atay_tkhwa->getType() == 2) body.erase(0, 2);
+			if (body == CRLF && atay_tkhwa->d.TYPE == 2) body.erase(0, 2);
 			else writeFile(body, 0, body.length(), 0);
 		}
 		if (boundryPos != string::npos)
@@ -137,10 +137,10 @@ void	Body::parseBoundryBody(string &body)
 		}
 		else if (endboundryPos != string::npos)
 		{
-			endboundryPos = body.find(atay_tkhwa->getEndB());	
-			writeFile(body, 0, endboundryPos, atay_tkhwa->getEndB().length());
+			endboundryPos = body.find(atay_tkhwa->d.endBoundry);	
+			writeFile(body, 0, endboundryPos, atay_tkhwa->d.endBoundry.length());
 			printV(Vec);
-			atay_tkhwa->setStat(2);
+			atay_tkhwa->d.REQUEST_IS_FINISH = (2);
 		}
 	}
 }
