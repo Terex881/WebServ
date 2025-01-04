@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/03 18:45:28 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 10:56:50 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,6 @@ void Header::parseHeader(string &header)
 	parseFirstLine(firstLine);
 	header.erase(0, pos + 2);
 
-
-
 	while(!header.empty())
 	{
 		colonPos = header.find(":");
@@ -91,7 +89,6 @@ void Header::parseHeader(string &header)
 		if (key == "transfer-encoding") // check other
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 		
-
 		bigMap.insert(std::make_pair(key, value));		
 		header.erase(0, lineEnd + 2);
 	}
@@ -122,16 +119,17 @@ void Header::fillData(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
-	ataty->d.REQUEST_IS_FINISH = (1);
-	ataty->d.TYPE = (3);
+	
+	ataty->data.requestStat = (1);
+	ataty->data.bodyType = BODY_SIZE;
 	
 	if (lengthPos != mp.end())
-		ataty->d.bodySize = (std::atol(lengthPos->second.c_str()));
+		ataty->data.bodySize = (std::atol(lengthPos->second.c_str()));
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
 	if (multiPart != mp.end())
-		ataty->d.extention = (getExtention(mp));
+		ataty->data.extention = (getExtention(mp));
 	else
 		cout << RED << "no type founded" << endl;
 
@@ -139,20 +137,19 @@ void Header::fillData(const std::map<string, string> &mp)
 	if (bol)
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
-		ataty->d.boundry = ("--" + sep + "\r\n");
-		ataty->d.endBoundry = ("\r\n--" + sep + "--\r\n");
-		ataty->d.TYPE = (0);
+		ataty->data.boundry = ("--" + sep + "\r\n");
+		ataty->data.endBoundry = ("\r\n--" + sep + "--\r\n");
+		ataty->data.bodyType =  BOUNDARY;
 	}
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			ataty->d.TYPE = (1);
+			ataty->data.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
 		{
-			ataty->d.TYPE = (2);
+			ataty->data.bodyType = CHUNKED_BOUNDARY;
 		}
 	}
-	// cout << YELLOW << "Before:" << ataty->getType() << endl;
 }

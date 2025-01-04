@@ -11,6 +11,10 @@ void Server::ft_start(int size, int *fd) {
 	
 	request.getBody();
 	request.getHeader();
+
+
+
+
 	
 																ofstream ss("tmp.py", ios::app);
 
@@ -107,7 +111,7 @@ void Server::ft_start(int size, int *fd) {
 					// ss << "\n------------------------------------------------------------------------\n" ;
 					
 					request.request(msg);
-					if (request.d.REQUEST_IS_FINISH == 2)
+					if (request.data.requestStat == 2)
 					{
 						cout << GREEN << "[---------------------Done---------------------]" << RESET << endl;
 						

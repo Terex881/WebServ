@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/03 18:45:34 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 10:56:50 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void Body::parseChunkedBody(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->d.extention);
+	openFile("Zip/ok." + atay_tkhwa->data.extention);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -58,7 +58,7 @@ void Body::parseChunkedBody(string &body)
 
 				}
 				outFile.close();
-				atay_tkhwa->d.REQUEST_IS_FINISH = (2);
+				atay_tkhwa->data.requestStat = (2);
 				return;
 			}
 		}
@@ -70,12 +70,12 @@ void Body::parseChunkedBody(string &body)
 
 void Body::parseBodyLength(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->d.extention);
+	openFile("Zip/ok." + atay_tkhwa->data.extention);
 
-	size_t tmp = atay_tkhwa->d.bodySize;
+	size_t tmp = atay_tkhwa->data.bodySize;
 	tmp -= body.length();
-	atay_tkhwa->d.bodySize = (tmp);
-	if (!atay_tkhwa->d.bodySize)
-		atay_tkhwa->d.REQUEST_IS_FINISH = (2);
+	atay_tkhwa->data.bodySize = (tmp);
+	if (!atay_tkhwa->data.bodySize)
+		atay_tkhwa->data.requestStat = (2);
 	writeFile(body, 0, body.length(), 0);
 }

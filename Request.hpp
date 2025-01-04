@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/03 18:47:09 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 10:56:17 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,14 @@ using namespace std;
 class Header;
 class Body;
 
+enum type
+{
+	BOUNDARY,
+	CHUNKED,
+	CHUNKED_BOUNDARY,
+	BODY_SIZE,
+};
+
 typedef struct s_Data
 {
 	string					boundry;
@@ -41,14 +49,11 @@ typedef struct s_Data
 	string					extention;
 	string					header;
 	size_t					bodySize;
-	int						TYPE;
-	int						REQUEST_IS_FINISH;
-
+	type					bodyType;
+	int						requestStat;
 	Body*					body_obj;
 	Header*					header_obj;
-
-	
-} t_Data;
+}	t_Data;
 
 
 class Request
@@ -56,7 +61,7 @@ class Request
 	protected:
 	
 	public:
-		t_Data d;
+		t_Data data;
 		Request();
 		~Request();
 
