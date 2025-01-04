@@ -47,7 +47,9 @@ void Server::ft_start(int size, int *fd) {
 		std::cerr << "kqueue failed" << std::endl;
 		exit(1);
 	}
-	Request R1;
+	Request request;
+	request.getBody();
+	request.getHeader();
 	connection_info connections[MAX_CLIENTS];
 	memset(connections, 0, sizeof(connections));
 
@@ -140,7 +142,7 @@ void Server::ft_start(int size, int *fd) {
 					// if (msg.find("POST") != std::string::npos) {
 
 					// 	//salah
-					R1.request(msg);
+					request.request(msg);
 					string sas = msg;
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 					size_t	first_pos = sas.find(' ');
@@ -155,18 +157,18 @@ void Server::ft_start(int size, int *fd) {
 					outputFile << msg << std::endl;
 
 					outputFile << sas << std::endl;
-					connections[client_socket].request = R1.getElement("path");
+					connections[client_socket].request = request.getElement("uri");
 
-					outputFile << "Path :: " << connections[client_socket].request << std::endl;
+					outputFile << "uri :: " << connections[client_socket].request << std::endl;
 
 					connections[client_socket].fd = client_socket;
 					if (connections[client_socket].file)
 					{
 						if (!(connections[client_socket].file->is_open()))
-							connections[client_socket].file = new std::ifstream("."+R1.getElement("path"), std::ios::binary);
+							connections[client_socket].file = new std::ifstream("."+request.getElement("uri"), std::ios::binary);
 					}
 					else
-						connections[client_socket].file = new std::ifstream("."+R1.getElement("path"), std::ios::binary);
+						connections[client_socket].file = new std::ifstream("."+request.getElement("uri"), std::ios::binary);
 					outputFile << "---------++++++++++++++ |||| Request |||| +++***********---------------\n\n\n\n\n\n" << std::endl;
 					/////////////////////////Data-Associated-With-The-Current-Event///////////////////////////////////
 
