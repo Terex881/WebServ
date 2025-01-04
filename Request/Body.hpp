@@ -36,9 +36,4 @@ class Body :  public Request
 	public:
 		void parseBodyTypes(string &body);
 		void	setAttay(Request *reqPtr);
-		Body()
-		{
-			_bodyPtr = NULL;
-			_bodyPtr = new Body();
-		}
 };

@@ -29,10 +29,4 @@ class Header :  public Request
 		void	parseHeader(string &header);
 		void	setAttay(Request *reqPtr);
 		const	std::map<string, string>	getMap() const;
-		Header()
-		{
-			_headerPtr = NULL;
-			_headerPtr = new Header();
-
-		}
 };
