@@ -6,16 +6,43 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 15:22:43 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 18:30:14 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./Header.hpp"
-#include "Request.hpp"
 
 void	Header::setAttay(Request *reqPtr)
 {
 	ataty = reqPtr;
+}
+
+
+void Header::storeQueryString(string &str, size_t QMPos)
+{
+	string	key, value;
+	size_t	andPos,	endPos;
+	string	queryStrings;
+
+	queryStrings = str.substr(QMPos + 1, str.length());
+	str.erase(QMPos);
+	
+	while (!queryStrings.empty()) 
+	{
+		andPos = queryStrings.find("&");
+		endPos = (andPos != string::npos) ? andPos : queryStrings.length();
+
+		size_t equalPos = queryStrings.find("=");
+		if (equalPos != string::npos && equalPos < endPos) 
+		{
+			key = queryStrings.substr(0, equalPos);
+			value = queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
+			ataty->requestData.queryStringMap.insert(make_pair(key, value));
+		}
+		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
+		else	queryStrings.clear();
+	}
+	// print(ataty->requestData.queryStringMap);
 }
 
 void Header::parseUri(string &str)
@@ -24,12 +51,10 @@ void Header::parseUri(string &str)
 		cout << RED << "bad URL" << std::endl;
 	
 	size_t QMPos = str.find("?");
+	
 	if (QMPos != string::npos)
 	{
-		queryStrings = str.substr(QMPos, str.length());
-		str.erase(QMPos);
-		cout << YELLOW << str <<	RESET << endl;
-		cout << RED << queryStrings << RESET << endl;
+		storeQueryString(str, QMPos);
 	}
 
 }
@@ -48,8 +73,11 @@ void Header::parseFirstLine(string &line)
 	bigMap.insert(std::make_pair("method", method));
 	bigMap.insert(std::make_pair("uri", uri));
 	bigMap.insert(std::make_pair("httpVersion", httpVersion));
-	
-	if ((it = bigMap.find("method")) != bigMap.end() && it->second != "POST" && it->second != "GET" && it->second != "DELETE")
+
+	cout << BLUE << "URI is" << uri << RESET << endl;
+
+	ataty->requestData.requestMethod = method;
+	if (ataty->requestData.requestMethod != "POST" && ataty->requestData.requestMethod != "GET" && ataty->requestData.requestMethod != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
 	if ((it = bigMap.find("uri")) != bigMap.end())
 		parseUri(it->second);

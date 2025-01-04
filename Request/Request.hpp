@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 14:00:34 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 16:38:50 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ enum type
 
 typedef struct s_Data
 {
+	std::map<string, string>	queryStringMap;
 	string					boundry;
 	string					endBoundry;
 	string					extention;
@@ -54,6 +55,7 @@ typedef struct s_Data
 	int						requestStat;
 	Body*					body_obj;
 	Header*					header_obj;
+	string					requestMethod;
 }	t_Data;
 
 

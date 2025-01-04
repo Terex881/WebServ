@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 15:22:49 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 18:31:30 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ string Request::getElement(const string & element)
 	{
 		res = it->second;		
 	}
-	return res;
+	return res; // return an error 
 }
 
 
@@ -89,5 +89,14 @@ void Request::request(string &request)
 			requestData.header.append(request);
 	}
 	if (requestData.requestStat == 1)
-		requestData.body_obj->parseBodyTypes(request);
+	{
+		if (requestData.requestMethod == "POST")
+			requestData.body_obj->parseBodyTypes(request);
+		else if (requestData.requestMethod == "GET")
+		{
+			requestData.requestStat = 2;
+		}
+		// else if (requestData.requestMethod == "DELETE");
+			//
+	}
 }
