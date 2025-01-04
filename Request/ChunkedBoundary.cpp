@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 17:15:21 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 11:56:11 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Body::parseChunkedBoundryBody(string &body)
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
 			{
-				// cout << RED << "error: no length founded\n" << RESET;
+				cout << RED << "error: no length founded\n" << RESET;
 				return;
 			}
 			/* get decimal number and erase hex + crlf and if length 0 erase 0 and rnrnr of crlf*/

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:35 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 17:43:21 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 11:57:00 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,14 @@
 
 #include "Request.hpp"
 
-class Body :  public Request
+class Body : public Request
 {
 	private:
 		std::vector<std::pair<string, string> >	Vec;
 		ofstream								outFile;
 		string									newStr;
 		string									buffer;
-		Request									*_bodyPtr;
+		Request									*atay_tkhwa;
 
 		void	openFile(string fileName);
 		bool	isBoundary(string &body);
@@ -36,4 +36,6 @@ class Body :  public Request
 	public:
 		void parseBodyTypes(string &body);
 		void	setAttay(Request *reqPtr);
+		
+		bool hasOneMatch(const std::string& str1, const std::string& str2);
 };

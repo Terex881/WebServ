@@ -24,6 +24,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm  *.py *.pdf *jpg *.png *.mp4 Zip/*.py Zip/*.pdf Zip/*jpg *.png Zip/*.mp4
+	rm -rf $(NAME) rm *.py Zip/*.pdf Zip/*jpg Zip/*.jpeg Zip/*.png Zip/*.mp4 Zip/*txt .DS_Store Zip/ok. *jpg *png
 
 re: fclean all

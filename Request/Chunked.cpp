@@ -6,15 +6,15 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 17:45:22 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 15:20:26 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./Body.hpp"
-
+#include <fstream>
 void Body::parseChunkedBody(string &body)
 {
-	openFile("Zip/ok." + _bodyPtr->getEx());
+	openFile("Zip/ok." + atay_tkhwa->requestData.extention);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -30,17 +30,14 @@ void Body::parseChunkedBody(string &body)
 			{
 				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
-				body.erase(0, str.length());;
+				body.erase(0, str.length());
 				if (str != CRLF && str.find_first_of(CRLF) == string::npos)
-				{
-					exit(1);
-					parseBoundryBody(str);
-				}
+					writeFile(str, 0, str.length(), 0);
 			}
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == string::npos)
 			{
-				// cout << RED << "error: no length founded\n" << RESET;
+				cout << RED << "error: no length founded\n" << RESET;
 				return;
 			}
 			
@@ -55,10 +52,9 @@ void Body::parseChunkedBody(string &body)
 				if (!body.empty())
 				{
 					cout << RED << "error: strtol fails\n" << RESET;
-
 				}
 				outFile.close();
-				_bodyPtr->setStat(2);
+				atay_tkhwa->requestData.requestStat = 2;
 				return;
 			}
 		}
@@ -70,12 +66,12 @@ void Body::parseChunkedBody(string &body)
 
 void Body::parseBodyLength(string &body)
 {
-	openFile("Zip/ok." + _bodyPtr->getEx());
-
-	size_t tmp = _bodyPtr->getSize();
+	openFile("Zip/ok." + atay_tkhwa->requestData.extention);
+	
+	size_t tmp = atay_tkhwa->requestData.bodySize;
 	tmp -= body.length();
-	_bodyPtr->setSize(tmp);
-	if (!_bodyPtr->getSize())
-		_bodyPtr->setStat(2);
+	atay_tkhwa->requestData.bodySize = (tmp);
+	if (!atay_tkhwa->requestData.bodySize)
+		atay_tkhwa->requestData.requestStat = (2);
 	writeFile(body, 0, body.length(), 0);
 }

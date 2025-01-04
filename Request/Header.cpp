@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/01 17:47:36 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/04 15:22:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 void	Header::setAttay(Request *reqPtr)
 {
-	_headerPtr = reqPtr;
+	ataty = reqPtr;
 }
 
 void Header::parseUri(string &str)
@@ -31,6 +31,7 @@ void Header::parseUri(string &str)
 		cout << YELLOW << str <<	RESET << endl;
 		cout << RED << queryStrings << RESET << endl;
 	}
+
 }
 
 void Header::parseFirstLine(string &line)
@@ -88,7 +89,6 @@ void Header::parseHeader(string &header)
 		if (key == "transfer-encoding") // check other
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 		
-
 		bigMap.insert(std::make_pair(key, value));		
 		header.erase(0, lineEnd + 2);
 	}
@@ -108,7 +108,7 @@ const string Header::getExtention(std::map<string, string> mp)
 		return str;
 	}
 	else
-		cout << RED << "Bad request\n";
+		cout << RED << "Bad request\n" ;
 	return ""; // check this 
 	// GET NAME FROM TIME
 }
@@ -119,41 +119,37 @@ void Header::fillData(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
-	_headerPtr->setStat(1);
-	_headerPtr->setType(3);
 	
-	if (lengthPos != mp.end())
-		_headerPtr->setSize(std::atol(lengthPos->second.c_str()));
+	ataty->requestData.requestStat = (1);
+	
+	ataty->requestData.bodyType = NONE;
+	
+	if (lengthPos != mp.end()){
+		ataty->requestData.bodySize = (std::atol(lengthPos->second.c_str()));
+		if (ataty->requestData.bodySize > 0)	ataty->requestData.bodyType = BODY_SIZE;
+	}
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
 	if (multiPart != mp.end())
-		_headerPtr->setEx(getExtention(mp));
-	else
-		cout << RED << "no type founded" << endl;
+		ataty->requestData.extention = (getExtention(mp));
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
-		_headerPtr->setB("--" + sep + "\r\n");
-		_headerPtr->setEndB("\r\n--" + sep + "--\r\n");
-		_headerPtr->setType(0);
+		ataty->requestData.boundry = ("--" + sep + "\r\n");
+		ataty->requestData.endBoundry = ("\r\n--" + sep + "--\r\n");
+		ataty->requestData.bodyType = BOUNDARY;
 	}
+	
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			_headerPtr->setType(1);
+			ataty->requestData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
-		{
-			_headerPtr->setType(2);
-		}
+			ataty->requestData.bodyType = CHUNKED_BOUNDARY;
 	}
-}
-
-const std::map<string, string> Header::getMap() const
-{
-	return bigMap;	
 }
