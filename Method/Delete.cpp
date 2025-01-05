@@ -1,5 +1,4 @@
 #include "Delete.hpp"
-#include <ostream>
 
 //config file check if the allowed is there for delete otherwise 405
 

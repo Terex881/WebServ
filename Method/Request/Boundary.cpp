@@ -6,12 +6,11 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 13:56:34 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/05 15:29:28 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./Body.hpp"
-#include "Request.hpp"
 
 void	Body::writeFile(string &body, int start, size_t end, size_t len)
 {

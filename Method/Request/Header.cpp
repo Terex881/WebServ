@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 18:30:14 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/05 16:25:58 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ void	Header::setAttay(Request *reqPtr)
 {
 	ataty = reqPtr;
 }
-
 
 void Header::storeQueryString(string &str, size_t QMPos)
 {
@@ -44,19 +43,30 @@ void Header::storeQueryString(string &str, size_t QMPos)
 	}
 	// print(ataty->requestData.queryStringMap);
 }
-
+ 
 void Header::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 		cout << RED << "bad URL" << std::endl;
-	
-	size_t QMPos = str.find("?");
-	
-	if (QMPos != string::npos)
-	{
-		storeQueryString(str, QMPos);
-	}
 
+	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		if (str[i] == '%' && i + 2 < str.length() && isxdigit(str[i+1]) && isxdigit(str[i+2]))
+		{
+			char number = strtol(str.substr(i + 1, 2).c_str(), NULL, 16);
+			str[i] = number;
+			str.erase(i + 1, 2);
+		}
+		else if (str[i] == '+')
+			str[i] = ' ';
+	}
+	// cout << BLUE << str << RESET << endl;
+
+	/* search for is there any query strigs*/
+	size_t QMPos = str.find("?");
+	if (QMPos != string::npos)
+		storeQueryString(str, QMPos);
 }
 
 void Header::parseFirstLine(string &line)
@@ -74,8 +84,7 @@ void Header::parseFirstLine(string &line)
 	bigMap.insert(std::make_pair("uri", uri));
 	bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-	cout << BLUE << "URI is" << uri << RESET << endl;
-
+	// cout << RED << uri << RESET << endl;
 	ataty->requestData.requestMethod = method;
 	if (ataty->requestData.requestMethod != "POST" && ataty->requestData.requestMethod != "GET" && ataty->requestData.requestMethod != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
@@ -88,7 +97,7 @@ void Header::parseFirstLine(string &line)
 void Header::parseHeader(string &header)
 {
 	string key, value;
-	size_t colonPos, lineEnd; 
+	size_t colonPos, lineEnd;
 	size_t pos = header.find(CRLF);
 	string firstLine = header.substr(0, pos);
 

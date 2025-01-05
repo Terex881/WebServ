@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:27 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 18:14:19 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/05 14:56:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,7 @@ class Header :  public Request
 
 
 
-
-
-		
-const std::map<string, string> getMap() const
+const std::map<string, string> &getMap() const
 {
 	return bigMap;	
 }

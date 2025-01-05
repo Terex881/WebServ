@@ -6,11 +6,11 @@ FLAG = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 
         
 
-OBJ =	main.o	Delete.o	Server.o	File_Parsing.o	Cgi.o	Response.o\
-		Request/Boundary.o	Request/Chunked.o	Request/Request.o	Request/Header.o	Request/ChunkedBoundary.o	Request/Body.o
+OBJ =	main.o	Method/Delete.o	Server.o	Config/File_Parsing.o	cgi-bin/Cgi.o	Response.o\
+		Method/Request/Boundary.o	Method/Request/Chunked.o	Method/Request/Request.o	Method/Request/Header.o	Method/Request/ChunkedBoundary.o	Method/Request/Body.o
 
-HEADERS =	Delete.hpp	Server.hpp	File_Parsing.hpp	DynamicStruct.hpp	Cgi.hpp\
-			Request/Request.hpp	Request/Header.hpp	Request/Body.hpp
+HEADERS =	Method/Delete.hpp	Server.hpp	Config/File_Parsing.hpp	Config/DynamicStruct.hpp	cgi-bin/Cgi.hpp Response.hpp\
+			Method/Request/Request.hpp	Method/Request/Header.hpp	Method/Request/Body.hpp
 
 all: $(NAME)
 

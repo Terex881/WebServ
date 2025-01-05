@@ -1,7 +1,7 @@
 #ifndef DELETE_HPP 
 #define DELETE_HPP 
 
-#include "Server.hpp"
+#include "../Server.hpp"
 #include <dirent.h>
 
 class Delete{

@@ -1,7 +1,6 @@
 #include "Server.hpp"
-#include "Delete.hpp"
 #include "./Response.hpp"
-#include "Request/Request.hpp"
+#include "Method/Request/Request.hpp"
 
 
 #define MAX_CLIENTS 128
@@ -130,8 +129,9 @@ void Server::ft_start(int size, int *fd) {
 				{
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
+									ss << "[" << client_socket << "]"  << endl;
 									ss << msg;
-									ss << "\n-----------------------------------------------------------------------\n";
+									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 																request_obj.request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					connections[client_socket].request = request_obj.getElement("uri");
@@ -232,9 +232,6 @@ Server::Server() {
 Server::~Server() {
 	std::cout << "good bye...\n";
 }
-
-
-
 
 int Server::ft_server_init() {
 

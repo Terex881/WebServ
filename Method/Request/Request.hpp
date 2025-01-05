@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 16:38:50 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/05 16:13:50 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ class Request
 	protected:
 	
 	public:
-		std::map<int, Request> clientsMap;
 		t_Data requestData;
 		Request();
 		~Request();
