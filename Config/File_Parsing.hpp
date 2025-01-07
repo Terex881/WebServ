@@ -22,7 +22,7 @@ struct location_data
 {
 	string root;
 	string	path;
-	string methods;
+	vector<string> methods;
 	string	directory_listing;
 	string	cgi;
 	string 	rturn;
@@ -37,9 +37,9 @@ class File_Parsing
 		string conf_path;
 		int	servers_count;
 		DynamicStruct obj;
-		DynamicStruct servers;
 		vector<dt> host_port;
 
+		DynamicStruct servers;
 		DynamicStruct locations[1000];
 
 		File_Parsing(void);
@@ -51,6 +51,9 @@ class File_Parsing
 		void	Struct_Call(DynamicStruct inner);
 		void	get_host_name(void);
 		location_data	get_location_val(DynamicStruct location);
+		string			get_body_size();
+		string			get_error_page(string statut_code);
+
 };
 
 #endif

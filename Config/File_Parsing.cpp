@@ -21,6 +21,11 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 		exit(1);
 	}
 	Checking_Hierarchy(obj, &servers, locations);
+	if (!servers_count)
+	{
+		file.close();
+		exit(1);
+	}
 	get_host_name();
 	file.close();
 }
@@ -93,16 +98,29 @@ int	check_port(vector<string> line)
 	if (!(line[1].length() >= 2))
 		return (0);
 	line[1] = line[1].substr(0, index);
+	index = line[1].find(':');
+	if (index == string::npos)
+	{
+		if (!is_num(line[1]))
+			return 0;
+	}
+	else
+	{
+		line[1] = line[1].substr(index + 1, line[1].length() - index);
+		if (!is_num(line[1]))
+			return 0;
+	}
 	num = strtod(line[1].c_str(), NULL);
 	if (num <= 0)
 		return 0;
-
 	return 1;
 }
 
 int	check_val(vector<string> line)
 {
-	size_t index;
+	char	*end = NULL;
+	size_t	mb;
+	size_t	index;
 
 	if (line[0] == "return" && line.size() != 3)
 		return (0);
@@ -114,6 +132,16 @@ int	check_val(vector<string> line)
 	{
 		if (line.size() != 2)
 			return (0);
+	}
+	if (line[0] == "client_max_body_size")
+	{
+		if (!is_num(line[1].substr(0, line[1].length() - 1)) || !line[1].substr(0, line[1].length() - 1).length())
+			return (0);
+		mb = strtod(line[1].c_str(), &end);
+		if (*end && *end != ';' && strlen(end) > 1)
+		{
+			return (0);
+		}
 	}
 	index = line[line.size() - 1].find(';');
 	if (line[line.size() - 1].length() != (index + 1))
@@ -135,7 +163,8 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 	DynamicStruct tmp;
 	string line;
 	static int i;
-	
+	static int j;
+
 	while (getline(*file, line))
 	{
 		trime_line(line);
@@ -187,10 +216,11 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			if (parent == "location" && key != "root" && key != "methods"
 				&& key != "cgi" && key != "directory_listing" && key != "return")
 				(*file).close(), exit(1);
-			if (parent == "servers" && key != "listen" && key != "error_page")
+			if (parent == "servers" && key != "listen" && key != "error_page" &&
+					key != "client_max_body_size")
 				(*file).close(), exit(1);
 
-			if (key == "methods" || key == "error_page" || key == "return")
+			if (key == "methods" || key == "return")
 			{
 				line = line.substr(key.length() + 1, (line.length() - key.length()));
 				current.values[key] = line;
@@ -200,6 +230,11 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 				i++;
 				servers_count = i;
 				current.values[key +"_"+ std::to_string(i)] = words[1];
+			}
+			else if (key == "error_page")
+			{
+				j++;
+				current.values[key +"_"+ std::to_string(j)] = line.substr(key.length() + 1, (line.length() - key.length()));
 			}
 			else
 				current.values[key] = words[1];
@@ -220,8 +255,6 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct &block, DynamicStruct *serve
 	vector<string> port_cart;
 	static int i;
 
-
-
 	// http : must contain 2 key:value (default) and only 1 children
 	if (name == "http" && (block.values.size() != 2 || block.children.size() != 1))
 		file.close(), exit(1);
@@ -234,7 +267,8 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct &block, DynamicStruct *serve
 	for (it = block.values.begin(); it != block.values.end(); it++)
 	{
 		it->second = it->second.substr(0, it->second.find(';'));
-
+		if (it->second.empty())
+			file.close(), exit(1);
 		if (it->first == "current")
 			current = it->second;
 		else if (it->first == "parent")
@@ -259,7 +293,7 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct &block, DynamicStruct *serve
 				path = "";
 			}
 			else
-				file.close(), exit(1);	
+				file.close(), exit(1);
 		}
 		if (current == "servers" && it->first != "error_page")
 		{
@@ -275,20 +309,29 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct &block, DynamicStruct *serve
 	if (name == "servers")
 		*server = block;
 	else if (name == "location")
+	{
+		if (!block.values["methods"].empty())
+		{
+			vector<string> methds = split(block.values["methods"]);
+			for (vector<string>::iterator it = methds.begin(); it != methds.end(); it++)
+			{
+				if (*it != "POST" && *it != "GET" && *it != "DELETE")
+					file.close(), exit(1);
+			}
+		}
 		locations[i++] = block;
+	}
 
 	for (map<string, vector<DynamicStruct> >::iterator it = block.children.begin(); it != block.children.end(); ++it)
 	{
 		const string &block_name = it->first;
 		vector<DynamicStruct> &blocks = it->second;
-
 		for (vector<DynamicStruct>::iterator child_it = blocks.begin(); child_it != blocks.end(); ++child_it)
 		{
 			Checking_Hierarchy(*child_it, server, locations, block_name);
 		}
 	}
 }
-
 
 void	File_Parsing::Struct_Call(DynamicStruct inner)
 {
@@ -299,7 +342,6 @@ void	File_Parsing::Struct_Call(DynamicStruct inner)
 		cout << "key = " << it->first << " Value = " << it->second << endl; 
 	}
 }
-
 
 void	File_Parsing::get_host_name(void)
 {
@@ -333,7 +375,6 @@ void	File_Parsing::get_host_name(void)
 		host_port.push_back(data);
 		i++;
 	}
-
 }
 
 location_data	File_Parsing::get_location_val(DynamicStruct location)
@@ -343,10 +384,21 @@ location_data	File_Parsing::get_location_val(DynamicStruct location)
 	l_data.root = location.values["root"];
 	l_data.cgi = location.values["cgi"];
 	l_data.directory_listing = location.values["directory_listing"];
-	l_data.methods = location.values["methods"];
+	l_data.methods = split(location.values["methods"]);
 	l_data.path = location.values["path"];
 	l_data.root = location.values["root"];
 	l_data.rturn = location.values["return"];
-	
+
 	return l_data;
+}
+
+string	File_Parsing::get_body_size()
+{
+	return servers.values["client_max_body_size"];
+}
+
+// return error page based on port number
+string	File_Parsing::get_error_page(string statut_code)
+{
+	return servers.values[statut_code];
 }
