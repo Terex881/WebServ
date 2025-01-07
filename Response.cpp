@@ -1,6 +1,5 @@
 #include "./Response.hpp"
 
-int Response::sent_head[MAX_CLIENTS] = {0};
 size_t	Calculate_File_Size(std::ifstream &file)
 {
 	file.seekg(0, std::ios::end);
@@ -10,23 +9,50 @@ size_t	Calculate_File_Size(std::ifstream &file)
 	return fileSize;
 }
 
-Response::Response(size_t status_code, size_t content_length, string content_type,\
-					string reason_phrase, string working_path, string method, std::ifstream *file, int idx, string Url):Chunk_Size(1024) // 8 KB chunks 8192
+Response::Response():Chunk_Size(1024)
 {
-	this->Status_Code = status_code;
-	this->Content_Length = content_length;
+
+}
+
+Response::Response(string content_type,\
+					string working_path, string method, std::ifstream *file, string Url):Chunk_Size(1024) // 8 KB chunks 8192
+{
 	this->Content_Type = content_type;
-	this->Reason_Phrase = reason_phrase;
 	this->Working_Path = working_path;
 	this->Method =	method;
 	this->current_read = 0;
 	this->file = file;
-	this->idx = idx;
 	this->Url = Url;
 	this->end = 0;
 }
 
-void	Response::Res_get_chunk(std::stringstream &responseStream)
+Response::Response(const Response& other)
+		: Content_Type(other.Content_Type),
+			Working_Path(other.Working_Path),
+			Method(other.Method),
+			current_read(other.current_read),
+			file(other.file),  // Share the ifstream object
+			Url(other.Url),
+			end(other.end),
+			Chunk_Size(other.Chunk_Size) {
+}
+
+Response& Response::operator=(const Response& other)
+{
+	if (this != &other)
+	{
+		Content_Type = other.Content_Type;
+		Working_Path = other.Working_Path;
+		Method = other.Method;
+		current_read = other.current_read;
+		Url = other.Url;
+		end = other.end;
+		file = other.file;
+    }
+    return *this;
+}
+
+void	Response::Res_get_chunk(std::stringstream &responseStream, int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
@@ -52,7 +78,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 			}
 			else
 			{
-				if (!sent_head[idx])
+				if (!sent_head)
 				{
 					size_t file_size = Calculate_File_Size(*file);
 					this->Res_Size = file_size;
@@ -63,9 +89,8 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 						"Transfer-Encoding: chunked\r\n"
 						"Connection: keep-alive\r\n"
 						"\r\n";
-					this->sent_head[idx] = 1;
+					sent_head = 1;
 					this->bytesRead = 0;
-
 					responseStream.write(header.c_str(), header.length());
 					return	;
 				}
@@ -75,7 +100,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					this->current_read = (*file).gcount();
 					if (current_read == 0)
 					{
-						sent_head[idx] = 0;
+						sent_head = 0;
 						responseStream.str(""); // Clear previous content
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
@@ -90,7 +115,7 @@ void	Response::Res_get_chunk(std::stringstream &responseStream)
 					{
 						responseStream.write("0\r\n\r\n", 6);
 						this->end = 1;
-						sent_head[idx] = 0;
+						sent_head = 0;
 					}
 					return ;
 				}

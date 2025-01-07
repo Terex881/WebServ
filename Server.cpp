@@ -1,10 +1,14 @@
 #include "Server.hpp"
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
-
+#include <ostream>
+#include <cstring>
+#include <map>
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
+
+using std::map;
 
 typedef struct
 {
@@ -12,7 +16,10 @@ typedef struct
 	struct sockaddr_in addr;
 	int	is_server;
 	int	is_client;
-	string	request;
+	int sent_head;
+	string	url;
+	string	first;
+	Response rsp;
 	size_t	bytes_sent;
 	std::ifstream *file;
 } connection_info;
@@ -44,14 +51,14 @@ void Server::ft_start(int size, int *fd) {
 		std::cerr << "kqueue failed" << std::endl;
 		exit(1);
 	}
+	map<int, connection_info> connections;
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
 									ofstream ss("tmp.py", ios::app | ios::binary);
 																			Request request_obj;
 																			request_obj.getBody();
 																			request_obj.getHeader();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	connection_info connections[MAX_CLIENTS];
-	memset(connections, 0, sizeof(connections));
+
 
 	// Set up events for each server listening socket
 	struct kevent event;
@@ -134,7 +141,10 @@ void Server::ft_start(int size, int *fd) {
 									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 																request_obj.request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-					connections[client_socket].request = request_obj.getElement("uri");
+					connections[client_socket].url = request_obj.getElement("uri");
+					connections[client_socket].sent_head = 0;
+
+
 					connections[client_socket].fd = client_socket;
 					if (connections[client_socket].file)
 					{
@@ -153,24 +163,32 @@ void Server::ft_start(int size, int *fd) {
 			else if (events[i].filter == EVFILT_WRITE)
 			{
 				int client_socket = events[i].ident;
-				string wer = data->request;
-				Response res(200, 10, Response::GetMimeType(data->request), "OK", "."+wer, "GET", connections[client_socket].file, client_socket, data->request);
-
 				std::stringstream response;
-				res.Res_get_chunk(response);
-				std::string responseStr = response.str();
+				string wer = data->url;
+				std::string responseStr;
+
+				if (data->first.empty())
+					data->rsp = Response(Response::GetMimeType(data->url), "."+wer, "GET", connections[client_socket].file, data->url);
+				data->first = "not empty";
+				
+				data->rsp.Res_get_chunk(response, data->sent_head);
+				responseStr = response.str();
+
 				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
+
 
 				if (bytes_sent < 0 || bytes_sent == SIZE_MAX)
 				{
+					data->first = "";
+					data->rsp.bytesRead = 0;
+					data->sent_head = 0;
+
 					std::cerr << "Send error: " << strerror(errno) 
 					<< " (errno: " << errno << ")" << std::endl;
 					std::cerr << "send failed" << std::endl;
-					res.bytesRead = 0;
-                    res.sent_head[client_socket] = 0;
 					clearSocketBuffer(client_socket);
-					close(client_socket);
-					EV_SET(&event, client_socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+					close(data->fd);
+					EV_SET(&event, data->fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
 					if (connections[client_socket].file)
@@ -180,6 +198,7 @@ void Server::ft_start(int size, int *fd) {
 						delete connections[client_socket].file;
 						connections[client_socket].file = NULL;
 					}
+					// Remove from the client list
 					for (int j = 0; j < MAX_CLIENTS; ++j)
 					{
 						if (client_sockets[j] == client_socket)
@@ -191,12 +210,14 @@ void Server::ft_start(int size, int *fd) {
 				}
 				else
 				{
-					data->bytes_sent += bytes_sent;
-					if ((size_t)res.bytesRead >= res.Res_Size || res.end)
+						data->bytes_sent += bytes_sent;
+
+						if ((size_t)data->rsp.bytesRead >= data->rsp.Res_Size || data->rsp.end)
 						{
+							data->first = "";
 							clearSocketBuffer(client_socket);
-		                    res.bytesRead = 0;
-                    		res.sent_head[client_socket] = 0;
+							data->rsp.bytesRead = 0;
+							data->sent_head = 0;
 
 							if (connections[client_socket].file)
 							{
@@ -205,10 +226,12 @@ void Server::ft_start(int size, int *fd) {
 								delete connections[client_socket].file;
 								connections[client_socket].file = NULL;
 							}
+							
 							close(client_socket);
 							EV_SET(&event, data->fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-							kevent(kq, &event, 1, NULL, 0, NULL);					
-						}	
+							kevent(kq, &event, 1, NULL, 0, NULL);
+						
+						}
 				}
 			}
 		}
