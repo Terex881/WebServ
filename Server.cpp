@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "./Response.hpp"
+#include "Client.hpp"
 #include "Method/Request/Request.hpp"
+// #include "Client.hpp"
 #include <ostream>
 #include <cstring>
 #include <map>
@@ -54,9 +56,11 @@ void Server::ft_start(int size, int *fd) {
 	map<int, connection_info> connections;
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
 									ofstream ss("tmp.py", ios::app | ios::binary);
-																			Request request_obj;
-																			request_obj.getBody();
-																			request_obj.getHeader();
+										// Client client_obj;
+										// client_obj.req_obj = new Request();
+																			// Request request_obj;
+																			// request_obj.getBody();
+																			// request_obj.getHeader();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -81,6 +85,7 @@ void Server::ft_start(int size, int *fd) {
 			std::cerr << "kevent failed" << std::endl;
 			exit(1);
 		}
+
 
 		for (int i = 0; i < n; ++i) {
 			bool is_new_connection = false;
@@ -109,6 +114,10 @@ void Server::ft_start(int size, int *fd) {
 							break;
 						}
 					}
+					//-----------------------------------------------------
+			clientsMap[new_socket] = Client();
+			clientsMap[new_socket].req_obj = new Request();
+					//-----------------------------------------------------
 					is_new_connection = true;
 					break;
 				}
@@ -136,12 +145,12 @@ void Server::ft_start(int size, int *fd) {
 				{
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-									ss << "[" << client_socket << "]"  << endl;
-									ss << msg;
-									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
-																request_obj.request(msg);
+									// ss << "[" << client_socket << "]"  << endl;
+									// ss << msg;
+									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
+									clientsMap[client_socket].req_obj->request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-					connections[client_socket].url = request_obj.getElement("uri");
+					connections[client_socket].url = clientsMap[client_socket].req_obj->getElement("uri");;
 					connections[client_socket].sent_head = 0;
 
 
@@ -149,11 +158,11 @@ void Server::ft_start(int size, int *fd) {
 					if (connections[client_socket].file)
 					{
 						if (!(connections[client_socket].file->is_open()))
-							connections[client_socket].file = new std::ifstream("."+request_obj.getElement("uri"), std::ios::binary);
+							connections[client_socket].file = new std::ifstream("." + clientsMap[client_socket].req_obj->getElement("uri"), std::ios::binary);
 					}
 					else
-						connections[client_socket].file = new std::ifstream("."+request_obj.getElement("uri"), std::ios::binary);
-					if(request_obj.requestData.requestStat == 2)
+						connections[client_socket].file = new std::ifstream("." + clientsMap[client_socket].req_obj->getElement("uri"), std::ios::binary);
+					if(clientsMap[client_socket].req_obj->requestData.requestStat == 2)
 					{
 						EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &connections[client_socket]);
 						kevent(kq, &event, 1, NULL, 0, NULL);
@@ -211,7 +220,6 @@ void Server::ft_start(int size, int *fd) {
 				else
 				{
 						data->bytes_sent += bytes_sent;
-
 						if ((size_t)data->rsp.bytesRead >= data->rsp.Res_Size || data->rsp.end)
 						{
 							data->first = "";
@@ -230,7 +238,6 @@ void Server::ft_start(int size, int *fd) {
 							close(client_socket);
 							EV_SET(&event, data->fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
-						
 						}
 				}
 			}

@@ -2,9 +2,7 @@ NAME = webserv
 
 CC = c++
 
-FLAG = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
-
-        
+# FLAG = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g        
 
 OBJ =	main.o	Method/Delete.o	Server.o	Config/File_Parsing.o	cgi-bin/Cgi.o	Response.o\
 		Method/Request/Boundary.o	Method/Request/Chunked.o	Method/Request/Request.o	Method/Request/Header.o	Method/Request/ChunkedBoundary.o	Method/Request/Body.o

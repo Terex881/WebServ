@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP 
 #define SERVER_HPP 
 
+#include "Client.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
@@ -22,9 +23,12 @@ public:
 	Server();
 	Server(std::string host, int port);
 	int		ft_server_init();
-	static void	ft_start(int size, int *fd);
+	void	ft_start(int size, int *fd);
 	std::string buffering_header(std::string msg, int first_time);
 	~Server();
+
+
+	std::map<int, Client> clientsMap;
 };
 
 #endif

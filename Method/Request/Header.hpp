@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:27 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/05 14:56:43 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/09 12:07:07 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@
 class Header :  public Request
 {
 	private:
-		std::map<string, string>	bigMap;
 		Request						*ataty;
 
 	public:
+		std::map<string, string>	bigMap;
+
+		
 		void	parseFirstLine(string &line);
 		void	fillData(const std::map<string, string> &mp);
 		const	string getExtention(std::map<string, string> mp);

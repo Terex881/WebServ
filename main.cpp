@@ -33,8 +33,11 @@ int main(int argc, char **argv)
 			fd[i] = server[i]->ft_server_init();
 			i++;
 		}
-
-		Server::ft_start(size, fd);
+		i =0;
+		while(i < size)
+		{
+			server[i]->ft_start(size, fd);
+		}
 	// }
 	// catch(const std::exception &e)
 	// {

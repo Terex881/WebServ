@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/05 16:13:50 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/09 15:59:14 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+// #include "Header.hpp"
 #include "sstream"
 
 
@@ -46,39 +47,29 @@ enum type
 typedef struct s_Data
 {
 	std::map<string, string>	queryStringMap;
-	string					boundry;
-	string					endBoundry;
-	string					extention;
-	string					header;
-	size_t					bodySize;
-	type					bodyType;
-	int						requestStat;
-	Body*					body_obj;
-	Header*					header_obj;
-	string					requestMethod;
+	string						boundry;
+	string						endBoundry;
+	string						extention;
+	string						header;
+	size_t						bodySize;
+	type						bodyType;
+	int							requestStat;
+	Body*						body_obj;
+	Header*						header_obj;
+	string						requestMethod;
+	
 }	t_Data;
 
+#include "../../Client.hpp"
 
-class Request
-{
-	protected:
-	
+class Request : public Client
+{	
 	public:
 		t_Data requestData;
 		Request();
 		~Request();
 
 		void	request(string &body);
-		
-		// t_Data	getStat() const
-		// {
-		// 	return d;
-		// }
-		// void	setStat(t_Data	_stat)
-		// {
-		// 	d = _stat;
-		// }
-
 
 		void	print(map<string, string> &headerMap);
 		void	printV(vector<pair<string, string> > &mp);

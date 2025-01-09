@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/05 15:54:01 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/09 15:53:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ Request::Request()
 
 Request::~Request()
 {
-	// delete requestData.body_obj; requestData.body_obj = NULL;
-	// delete requestData.header_obj; requestData.header_obj = NULL;
+	delete requestData.body_obj; requestData.body_obj = NULL;
+	delete requestData.header_obj; requestData.header_obj = NULL;
 }
 
 Body* Request::getBody()
@@ -36,7 +36,7 @@ Body* Request::getBody()
 }
 
 Header* Request::getHeader()
-{
+{	
 	if (!requestData.header_obj)
 		requestData.header_obj = new Header();
 	return requestData.header_obj;
@@ -73,14 +73,20 @@ string Request::getElement(const string & element)
 
 void Request::request(string &request)
 {
+
+	getBody();
+	getHeader();
+
+
+
 	requestData.body_obj->setAttay(this);
 	requestData.header_obj->setAttay(this);
 
-	// cout << RED << clientsMap.size() << RESET << endl;
 	
 
 	if (!requestData.requestStat)
 	{
+		
 		size_t pos = request.find(DCRLF);
 		if (pos != string::npos)
 		{

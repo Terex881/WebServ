@@ -1,6 +1,7 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
+#include "Client.hpp"
 #include <iostream>
 #include <sys/stat.h>
 #include <fstream>
@@ -12,7 +13,7 @@
 using std::string;
 #define MAX_CLIENTS 128
 
-class Response
+class Response : public Client
 {
 	public :
 		size_t			Status_Code;
