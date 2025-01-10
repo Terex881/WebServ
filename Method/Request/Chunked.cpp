@@ -14,7 +14,7 @@
 #include <fstream>
 void Body::parseChunkedBody(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->requestData.extention);
+	openFile("Zip/ok." + atay_tkhwa->clientData.extention);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -54,7 +54,7 @@ void Body::parseChunkedBody(string &body)
 					cout << RED << "error: strtol fails\n" << RESET;
 				}
 				outFile.close();
-				atay_tkhwa->requestData.requestStat = 2;
+				atay_tkhwa->clientData.requestStat = 2;
 				return;
 			}
 		}
@@ -66,12 +66,12 @@ void Body::parseChunkedBody(string &body)
 
 void Body::parseBodyLength(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->requestData.extention);
+	openFile("Zip/ok." + atay_tkhwa->clientData.extention);
 	
-	size_t tmp = atay_tkhwa->requestData.bodySize;
+	size_t tmp = atay_tkhwa->clientData.bodySize;
 	tmp -= body.length();
-	atay_tkhwa->requestData.bodySize = (tmp);
-	if (!atay_tkhwa->requestData.bodySize)
-		atay_tkhwa->requestData.requestStat = (2);
+	atay_tkhwa->clientData.bodySize = (tmp);
+	if (!atay_tkhwa->clientData.bodySize)
+		atay_tkhwa->clientData.requestStat = (2);
 	writeFile(body, 0, body.length(), 0);
 }

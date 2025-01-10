@@ -35,37 +35,39 @@ using namespace std;
 class Header;
 class Body;
 
-enum type
-{
-	BOUNDARY,
-	CHUNKED,
-	CHUNKED_BOUNDARY,
-	BODY_SIZE,
-	NONE,
-};
+// enum type
+// {
+// 	BOUNDARY,
+// 	CHUNKED,
+// 	CHUNKED_BOUNDARY,
+// 	BODY_SIZE,
+// 	NONE,
+// };
 
-typedef struct s_Data
-{
-	std::map<string, string>	queryStringMap;
-	string						boundry;
-	string						endBoundry;
-	string						extention;
-	string						header;
-	size_t						bodySize;
-	type						bodyType;
-	int							requestStat;
-	Body*						body_obj;
-	Header*						header_obj;
-	string						requestMethod;
+// typedef struct s_Data
+// {
+// 	std::map<string, string>	queryStringMap;
+// 	string						boundry;
+// 	string						endBoundry;
+// 	string						extention;
+// 	string						header;
+// 	size_t						bodySize;
+// 	type						bodyType;
+// 	int							requestStat;
+// 	string						requestMethod;
 	
-}	t_Data;
+// }	t_Data;
+// 		t_Data clientData;
 
 #include "../../Client.hpp"
 
 class Request : public Client
 {	
 	public:
-		t_Data requestData;
+	Body*						body_obj;
+	Header*						header_obj;
+
+	
 		Request();
 		~Request();
 

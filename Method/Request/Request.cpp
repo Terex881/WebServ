@@ -16,30 +16,30 @@
 
 Request::Request()
 {
-	requestData.body_obj = NULL;
-	requestData.header_obj = NULL;
-	requestData.bodySize = 0;
-	requestData.requestStat = 0;
+	body_obj = NULL;
+	header_obj = NULL;
+	clientData.bodySize = 0;
+	clientData.requestStat = 0;
 }
 
 Request::~Request()
 {
-	delete requestData.body_obj; requestData.body_obj = NULL;
-	delete requestData.header_obj; requestData.header_obj = NULL;
+	delete body_obj; body_obj = NULL;
+	delete header_obj; header_obj = NULL;
 }
 
 Body* Request::getBody()
 {
-	if (!requestData.body_obj)
-		requestData.body_obj = new Body();
-	return requestData.body_obj;
+	if (!body_obj)
+		body_obj = new Body();
+	return body_obj;
 }
 
 Header* Request::getHeader()
 {	
-	if (!requestData.header_obj)
-		requestData.header_obj = new Header();
-	return requestData.header_obj;
+	if (!header_obj)
+		header_obj = new Header();
+	return header_obj;
 }
 
 void Request::print(map<string, string> &mp)
@@ -60,10 +60,10 @@ void Request::printV(vector<pair<string, string> > &mp)
 string Request::getElement(const string & element)
 {
 	string res;
-	const map<string, string>& headers = requestData.header_obj->getMap();
+	const map<string, string>& headers = header_obj->getMap();
 	map<string, string>::const_iterator it = headers.find(element);
 	
-	if (it != requestData.header_obj->getMap().end())
+	if (it != header_obj->getMap().end())
 	{
 		res = it->second;		
 	}
@@ -79,33 +79,33 @@ void Request::request(string &request)
 
 
 
-	requestData.body_obj->setAttay(this);
-	requestData.header_obj->setAttay(this);
+	body_obj->setAttay(this);
+	header_obj->setAttay(this);
 
 	
 
-	if (!requestData.requestStat)
+	if (!clientData.requestStat)
 	{
 		
 		size_t pos = request.find(DCRLF);
 		if (pos != string::npos)
 		{
-			requestData.header.append(request.c_str(), 0, pos);
-			requestData.header_obj->parseHeader(requestData.header);
+			clientData.header.append(request.c_str(), 0, pos);
+			header_obj->parseHeader(clientData.header);
 			request.erase(0, pos + 4);
 		}
 		else
-			requestData.header.append(request);
+			clientData.header.append(request);
 	}
-	if (requestData.requestStat == 1)
+	if (clientData.requestStat == 1)
 	{
-		if (requestData.requestMethod == "POST")
-			requestData.body_obj->parseBodyTypes(request);
-		else if (requestData.requestMethod == "GET")
+		if (clientData.requestMethod == "POST")
+			body_obj->parseBodyTypes(request);
+		else if (clientData.requestMethod == "GET")
 		{
-			requestData.requestStat = 2;
+			clientData.requestStat = 2;
 		}
-		// else if (requestData.requestMethod == "DELETE");
+		// else if (clientData.requestMethod == "DELETE");
 			//
 	}
 }

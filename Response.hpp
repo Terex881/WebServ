@@ -32,7 +32,7 @@ class Response : public Client
 		int				idx;
 		std::streamsize	bytesRead;
 		char			buffer[8192];
-
+		std::stringstream	responseStream;
 		string			header;
 		string			body;
 
@@ -43,7 +43,7 @@ class Response : public Client
 
 		bool	isFile(const std::string& path);
 		bool	isDirectory(const std::string& path);
-		void	Res_get_chunk(std::stringstream &responseStream, int &sent_head);
+		void	Res_get_chunk(int &sent_head);
 		static string	GetMimeType(const std::string& filename);
 };
 

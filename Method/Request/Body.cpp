@@ -16,12 +16,12 @@
 void	Body::parseBodyTypes(string &body)
 {
 	newStr.append(body.c_str(), body.length());
-	string last = newStr.substr(std::max(0, (int)(newStr.length() - atay_tkhwa->requestData.endBoundry.length())));
+	string last = newStr.substr(std::max(0, (int)(newStr.length() - atay_tkhwa->clientData.endBoundry.length())));
 
-	if (hasOneMatch(last, atay_tkhwa->requestData.endBoundry) && newStr.find(atay_tkhwa->requestData.endBoundry) == string::npos)
+	if (hasOneMatch(last, atay_tkhwa->clientData.endBoundry) && newStr.find(atay_tkhwa->clientData.endBoundry) == string::npos)
 		return;
 
-	switch (atay_tkhwa->requestData.bodyType)
+	switch (atay_tkhwa->clientData.bodyType)
 	{
 		case (BOUNDARY):parseBoundryBody(newStr); break;
 		case (CHUNKED): parseChunkedBody(newStr); break;

@@ -36,12 +36,12 @@ void Header::storeQueryString(string &str, size_t QMPos)
 		{
 			key = queryStrings.substr(0, equalPos);
 			value = queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
-			ataty->requestData.queryStringMap.insert(make_pair(key, value));
+			ataty->clientData.queryStringMap.insert(make_pair(key, value));
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	// print(ataty->requestData.queryStringMap);
+	// print(ataty->clientData.queryStringMap);
 }
  
 void Header::parseUri(string &str)
@@ -85,8 +85,8 @@ void Header::parseFirstLine(string &line)
 	bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
 	// cout << RED << uri << RESET << endl;
-	ataty->requestData.requestMethod = method;
-	if (ataty->requestData.requestMethod != "POST" && ataty->requestData.requestMethod != "GET" && ataty->requestData.requestMethod != "DELETE")
+	ataty->clientData.requestMethod = method;
+	if (ataty->clientData.requestMethod != "POST" && ataty->clientData.requestMethod != "GET" && ataty->clientData.requestMethod != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
 	if ((it = bigMap.find("uri")) != bigMap.end())
 		parseUri(it->second);
@@ -157,27 +157,27 @@ void Header::fillData(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	
-	ataty->requestData.requestStat = (1);
+	ataty->clientData.requestStat = (1);
 	
-	ataty->requestData.bodyType = NONE;
+	ataty->clientData.bodyType = NONE;
 	
 	if (lengthPos != mp.end()){
-		ataty->requestData.bodySize = (std::atol(lengthPos->second.c_str()));
-		if (ataty->requestData.bodySize > 0)	ataty->requestData.bodyType = BODY_SIZE;
+		ataty->clientData.bodySize = (std::atol(lengthPos->second.c_str()));
+		if (ataty->clientData.bodySize > 0)	ataty->clientData.bodyType = BODY_SIZE;
 	}
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
 	if (multiPart != mp.end())
-		ataty->requestData.extention = (getExtention(mp));
+		ataty->clientData.extention = (getExtention(mp));
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
-		ataty->requestData.boundry = ("--" + sep + "\r\n");
-		ataty->requestData.endBoundry = ("\r\n--" + sep + "--\r\n");
-		ataty->requestData.bodyType = BOUNDARY;
+		ataty->clientData.boundry = ("--" + sep + "\r\n");
+		ataty->clientData.endBoundry = ("\r\n--" + sep + "--\r\n");
+		ataty->clientData.bodyType = BOUNDARY;
 	}
 	
 	if (chunked != mp.end())
@@ -185,8 +185,8 @@ void Header::fillData(const std::map<string, string> &mp)
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			ataty->requestData.bodyType = CHUNKED;
+			ataty->clientData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
-			ataty->requestData.bodyType = CHUNKED_BOUNDARY;
+			ataty->clientData.bodyType = CHUNKED_BOUNDARY;
 	}
 }

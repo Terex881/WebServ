@@ -48,11 +48,11 @@ Response& Response::operator=(const Response& other)
 		Url = other.Url;
 		end = other.end;
 		file = other.file;
-    }
+	}
     return *this;
 }
 
-void	Response::Res_get_chunk(std::stringstream &responseStream, int &sent_head)
+void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
