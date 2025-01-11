@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/09 15:59:14 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/11 20:51:16 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 #include <string>
 #include <fstream>
 #include <vector>
-// #include "Header.hpp"
 #include "sstream"
 
 
@@ -35,37 +34,53 @@ using namespace std;
 class Header;
 class Body;
 
-// enum type
-// {
-// 	BOUNDARY,
-// 	CHUNKED,
-// 	CHUNKED_BOUNDARY,
-// 	BODY_SIZE,
-// 	NONE,
-// };
+enum type
+{
+	BOUNDARY,
+	CHUNKED,
+	CHUNKED_BOUNDARY,
+	BODY_SIZE,
+	NONE,
+};
 
-// typedef struct s_Data
-// {
-// 	std::map<string, string>	queryStringMap;
-// 	string						boundry;
-// 	string						endBoundry;
-// 	string						extention;
-// 	string						header;
-// 	size_t						bodySize;
-// 	type						bodyType;
-// 	int							requestStat;
-// 	string						requestMethod;
+typedef struct s_Data
+{
+	std::map<string, string>	queryStringMap;
+	string						boundry;
+	string						endBoundry;
+	string						extention;
+	string						header;
+	size_t						bodySize;
+	type						bodyType;
+	int							requestStat;
+	string						requestMethod;
+	//------------------------------------------------------
+	int fd;
+	// struct sockaddr_in addr;
+	int	is_server;
+	int	is_client;
+	int sent_head;
+	string	url;
+	string	first;
+	// Response rsp;
+	size_t	bytes_sent;
+	std::ifstream *file;
 	
-// }	t_Data;
-// 		t_Data clientData;
+}	t_Data;
 
-#include "../../Client.hpp"
+class Client;
+// #include "../../Client.hpp"
 
-class Request : public Client
+class Request 
 {	
 	public:
 	Body*						body_obj;
 	Header*						header_obj;
+	t_Data clientData;
+
+	// Client						client_obj;
+
+	
 
 	
 		Request();
@@ -79,4 +94,9 @@ class Request : public Client
 		Header*	getHeader();
 		Body*	getBody();
 		string	getElement(const string & element);
+
+		// Client& get()
+		// {
+		// 	return client_obj;
+		// }
 };

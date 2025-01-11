@@ -2,73 +2,62 @@
 #pragma once 
 
 
-#include <iostream>
-#include <map>
-#include <string>
-#include <fstream>
-#include <vector>
-#include "sstream"
 
+#include "Response.hpp"
+#include "Method/Request/Request.hpp"
 
-#define RED "\033[31m"
-#define BLUE "\033[34m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define RESET "\033[0m"
+// enum type
+// {
+// 	BOUNDARY,
+// 	CHUNKED,
+// 	CHUNKED_BOUNDARY,
+// 	BODY_SIZE,
+// 	NONE,
+// };
 
-#define CRLF "\r\n"
-#define DCRLF "\r\n\r\n"
-#define FILE_NAME "; filename=\""
-
-using namespace std;
-
-class Request;
-class Response;
-
-
-enum type
-{
-	BOUNDARY,
-	CHUNKED,
-	CHUNKED_BOUNDARY,
-	BODY_SIZE,
-	NONE,
-};
-
-typedef struct s_Data
-{
-	std::map<string, string>	queryStringMap;
-	string						boundry;
-	string						endBoundry;
-	string						extention;
-	string						header;
-	size_t						bodySize;
-	type						bodyType;
-	int							requestStat;
-	string						requestMethod;
-	//------------------------------------------------------
-	int fd;
-	// struct sockaddr_in addr;
-	int	is_server;
-	int	is_client;
-	int sent_head;
-	string	url;
-	string	first;
-	// Response rsp;
-	size_t	bytes_sent;
-	std::ifstream *file;
+// typedef struct s_Data
+// {
+// 	std::map<string, string>	queryStringMap;
+// 	string						boundry;
+// 	string						endBoundry;
+// 	string						extention;
+// 	string						header;
+// 	size_t						bodySize;
+// 	type						bodyType;
+// 	int							requestStat;
+// 	string						requestMethod;
+// 	//------------------------------------------------------
+// 	int fd;
+// 	// struct sockaddr_in addr;
+// 	int	is_server;
+// 	int	is_client;
+// 	int sent_head;
+// 	string	url;
+// 	string	first;
+// 	// Response rsp;
+// 	size_t	bytes_sent;
+// 	std::ifstream *file;
 	
-}	t_Data;
+// }	t_Data;
+// 		t_Data clientData;
 
 class Client
 {
 	public:
-		t_Data clientData;
-		Request *req_obj;
-		Response *res_obj;
+		Request		req_obj;
+		Response	res_obj;
 
-	Client() : req_obj(NULL), res_obj(NULL)
+	Client() //: req_obj(NULL), res_obj(NULL)
 	{}
+
+	Response&	getRes()
+	{
+		return res_obj;
+	}
+	Request&	getReq()
+	{
+		return req_obj;
+	}
 
 
 

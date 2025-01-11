@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/09 13:29:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/11 20:42:36 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <fstream>
 void Body::parseChunkedBody(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->clientData.extention);
+	openFile("/Users/sdemnati/goinfre/UP/ok." + atay_tkhwa->clientData.extention);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -66,7 +66,7 @@ void Body::parseChunkedBody(string &body)
 
 void Body::parseBodyLength(string &body)
 {
-	openFile("Zip/ok." + atay_tkhwa->clientData.extention);
+	openFile("/Users/sdemnati/goinfre/UP/ok." + atay_tkhwa->clientData.extention);
 	
 	size_t tmp = atay_tkhwa->clientData.bodySize;
 	tmp -= body.length();

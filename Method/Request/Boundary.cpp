@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/09 13:29:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/11 20:53:06 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	Body::openFile(string fileName)
 {
 	if (!outFile.is_open())
 	{
-		outFile.open(fileName, ios::binary | ios::app);
+		outFile.open(fileName, ios::binary | ios::trunc);
 		if (!outFile.is_open())
 			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
 	}
@@ -106,7 +106,7 @@ bool	Body::isBoundary(string &body)
 		else
 			contentEndtPos = body.length();
 
-		openFile("Zip/" + fileName);
+		openFile("/Users/sdemnati/goinfre/UP/" + fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)
