@@ -6,41 +6,26 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/11 20:48:21 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/12 18:55:42 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include "Body.hpp"
-#include "Header.hpp"
 
 Request::Request()
 {
-	body_obj = NULL;
-	header_obj = NULL;
-	clientData.bodySize = 0;
-	clientData.requestStat = 0;
+	BodyData.bodySize = 0;
+	RequestData.requestStat = 0;
+	BodyData.outFile = new ofstream;
+
 }
 
 Request::~Request()
 {
-	delete body_obj; body_obj = NULL;
-	delete header_obj; header_obj = NULL;
+	delete BodyData.outFile;
 }
 
-Body* Request::getBody()
-{
-	if (!body_obj)
-		body_obj = new Body();
-	return body_obj;
-}
 
-Header* Request::getHeader()
-{	
-	if (!header_obj)
-		header_obj = new Header();
-	return header_obj;
-}
 
 void Request::print(map<string, string> &mp)
 {
@@ -60,52 +45,39 @@ void Request::printV(vector<pair<string, string> > &mp)
 string Request::getElement(const string & element)
 {
 	string res;
-	const map<string, string>& headers = header_obj->getMap();
-	map<string, string>::const_iterator it = headers.find(element);
+	map<string, string>::const_iterator it = HeaderData.bigMap.find(element);
 	
-	if (it != header_obj->getMap().end())
+	if (it != HeaderData.bigMap.end())
 	{
 		res = it->second;		
 	}
-	return res; // return an error 
+	return res;
 }
 
 
 void Request::request(string &request)
 {
-
-	getBody();
-	getHeader();
-
-
-
-	body_obj->setAttay(this);
-	header_obj->setAttay(this);
-
-	
-
-	if (!clientData.requestStat)
-	{
-		
+	if (!RequestData.requestStat)
+	{		
 		size_t pos = request.find(DCRLF);
 		if (pos != string::npos)
 		{
-			clientData.header.append(request.c_str(), 0, pos);
-			header_obj->parseHeader(clientData.header);
+			RequestData.header.append(request.c_str(), 0, pos);
+			parseHeader(RequestData.header);
 			request.erase(0, pos + 4);
 		}
 		else
-			clientData.header.append(request);
+			RequestData.header.append(request);
 	}
-	if (clientData.requestStat == 1)
+	if (RequestData.requestStat == 1)
 	{
-		if (clientData.requestMethod == "POST")
-			body_obj->parseBodyTypes(request);
-		else if (clientData.requestMethod == "GET")
+		if (HeaderData.requestMethod == "POST")
+			parseBodyTypes(request);
+		else if (HeaderData.requestMethod == "GET")
 		{
-			clientData.requestStat = 2;
+			RequestData.requestStat = 2;
 		}
-		// else if (clientData.requestMethod == "DELETE");
+		// else if (RequestData.requestMethod == "DELETE");
 			//
 	}
 }

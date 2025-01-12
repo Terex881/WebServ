@@ -6,18 +6,15 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/09 13:29:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/12 18:52:31 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Header.hpp"
+#include "Request.hpp"
 
-void	Header::setAttay(Request *reqPtr)
-{
-	ataty = reqPtr;
-}
 
-void Header::storeQueryString(string &str, size_t QMPos)
+
+void Request::storeQueryString(string &str, size_t QMPos)
 {
 	string	key, value;
 	size_t	andPos,	endPos;
@@ -36,15 +33,15 @@ void Header::storeQueryString(string &str, size_t QMPos)
 		{
 			key = queryStrings.substr(0, equalPos);
 			value = queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
-			ataty->clientData.queryStringMap.insert(make_pair(key, value));
+			HeaderData.queryStringMap.insert(make_pair(key, value));
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	// print(ataty->clientData.queryStringMap);
+	// print(HeaderData.queryStringMap);
 }
  
-void Header::parseUri(string &str)
+void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 		cout << RED << "bad URL" << std::endl;
@@ -69,7 +66,7 @@ void Header::parseUri(string &str)
 		storeQueryString(str, QMPos);
 }
 
-void Header::parseFirstLine(string &line)
+void Request::parseFirstLine(string &line)
 {
 	string method, uri, httpVersion;
 	map<string, string>::iterator it;
@@ -80,21 +77,21 @@ void Header::parseFirstLine(string &line)
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;
 	
-	bigMap.insert(std::make_pair("method", method));
-	bigMap.insert(std::make_pair("uri", uri));
-	bigMap.insert(std::make_pair("httpVersion", httpVersion));
+	HeaderData.bigMap.insert(std::make_pair("method", method));
+	HeaderData.bigMap.insert(std::make_pair("uri", uri));
+	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
 	// cout << RED << uri << RESET << endl;
-	ataty->clientData.requestMethod = method;
-	if (ataty->clientData.requestMethod != "POST" && ataty->clientData.requestMethod != "GET" && ataty->clientData.requestMethod != "DELETE")
+	HeaderData.requestMethod = method;
+	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
 		cout << RED << "501 Not Implemented" << std::endl;
-	if ((it = bigMap.find("uri")) != bigMap.end())
+	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
 		parseUri(it->second);
-	if ((it = bigMap.find("httpVersion")) != bigMap.end() && it->second != "HTTP/1.1")
+	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
 }
 
-void Header::parseHeader(string &header)
+void Request::parseHeader(string &header)
 {
 	string key, value;
 	size_t colonPos, lineEnd;
@@ -126,15 +123,15 @@ void Header::parseHeader(string &header)
 		if (key == "transfer-encoding") // check other
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 		
-		bigMap.insert(std::make_pair(key, value));		
+		HeaderData.bigMap.insert(std::make_pair(key, value));		
 		header.erase(0, lineEnd + 2);
 	}
-	// print(bigMap);
-	fillData(bigMap);
+	// print(HeaderData.bigMap);
+	fillData(HeaderData.bigMap);
 }
 
 
-const string Header::getExtention(std::map<string, string> mp)
+const string Request::getExtention(std::map<string, string> mp)
 {
 	std::map<string, string>::iterator it = mp.find("content-type");
 	if (it != mp.end())
@@ -151,33 +148,33 @@ const string Header::getExtention(std::map<string, string> mp)
 }
 
 
-void Header::fillData(const std::map<string, string> &mp)
+void Request::fillData(const std::map<string, string> &mp)
 {
 	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	
-	ataty->clientData.requestStat = (1);
+	RequestData.requestStat = (1);
 	
-	ataty->clientData.bodyType = NONE;
+	BodyData.bodyType = NONE;
 	
 	if (lengthPos != mp.end()){
-		ataty->clientData.bodySize = (std::atol(lengthPos->second.c_str()));
-		if (ataty->clientData.bodySize > 0)	ataty->clientData.bodyType = BODY_SIZE;
+		BodyData.bodySize = (std::atol(lengthPos->second.c_str()));
+		if (BodyData.bodySize > 0)	BodyData.bodyType = BODY_SIZE;
 	}
 	if (mp.find("host") == mp.end())
 		cout << RED << "no Host found !!\n" << RESET;
 
 	if (multiPart != mp.end())
-		ataty->clientData.extention = (getExtention(mp));
+		HeaderData.extention = (getExtention(mp));
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
-		ataty->clientData.boundry = ("--" + sep + "\r\n");
-		ataty->clientData.endBoundry = ("\r\n--" + sep + "--\r\n");
-		ataty->clientData.bodyType = BOUNDARY;
+		BodyData.boundry = ("--" + sep + "\r\n");
+		BodyData.endBoundry = ("\r\n--" + sep + "--\r\n");
+		BodyData.bodyType = BOUNDARY;
 	}
 	
 	if (chunked != mp.end())
@@ -185,8 +182,8 @@ void Header::fillData(const std::map<string, string> &mp)
 		if (chunked->second != "chunked")
 			cout << RED << "not implemented\n" << RESET ;
 		else if (chunked->second == "chunked" && !bol)
-			ataty->clientData.bodyType = CHUNKED;
+			BodyData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
-			ataty->clientData.bodyType = CHUNKED_BOUNDARY;
+			BodyData.bodyType = CHUNKED_BOUNDARY;
 	}
 }

@@ -6,31 +6,33 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/11 20:53:06 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/12 18:54:09 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Body.hpp"
+#include "Request.hpp"
 
-void	Body::writeFile(string &body, int start, size_t end, size_t len)
+void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);
-	if (outFile.is_open())
-		outFile.write(content.c_str(), content.length()); outFile.flush();
+	if (BodyData.outFile->is_open())
+		BodyData.outFile->write(content.c_str(), content.length()); BodyData.outFile->flush();
 	body.erase(0, end + len);
 }
 
-void	Body::openFile(string fileName)
+void	Request::openFile(const string &fileName)
 {
-	if (!outFile.is_open())
+	if (!BodyData.outFile->is_open())
 	{
-		outFile.open(fileName, ios::binary | ios::trunc);
-		if (!outFile.is_open())
+		BodyData.outFile->open(fileName, ios::binary | ios::trunc);
+		if (!BodyData.outFile->is_open())
 			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
 	}
 }
 
-void	Body::getQweryString(string &body)
+
+
+void	Request::getQweryString(string &body)
 {
 	string key, val;
 	size_t contentEndtPos = 0, namePos = body.find("; name=\"");
@@ -42,19 +44,19 @@ void	Body::getQweryString(string &body)
 	
 	if ((crlfPos = body.find(CRLF)) != std::string::npos)
 		contentEndtPos = crlfPos;
-	else if ((endBoundyPos = body.find(atay_tkhwa->clientData.endBoundry)) != std::string::npos)
+	else if ((endBoundyPos = body.find(BodyData.endBoundry)) != std::string::npos)
 		contentEndtPos = endBoundyPos;
 	else
 		contentEndtPos = body.length();
 	
 	val = body.substr(0, contentEndtPos);
-	Vec.push_back(make_pair(key, val));
+	BodyData.Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
 }
 
-int	Body::getFileName(string &body, string &fileName)
+int	Request::getFileName(string &body, string &fileName)
 {
-	string tmp = body.substr(body.find(atay_tkhwa->clientData.boundry) + atay_tkhwa->clientData.boundry.length(), body.length());
+	string tmp = body.substr(body.find(BodyData.boundry) + BodyData.boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
 	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
@@ -76,28 +78,28 @@ int	Body::getFileName(string &body, string &fileName)
 	}
 	else
 	{
-		if (tmp.find(atay_tkhwa->clientData.boundry) == string::npos && tmp.find(atay_tkhwa->clientData.endBoundry) == string::npos)
+		if (tmp.find(BodyData.boundry) == string::npos && tmp.find(BodyData.endBoundry) == string::npos)
 			return 0;
 		getQweryString(body);
 	}
 	return -1;
 }
 
-bool	Body::isBoundary(string &body)
+bool	Request::isBoundary(string &body)
 {
-	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(atay_tkhwa->clientData.boundry);
+	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(BodyData.boundry);
 	string	fileName;
 
 	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
 	else writeFile(body, 0, boundryPos, 0);
-	outFile.close();
+	BodyData.outFile->close();
 	
 	int i = getFileName(body, fileName);
 	if (i == 1)
 	{
 		body.erase(0, body.find(DCRLF) + 4);
-		boundryPos = body.find(atay_tkhwa->clientData.boundry);
-		endboundryPos = body.find(atay_tkhwa->clientData.endBoundry);
+		boundryPos = body.find(BodyData.boundry);
+		endboundryPos = body.find(BodyData.endBoundry);
 
 		if (boundryPos != std::string::npos)
 			contentEndtPos = boundryPos;
@@ -114,20 +116,16 @@ bool	Body::isBoundary(string &body)
 	return 1;
 }
 
-void	Body::parseBoundryBody(string &body)
+void	Request::parseBoundryBody(string &body)
 {
-	// ofstream ss("Z.py", ios::app);
-	// ss << body;
-	// ss << "\n--------------------------------------------\n";
-
 	size_t boundryPos, endboundryPos;
-	endboundryPos = body.find(atay_tkhwa->clientData.endBoundry);
+	endboundryPos = body.find(BodyData.endBoundry);
 	while(!body.empty())
 	{
-		boundryPos = body.find(atay_tkhwa->clientData.boundry);
+		boundryPos = body.find(BodyData.boundry);
 		if (boundryPos == string::npos && endboundryPos == string::npos)
 		{
-			if (body == CRLF && atay_tkhwa->clientData.bodyType == CHUNKED_BOUNDARY) body.erase(0, 2);
+			if (body == CRLF && BodyData.bodyType == CHUNKED_BOUNDARY) body.erase(0, 2);
 			else writeFile(body, 0, body.length(), 0);
 		}
 		if (boundryPos != string::npos)
@@ -136,10 +134,10 @@ void	Body::parseBoundryBody(string &body)
 		}
 		else if (endboundryPos != string::npos)
 		{
-			endboundryPos = body.find(atay_tkhwa->clientData.endBoundry);	
-			writeFile(body, 0, endboundryPos, atay_tkhwa->clientData.endBoundry.length());
-			printV(Vec);
-			atay_tkhwa->clientData.requestStat = (2);
+			endboundryPos = body.find(BodyData.endBoundry);	
+			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());
+			printV(BodyData.Vec);
+			RequestData.requestStat = 2;
 		}
 	}
 }

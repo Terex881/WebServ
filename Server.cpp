@@ -109,8 +109,6 @@ void Server::ft_start(int size, int *fd)
 					}
 					//-----------------------------------------------------
 			clientsMap[new_socket] = Client();
-			// clientsMap[new_socket].req_obj = new Request();
-			// clientsMap[new_socket].res_obj = new Response();
 					//-----------------------------------------------------
 					is_new_connection = true;
 					break;
@@ -144,19 +142,19 @@ void Server::ft_start(int size, int *fd)
 									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									clientsMap[client_socket].getReq().request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-					clientsMap[client_socket].getReq().clientData.url = clientsMap[client_socket].getReq().getElement("uri");;
-					clientsMap[client_socket].getReq().clientData.sent_head = 0;
+					clientsMap[client_socket].getReq().HeaderData.url = clientsMap[client_socket].getReq().getElement("uri");;
+					clientsMap[client_socket].getReq().RequestData.sent_head = 0;
 
 
-					clientsMap[client_socket].getReq().clientData.fd = client_socket;
-					if (clientsMap[client_socket].getReq().clientData.file)
+					clientsMap[client_socket].getReq().RequestData.fd = client_socket;
+					if (clientsMap[client_socket].getReq().RequestData.file)
 					{
-						if (!(clientsMap[client_socket].getReq().clientData.file->is_open()))
-							clientsMap[client_socket].getReq().clientData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
+						if (!(clientsMap[client_socket].getReq().RequestData.file->is_open()))
+							clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
 					}
 					else
-						clientsMap[client_socket].getReq().clientData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
-					if(clientsMap[client_socket].getReq().clientData.requestStat == 2)
+						clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
+					if(clientsMap[client_socket].getReq().RequestData.requestStat == 2)
 					{
 						std::cout << YELLOW << (double)(clock() - s) /CLOCKS_PER_SEC << "\n" << RESET;
 						cout << GREEN << "[--------------------------------DONE--------------------------------]" << RESET << endl;
@@ -171,37 +169,37 @@ void Server::ft_start(int size, int *fd)
 
 				int client_socket = events[i].ident;
 				// std::stringstream response;
-				string wer = data->getReq().clientData.url;
+				string wer = data->getReq().HeaderData.url;
 				std::string responseStr;
 
-				if (data->getReq().clientData.first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().clientData.url), "."+wer, "GET", data->getReq().clientData.file, data->getReq().clientData.url);
-				data->getReq().clientData.first = "not empty";
+				if (data->getReq().RequestData.first.empty())
+					data->res_obj = Response(Response::GetMimeType(data->getReq().HeaderData.url), "."+wer, "GET", data->getReq().RequestData.file, data->getReq().HeaderData.url);
+				data->getReq().RequestData.first = "not empty";
 				
-				data->getRes().Res_get_chunk(data->getReq().clientData.sent_head);
+				data->getRes().Res_get_chunk(data->getReq().RequestData.sent_head);
 				responseStr = data->getRes().responseStream.str();
 				// data->getRes().responseStream
 				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
 
 				if (bytes_sent < 0 || bytes_sent == SIZE_MAX)
 				{
-					data->getReq().clientData.first = "";
+					data->getReq().RequestData.first = "";
 					data->getRes().bytesRead = 0;
-					data->getReq().clientData.sent_head = 0;
+					data->getReq().RequestData.sent_head = 0;
 					std::cerr << "Send error: " << strerror(errno) 
 					<< " (errno: " << errno << ")" << std::endl;
 					std::cerr << "send failed" << std::endl;
 					clearSocketBuffer(client_socket);
-					close(data->getReq().clientData.fd);
-					EV_SET(&event, data->getReq().clientData.fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+					close(data->getReq().RequestData.fd);
+					EV_SET(&event, data->getReq().RequestData.fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
-					if (data->getReq().clientData.file)
+					if (data->getReq().RequestData.file)
 					{
-						if (data->getReq().clientData.file->is_open())
-							data->getReq().clientData.file->close();
-						delete data->getReq().clientData.file;
-						data->getReq().clientData.file = NULL;
+						if (data->getReq().RequestData.file->is_open())
+							data->getReq().RequestData.file->close();
+						delete data->getReq().RequestData.file;
+						data->getReq().RequestData.file = NULL;
 					}
 					// Remove from the client list
 					for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -215,26 +213,26 @@ void Server::ft_start(int size, int *fd)
 				}
 				else
 				{
-						data->getReq().clientData.bytes_sent += bytes_sent;
+						data->getReq().RequestData.bytes_sent += bytes_sent;
 						if ((size_t)data->getRes().bytesRead >= data->getRes().Res_Size || data->getRes().end)
 						{
 
-							data->getReq().clientData.first = "";
+							data->getReq().RequestData.first = "";
 							clearSocketBuffer(client_socket);
 							data->getRes().bytesRead = 0;
-							data->getReq().clientData.sent_head = 0;
+							data->getReq().RequestData.sent_head = 0;
 
 
-							if (data->getReq().clientData.file)
+							if (data->getReq().RequestData.file)
 							{
-								if (data->getReq().clientData.file->is_open())
-									data->getReq().clientData.file->close();
-								delete data->getReq().clientData.file;
-								data->getReq().clientData.file = NULL;
+								if (data->getReq().RequestData.file->is_open())
+									data->getReq().RequestData.file->close();
+								delete data->getReq().RequestData.file;
+								data->getReq().RequestData.file = NULL;
 							}
 
 							close(client_socket);
-							EV_SET(&event, data->getReq().clientData.fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+							EV_SET(&event, data->getReq().RequestData.fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
 						}
 				}

@@ -6,15 +6,15 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/11 20:42:36 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/12 18:51:49 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Body.hpp"
-#include <fstream>
-void Body::parseChunkedBody(string &body)
+#include "Request.hpp"
+
+void Request::parseChunkedBody(string &body)
 {
-	openFile("/Users/sdemnati/goinfre/UP/ok." + atay_tkhwa->clientData.extention);
+	openFile("/Users/sdemnati/goinfre/UP/ok." + HeaderData.extention);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -53,8 +53,8 @@ void Body::parseChunkedBody(string &body)
 				{
 					cout << RED << "error: strtol fails\n" << RESET;
 				}
-				outFile.close();
-				atay_tkhwa->clientData.requestStat = 2;
+				BodyData.outFile->close();
+				RequestData.requestStat = 2;
 				return;
 			}
 		}
@@ -64,14 +64,14 @@ void Body::parseChunkedBody(string &body)
 	}
 }
 
-void Body::parseBodyLength(string &body)
+void Request::parseBodyLength(string &body)
 {
-	openFile("/Users/sdemnati/goinfre/UP/ok." + atay_tkhwa->clientData.extention);
+	openFile("/Users/sdemnati/goinfre/UP/ok." + HeaderData.extention);
 	
-	size_t tmp = atay_tkhwa->clientData.bodySize;
+	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();
-	atay_tkhwa->clientData.bodySize = (tmp);
-	if (!atay_tkhwa->clientData.bodySize)
-		atay_tkhwa->clientData.requestStat = (2);
+	BodyData.bodySize = (tmp);
+	if (!BodyData.bodySize)
+		RequestData.requestStat = (2);
 	writeFile(body, 0, body.length(), 0);
 }

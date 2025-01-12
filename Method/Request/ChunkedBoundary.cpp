@@ -6,13 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/04 11:56:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/12 18:27:01 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Body.hpp"
+#include "Request.hpp"
 
-void Body::parseChunkedBoundryBody(string &body)
+void Request::parseChunkedBoundryBody(string &body)
 {
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -47,10 +47,10 @@ void Body::parseChunkedBoundryBody(string &body)
 			}
 		}
 		subBody = body.substr(0, length);
-		buffer.append(subBody.c_str(), subBody.length());
+		BodyData.buffer.append(subBody.c_str(), subBody.length());
 		length -= subBody.length();
 
 		body.erase(0, subBody.length());
-		parseBoundryBody(buffer);
+		parseBoundryBody(BodyData.buffer);
 	}
 }
