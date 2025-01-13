@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:55:12 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/13 09:36:04 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,6 @@ class Request
 		void	request(string &body);
 		void	print(map<string, string> &headerMap);
 		void	printV(vector<pair<string, string> > &mp);
-		string	getElement(const string & element);
 
 		//--------------------------------------------------------------
 

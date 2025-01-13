@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:52:31 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/13 09:34:58 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ void Request::parseUri(string &str)
 	size_t QMPos = str.find("?");
 	if (QMPos != string::npos)
 		storeQueryString(str, QMPos);
+	HeaderData.url = str;
 }
 
 void Request::parseFirstLine(string &line)

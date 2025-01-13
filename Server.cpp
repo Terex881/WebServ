@@ -2,29 +2,9 @@
 #include "./Response.hpp"
 #include "Client.hpp"
 #include "Method/Request/Request.hpp"
-// #include "Client.hpp"
-#include <ostream>
-#include <cstring>
-#include <map>
 
 #define MAX_CLIENTS 128
 #define BUFFER_SIZE 4096
-
-using std::map;
-
-// typedef struct
-// {
-// 	int fd;
-// 	struct sockaddr_in addr;
-// 	int	is_server;
-// 	int	is_client;
-// 	int sent_head;
-// 	string	url;
-// 	string	first;
-// 	Response rsp;
-// 	size_t	bytes_sent;
-// 	std::ifstream *file;
-// } connection_info;
 
 // Function to clear socket's incoming buffer
 void clearSocketBuffer(int socket) {
@@ -53,11 +33,9 @@ void Server::ft_start(int size, int *fd)
 		exit(1);
 	}
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-													ofstream ss("tmp.py", ios::app | ios::binary);
+													// ofstream ss("tmp.py", ios::app | ios::binary);
 													static int s = clock();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
 	// Set up events for each server listening socket
 	struct kevent event;
 	for (int i = 0; i < size; ++i) {
@@ -108,7 +86,7 @@ void Server::ft_start(int size, int *fd)
 						}
 					}
 					//-----------------------------------------------------
-			clientsMap[new_socket] = Client();
+							clientsMap[new_socket] = Client();
 					//-----------------------------------------------------
 					is_new_connection = true;
 					break;
@@ -142,18 +120,17 @@ void Server::ft_start(int size, int *fd)
 									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									clientsMap[client_socket].getReq().request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-					clientsMap[client_socket].getReq().HeaderData.url = clientsMap[client_socket].getReq().getElement("uri");;
+					// clientsMap[client_socket].getReq().HeaderData.url = clientsMap[client_socket].getReq().getElement("uri");;
 					clientsMap[client_socket].getReq().RequestData.sent_head = 0;
-
 
 					clientsMap[client_socket].getReq().RequestData.fd = client_socket;
 					if (clientsMap[client_socket].getReq().RequestData.file)
 					{
 						if (!(clientsMap[client_socket].getReq().RequestData.file->is_open()))
-							clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
+							clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().HeaderData.url, std::ios::binary);
 					}
 					else
-						clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().getElement("uri"), std::ios::binary);
+						clientsMap[client_socket].getReq().RequestData.file = new std::ifstream("." + clientsMap[client_socket].getReq().HeaderData.url, std::ios::binary);
 					if(clientsMap[client_socket].getReq().RequestData.requestStat == 2)
 					{
 						std::cout << YELLOW << (double)(clock() - s) /CLOCKS_PER_SEC << "\n" << RESET;
@@ -169,11 +146,11 @@ void Server::ft_start(int size, int *fd)
 
 				int client_socket = events[i].ident;
 				// std::stringstream response;
-				string wer = data->getReq().HeaderData.url;
+				// string wer = data->getReq().HeaderData.url;
 				std::string responseStr;
 
 				if (data->getReq().RequestData.first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().HeaderData.url), "."+wer, "GET", data->getReq().RequestData.file, data->getReq().HeaderData.url);
+					data->res_obj = Response(Response::GetMimeType(data->getReq().HeaderData.url), "." + data->getReq().HeaderData.url, "GET", data->getReq().RequestData.file, data->getReq().HeaderData.url);
 				data->getReq().RequestData.first = "not empty";
 				
 				data->getRes().Res_get_chunk(data->getReq().RequestData.sent_head);
@@ -234,6 +211,7 @@ void Server::ft_start(int size, int *fd)
 							close(client_socket);
 							EV_SET(&event, data->getReq().RequestData.fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
+							delete clientsMap[client_socket].getReq().BodyData.outFile;
 						}
 				}
 			}

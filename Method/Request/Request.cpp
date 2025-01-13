@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:55:42 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/13 09:39:30 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,10 @@ Request::Request()
 {
 	BodyData.bodySize = 0;
 	RequestData.requestStat = 0;
-	BodyData.outFile = new ofstream;
-
+	BodyData.outFile = NULL;	
 }
 
-Request::~Request()
-{
-	delete BodyData.outFile;
-}
+Request::~Request()	{}
 
 
 
@@ -42,21 +38,12 @@ void Request::printV(vector<pair<string, string> > &mp)
 	}
 }
 
-string Request::getElement(const string & element)
-{
-	string res;
-	map<string, string>::const_iterator it = HeaderData.bigMap.find(element);
-	
-	if (it != HeaderData.bigMap.end())
-	{
-		res = it->second;		
-	}
-	return res;
-}
 
 
 void Request::request(string &request)
 {
+	if (!BodyData.outFile)
+		BodyData.outFile = new ofstream;
 	if (!RequestData.requestStat)
 	{		
 		size_t pos = request.find(DCRLF);
