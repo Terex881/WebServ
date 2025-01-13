@@ -6,15 +6,15 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/13 09:34:58 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/13 14:51:59 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include <cstddef>
+#include <string>
 
-
-
-void Request::storeQueryString(string &str, size_t QMPos)
+void Request::storeQueryString(string &str, const size_t &QMPos)
 {
 	string	key, value;
 	size_t	andPos,	endPos;
@@ -67,7 +67,7 @@ void Request::parseUri(string &str)
 	HeaderData.url = str;
 }
 
-void Request::parseFirstLine(string &line)
+void Request::parseFirstLine(const string &line)
 {
 	string method, uri, httpVersion;
 	map<string, string>::iterator it;
@@ -91,83 +91,70 @@ void Request::parseFirstLine(string &line)
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
 }
-
 void Request::parseHeader(string &header)
 {
-	string key, value;
+	string key, line, value;
 	size_t colonPos, lineEnd;
 	size_t pos = header.find(CRLF);
 	string firstLine = header.substr(0, pos);
-
-	// check if first line has space in start and print error 
+ 
 	parseFirstLine(firstLine);
+	
 	header.erase(0, pos + 2);
+	BodyData.bodyType = NONE;
 
 	while(!header.empty())
 	{
-		colonPos = header.find(":");
-		if(colonPos == string::npos || std::isspace(header[colonPos - 1]) || std:: isspace(header[0]))
-		{
+		line = header.substr(0, header.find(CRLF));
+		colonPos = line.find(":");
+		
+		if(colonPos == string::npos || std::isspace(line[colonPos - 1]) || std:: isspace(line[0])) {
 			cout << RED << "foud space or doesn't find :";
 			break;
 		}
-		lineEnd = header.find(CRLF);
-		if(lineEnd == string::npos)
-			lineEnd = header.length();
-		key = header.substr(0, colonPos);
-		key.erase(0, key.find_first_not_of(" "));
-
-		value = header.substr(colonPos + 1, lineEnd - colonPos - 1);
-		value.erase(0, value.find_first_not_of(" "));
-		
+		// check mli7
+		key = line.substr(0, colonPos);
+		size_t valEndPos  = line.find_first_not_of(' ', colonPos + 1);
+		if (valEndPos == string::npos)	valEndPos = 0;
+		value = line.substr(valEndPos, line.find_last_not_of(' ') - valEndPos + 1);
+	
 		std::transform(key.begin(), key.end(), key.begin(), ::tolower); // check this 
 		if (key == "transfer-encoding") // check other
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
-		
+
+		fillData(key, value);		
 		HeaderData.bigMap.insert(std::make_pair(key, value));		
-		header.erase(0, lineEnd + 2);
+		header.erase(0, line.length() + 2);
 	}
 	// print(HeaderData.bigMap);
-	fillData(HeaderData.bigMap);
+	getTypes(HeaderData.bigMap);
 }
 
-
-const string Request::getExtention(std::map<string, string> mp)
+void Request::fillData(const string &key, const string &value)
 {
-	std::map<string, string>::iterator it = mp.find("content-type");
-	if (it != mp.end())
+	if  (key == "content-type")
 	{
-		string str = it->second.substr(it->second.find("/") + 1, it->second.length());
-		if(str == "octet-stream")
-			return "py";
-		return str;
+		HeaderData.extention = value.substr(value.find("/") + 1, value.length());
+		if(HeaderData.extention == "octet-stream")
+			HeaderData.extention = "py";
 	}
-	else
-		cout << RED << "Bad request\n" ;
-	return ""; // check this 
-	// GET NAME FROM TIME
-}
-
-
-void Request::fillData(const std::map<string, string> &mp)
-{
-	map<string, string>::const_iterator	lengthPos = mp.find("content-length");
-	map<string, string>::const_iterator	multiPart = mp.find("content-type");
-	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
-	
-	RequestData.requestStat = (1);
-	
-	BodyData.bodyType = NONE;
-	
-	if (lengthPos != mp.end()){
-		BodyData.bodySize = (std::atol(lengthPos->second.c_str()));
+	if (key == "content-length")
+	{
+		BodyData.bodySize = (std::atol(value.c_str()));
 		if (BodyData.bodySize > 0)	BodyData.bodyType = BODY_SIZE;
 	}
-	if (mp.find("host") == mp.end())
-		cout << RED << "no Host found !!\n" << RESET;
+	if (key == "host")
+		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
+}
 
-	if (multiPart != mp.end())
-		HeaderData.extention = (getExtention(mp));
+void Request::getTypes(const std::map<string, string> &mp)
+{
+	map<string, string>::const_iterator	multiPart = mp.find("content-type");
+	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
+	RequestData.requestStat = 1;
+	
+	if (HeaderData.port.empty())
+		cout << RED << "no Host found !!\n" << RESET;
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -177,7 +164,6 @@ void Request::fillData(const std::map<string, string> &mp)
 		BodyData.endBoundry = ("\r\n--" + sep + "--\r\n");
 		BodyData.bodyType = BOUNDARY;
 	}
-	
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")

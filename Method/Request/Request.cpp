@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/13 09:39:30 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/13 13:58:01 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,14 @@ void Request::printV(vector<pair<string, string> > &mp)
 	}
 }
 
+t_Request&	Request::getRequestData()	{ return RequestData; }
+t_Header&	Request::getHeaderData()	{ return HeaderData; }
+t_Body&		Request::getBodyData()		{ return BodyData; }
 
 
 void Request::request(string &request)
 {
+
 	if (!BodyData.outFile)
 		BodyData.outFile = new ofstream;
 	if (!RequestData.requestStat)
