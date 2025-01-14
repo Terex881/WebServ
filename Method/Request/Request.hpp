@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/13 13:20:30 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/14 18:42:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,12 @@ typedef struct s_Body
 	string									boundry;
 	string									endBoundry;
 	std::vector<std::pair<string, string> >	Vec;
-	ofstream								*outFile;
+	ofstream								outFile;
 	string									newStr;
 	string									buffer;	
 }	t_Body;
+
+#include "../../Config/File_Parsing.hpp"
 
 class Request 
 {
@@ -82,6 +84,40 @@ class Request
 		t_Header		HeaderData;
 		t_Body			BodyData;
 	public:
+		// File_Parsing			configFileObj;
+
+		// File_Parsing& geto()
+		// {
+		// 	return configFileObj;
+		// }
+
+		
+
+	Request(const Request &src)
+	{
+		*this = src;
+	}
+
+
+	Request& operator=(const Request &copy)
+	{
+		if (this != &copy)
+		{
+			BodyData.bodyType = copy.BodyData.bodyType;
+			BodyData.bodySize = copy.BodyData.bodySize;
+			BodyData.boundry = copy.BodyData.boundry;
+			BodyData.endBoundry = copy.BodyData.endBoundry;
+			BodyData.Vec = copy.BodyData.Vec;
+			BodyData.newStr = copy.BodyData.newStr;
+			BodyData.buffer = copy.BodyData.buffer;	
+			// BodyData.outFile = copy.BodyData.outFile;
+			RequestData = copy.RequestData;
+			HeaderData = copy.HeaderData;
+		}
+		return *this;
+	}
+				
+
 		Request();
 		~Request();
 		

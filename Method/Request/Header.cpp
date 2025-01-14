@@ -6,13 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/13 14:51:59 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/14 18:38:34 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include <cstddef>
-#include <string>
+#include "../../Config/File_Parsing.hpp"
+#include <filesystem>
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -144,7 +144,22 @@ void Request::fillData(const string &key, const string &value)
 		if (BodyData.bodySize > 0)	BodyData.bodyType = BODY_SIZE;
 	}
 	if (key == "host")
+	{
 		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
+		// std::vector<dt>::iterator it = geto().host_port.begin();
+		
+		// cout << BLUE << HeaderData.port << RESET << endl;
+
+		// cout << &it << endl;
+		// for(; it != geto().host_port.end(); it++)
+		// {
+		// 	if (it->val == HeaderData.port)
+		// 		cout << RED << "OK\n" << RESET;
+
+		// }
+		
+	}
+	
 }
 
 void Request::getTypes(const std::map<string, string> &mp)

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:54:09 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/14 18:42:12 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,17 @@
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);
-	if (BodyData.outFile->is_open())
-		BodyData.outFile->write(content.c_str(), content.length()); BodyData.outFile->flush();
+	if (BodyData.outFile.is_open())
+		BodyData.outFile.write(content.c_str(), content.length()); BodyData.outFile.flush();
 	body.erase(0, end + len);
 }
 
 void	Request::openFile(const string &fileName)
 {
-	if (!BodyData.outFile->is_open())
+	if (!BodyData.outFile.is_open())
 	{
-		BodyData.outFile->open(fileName, ios::binary | ios::trunc);
-		if (!BodyData.outFile->is_open())
+		BodyData.outFile.open(fileName, ios::binary | ios::trunc);
+		if (!BodyData.outFile.is_open())
 			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
 	}
 }
@@ -92,7 +92,7 @@ bool	Request::isBoundary(string &body)
 
 	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
 	else writeFile(body, 0, boundryPos, 0);
-	BodyData.outFile->close();
+	BodyData.outFile.close();
 	
 	int i = getFileName(body, fileName);
 	if (i == 1)

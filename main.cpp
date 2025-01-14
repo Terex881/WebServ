@@ -2,8 +2,6 @@
 
 #include "Config/File_Parsing.hpp"
 
-
-
 int main(int argc, char **argv)
 {
 	// try{
@@ -12,9 +10,12 @@ int main(int argc, char **argv)
 		if (argc != 2)
 			return 0;
 		char *end = NULL;
+
 		File_Parsing p(argv[1]);
 
-		int size = p.servers_count;
+
+		int size = p.port_count;
+
 		Server* server[size];
 		int fd[size];
 		int i = 0;
