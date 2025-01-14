@@ -24,8 +24,15 @@ struct location_data
 	string	path;
 	vector<string> methods;
 	string	directory_listing;
-	string	cgi;
 	string 	rturn;
+};
+
+struct server_data
+{
+	string server_name;
+	string	root;
+	string client_max_body_size;
+	string default_page;
 };
 
 class File_Parsing
@@ -36,23 +43,30 @@ class File_Parsing
 		ifstream file;
 		string conf_path;
 		int	servers_count;
+		int	port_count;
 		DynamicStruct obj;
 		vector<dt> host_port;
 
-		DynamicStruct servers;
+		DynamicStruct servers[1000];
 		DynamicStruct locations[1000];
 
 		File_Parsing(void);
 		File_Parsing(string conf_path);
 		~File_Parsing(void);
 		DynamicStruct	recursive_push(ifstream *file, string parent, int *open_bracket, int *close_bracket);
-		void	Checking_Hierarchy(DynamicStruct &block, DynamicStruct *server, DynamicStruct *locations, const string &name = "");
+		void	Checking_Hierarchy(DynamicStruct *block, DynamicStruct *server, DynamicStruct *locations, const string &name = "");
+		void	recursive_call(DynamicStruct &block, DynamicStruct *server, DynamicStruct *locations, const string &name = "");
 
+		void	override_server(int index, DynamicStruct *server);
 		void	Struct_Call(DynamicStruct inner);
 		void	get_host_name(void);
 		location_data	get_location_val(DynamicStruct location);
+		server_data		get_server_val(DynamicStruct server);
 		string			get_body_size();
-		string			get_error_page(string statut_code);
+		string			get_error_page(string statut_code, DynamicStruct server);
+
+		void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server);
+
 };
 
 #endif
