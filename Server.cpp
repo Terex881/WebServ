@@ -87,7 +87,8 @@ void Server::ft_start(int size, int *fd)
 						}
 					}
 					//-----------------------------------------------------
-							clientsMap[new_socket] = Client();
+							// clientsMap[new_socket] = Client();
+							clientsMap.insert(make_pair(new_socket, Client()));
 					//-----------------------------------------------------
 					is_new_connection = true;
 					break;
@@ -212,7 +213,7 @@ void Server::ft_start(int size, int *fd)
 							close(client_socket);
 							EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
-							delete clientsMap[client_socket].getReq().getBodyData().outFile;
+							// delete clientsMap[client_socket].getReq().getBodyData().outFile;
 						}
 				}
 			}

@@ -30,7 +30,7 @@ struct location_data
 
 class File_Parsing
 {
-	public :
+	public:
 		int	open_b;
 		int	close_b;
 		ifstream file;
@@ -53,7 +53,6 @@ class File_Parsing
 		location_data	get_location_val(DynamicStruct location);
 		string			get_body_size();
 		string			get_error_page(string statut_code);
-
 };
 
 #endif
