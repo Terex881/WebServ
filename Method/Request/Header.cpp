@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 06:08:55 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 10:35:00 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,16 +91,19 @@ void Request::parseFirstLine(const string &line)
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 		cout << RED << "error: invalid version" << std::endl;
 }
-void Request::parseHeader(string &header)
+void Request::parseHeader(string &header, int isCgi)
 {
 	string key, line, value;
 	size_t colonPos, lineEnd;
-	size_t pos = header.find(CRLF);
-	string firstLine = header.substr(0, pos);
+	if (!isCgi)
+	{
+		size_t pos = header.find(CRLF);
+		string firstLine = header.substr(0, pos);
+		parseFirstLine(firstLine);
+		header.erase(0, pos + 2);	
+	}
  
-	parseFirstLine(firstLine);
 	
-	header.erase(0, pos + 2);
 	BodyData.bodyType = NONE;
 
 	while(!header.empty())
@@ -127,7 +130,8 @@ void Request::parseHeader(string &header)
 		header.erase(0, line.length() + 2);
 	}
 	// print(HeaderData.bigMap);
-	getTypes(HeaderData.bigMap);
+	if (!isCgi)
+		getTypes(HeaderData.bigMap);
 }
 
 void Request::fillData(const string &key, const string &value)
@@ -146,20 +150,17 @@ void Request::fillData(const string &key, const string &value)
 	if (key == "host")
 	{
 		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
-		// std::vector<dt>::iterator it = geto().host_port.begin();
+		std::vector<dt>::iterator it = geto().host_port.begin();
 		
-		// cout << BLUE << HeaderData.port << RESET << endl;
+		cout << BLUE << HeaderData.port << RESET << endl;
 
-		// cout << &it << endl;
-		// for(; it != geto().host_port.end(); it++)
-		// {
-		// 	if (it->val == HeaderData.port)
-		// 		cout << RED << "OK\n" << RESET;
-
-		// }
-		
+		cout << it->val << endl;
+		for(; it != geto().host_port.end(); it++)
+		{
+			if (it->val == HeaderData.port)
+				cout << RED << "OK\n" << RESET;
+		}	
 	}
-	
 }
 
 void Request::getTypes(const std::map<string, string> &mp)

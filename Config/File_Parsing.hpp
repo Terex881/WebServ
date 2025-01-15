@@ -45,7 +45,7 @@ class File_Parsing
 		int	servers_count;
 		int	port_count;
 		DynamicStruct obj;
-		vector<dt> host_port;
+		static vector<dt> host_port;
 
 		DynamicStruct servers[1000];
 		DynamicStruct locations[1000];

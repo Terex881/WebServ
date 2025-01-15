@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 06:09:13 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 10:35:16 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void Request::request(string &request)
 		if (pos != string::npos)
 		{
 			RequestData.header.append(request.c_str(), 0, pos);
-			parseHeader(RequestData.header);
+			parseHeader(RequestData.header, 0);
 			request.erase(0, pos + 4);
 		}
 		else

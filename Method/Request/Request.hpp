@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 06:09:32 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 10:35:26 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,12 +84,12 @@ class Request
 		t_Header		HeaderData;
 		t_Body			BodyData;
 	public:
-		// File_Parsing			configFileObj;
+		File_Parsing			configFileObj;
 
-		// File_Parsing& geto()
-		// {
-		// 	return configFileObj;
-		// }
+		File_Parsing& geto()
+		{
+			return configFileObj;
+		}
 
 		
 
@@ -132,7 +132,7 @@ class Request
 
 		void		parseFirstLine(const string &line);
 		void		getTypes(const std::map<string, string> &mp);
-		void		parseHeader(string &header);
+		void		parseHeader(string &header, int isCgi); // achref
 		void		parseUri(string &str);
 		void		storeQueryString(string &str, const size_t &QMPos);
 		void		fillData(const string &key, const string &value);

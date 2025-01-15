@@ -1,5 +1,8 @@
 #include "./File_Parsing.hpp"
 
+vector<dt> File_Parsing::host_port;
+
+
 File_Parsing::File_Parsing()
 {
 
