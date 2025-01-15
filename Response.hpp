@@ -17,6 +17,7 @@ class Response
 {
 	public :
 		size_t			Status_Code;
+		int ss;
 		string			Content_Type;
 		string			Reason_Phrase;
 		size_t			Content_Length;

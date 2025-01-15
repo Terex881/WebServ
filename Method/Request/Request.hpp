@@ -6,12 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 10:41:13 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 16:04:22 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <string>
@@ -51,6 +52,11 @@ typedef struct s_Request
 	size_t						bytes_sent;
 	std::ifstream				*file;
 	int							codeStatus;
+	bool						isDirListening;
+	bool						isRedirect;
+	size_t						maxBodySize;
+	string						serverName;
+	bool						isCgi;
 	
 }	t_Request;
 
@@ -133,10 +139,12 @@ class Request
 
 		void		parseFirstLine(const string &line);
 		void		getTypes(const std::map<string, string> &mp);
-		void		parseHeader(string &header, int isCgi); // achref
+		void		parseHeader(string &header);
 		void		parseUri(string &str);
 		void		storeQueryString(string &str, const size_t &QMPos);
 		void		fillData(const string &key, const string &value);
+
+		void		fillHeaderMap(string &header);
 
 		//-----------------------------------------------------------------------------
 

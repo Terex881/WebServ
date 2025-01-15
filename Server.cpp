@@ -148,15 +148,21 @@ void Server::ft_start(int size, int *fd)
 			else if (events[i].filter == EVFILT_WRITE)
 			{
 				Client *data = (Client *)events[i].udata;
+				// data->getReq().getRequestData().isDirListening
 				// data->getReq().getRequestData().codeStatus;
+				// data->getReq().getRequestData().isRedirect
+				// data->getReq().getRequestData().serverName
+				// 
+
 				int client_socket = events[i].ident;
 				// std::stringstream response;
 				// string wer = data->getReq().getHeaderData().url;
 				std::string responseStr;
-				cout <<  "+++ "<< data->getReq().getRequestData().codeStatus << endl;
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getRequestData().file, data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus);
 				data->getReq().getRequestData().first = "not empty";
+
+
 				
 				data->getRes().Res_get_chunk(data->getReq().getRequestData().sent_head);
 				responseStr = data->getRes().responseStream.str();

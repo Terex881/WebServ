@@ -42,13 +42,13 @@ class File_Parsing
 		int	close_b;
 		ifstream file;
 		string conf_path;
-		int	servers_count;
-		int	port_count;
+		static int	servers_count;
+		static int	port_count;
 		DynamicStruct obj;
 		static vector<dt> host_port;
 
-		DynamicStruct servers[1000];
-		DynamicStruct locations[1000];
+		static DynamicStruct servers[4000];
+		static DynamicStruct locations[4000];
 
 		File_Parsing(void);
 		File_Parsing(string conf_path);
@@ -65,7 +65,9 @@ class File_Parsing
 		string			get_body_size();
 		string			get_error_page(string statut_code, DynamicStruct server);
 
-		void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server);
+		static void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server);
+
+		string	correct_url(string path);
 
 };
 

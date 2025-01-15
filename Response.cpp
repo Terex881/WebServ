@@ -1,4 +1,5 @@
 #include "./Response.hpp"
+#include "Method/Request/Request.hpp"
 #include <cstddef>
 #include <string>
 
@@ -27,7 +28,6 @@ Response::Response(string content_type,\
 	this->Url = Url;
 	this->end = 0;
 	this->Status_Code = (size_t)codeStatus;
-	std::cout << "==== "<< this->Status_Code << std::endl;
 }
 
 Response::Response(const Response& other)
@@ -52,6 +52,7 @@ Response& Response::operator=(const Response& other)
 		Url = other.Url;
 		end = other.end;
 		file = other.file;
+		Status_Code = other.Status_Code;
 	}
     return *this;
 }
@@ -62,11 +63,14 @@ void	Response::Res_get_chunk(int &sent_head)
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
+
+
 	if (Method == "GET")
 	{
 		if (Status_Code != 200)
 		{
-				std::cout << "Nottttttt Open " << std::to_string(Status_Code) << std::endl;
+			std::cout << Status_Code << std::endl;
+			
 				header = 
 					"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
 					"Content-Type: text/plain\r\n"

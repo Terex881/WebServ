@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 10:41:36 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 15:29:44 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,10 @@ Request::Request()
 	BodyData.bodySize = 0;
 	RequestData.requestStat = 0;
 	RequestData.codeStatus = 200;
+	RequestData.isDirListening = false;
+	RequestData.isRedirect = false;
+	RequestData.isCgi = false;
+	// RequestData.maxBodySize = 0;
 }
 
 Request::~Request()	{}
@@ -55,7 +59,7 @@ void Request::request(string &request)
 		if (pos != string::npos)
 		{
 			RequestData.header.append(request.c_str(), 0, pos);
-			parseHeader(RequestData.header, 0);
+			parseHeader(RequestData.header);
 			request.erase(0, pos + 4);
 		}
 		else

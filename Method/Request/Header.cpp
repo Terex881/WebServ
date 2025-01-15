@@ -6,13 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 11:20:12 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 16:04:20 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../../Config/File_Parsing.hpp"
-#include <filesystem>
+#include <algorithm>
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -70,6 +70,8 @@ void Request::parseUri(string &str)
 	if (QMPos != string::npos)
 		storeQueryString(str, QMPos);
 	HeaderData.url = str;
+	if (str.find("cgi-bin/") != string::npos)
+		RequestData.isCgi = true;
 }
 
 void Request::parseFirstLine(const string &line)
@@ -110,20 +112,12 @@ void Request::parseFirstLine(const string &line)
 		cout << RED << "error: invalid version" << std::endl;
 	}
 }
-void Request::parseHeader(string &header, int isCgi)
+
+void Request::fillHeaderMap(string &header)
 {
-	string key, line, value;
 	size_t colonPos, lineEnd;
-	if (!isCgi)
-	{
-		size_t pos = header.find(CRLF);
-		string firstLine = header.substr(0, pos);
-		parseFirstLine(firstLine);
-		header.erase(0, pos + 2);	
-	}
- 
-	
-	BodyData.bodyType = NONE;
+
+	string key, line, value;
 
 	while(!header.empty())
 	{
@@ -147,12 +141,56 @@ void Request::parseHeader(string &header, int isCgi)
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 
 		fillData(key, value);		
-		HeaderData.bigMap.insert(std::make_pair(key, value));		
+		HeaderData.bigMap.insert(std::make_pair(key, value));	
 		header.erase(0, line.length() + 2);
 	}
-	// print(HeaderData.bigMap);
-	if (!isCgi)
-		getTypes(HeaderData.bigMap);
+}
+
+void Request::parseHeader(string &header)
+{
+	size_t			pos = header.find(CRLF);
+	string			firstLine = header.substr(0, pos);
+	DynamicStruct	location;
+	DynamicStruct	server;
+	
+	parseFirstLine(firstLine);
+	header.erase(0, pos + 2);	
+	BodyData.bodyType = NONE;
+	fillHeaderMap(header);
+
+	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
+	if (!location.values.size() && !server.values.size())
+	{
+		RequestData.codeStatus = 404;
+		RequestData.requestStat = 2;
+		cout << RED << "location not found" << RESET << endl;
+	}
+	else
+	{
+		location_data l_data = configFileObj.get_location_val(location);
+		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
+		{
+			RequestData.codeStatus = 501; //check this
+			RequestData.requestStat = 2;
+			return;
+		}
+		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on")
+			RequestData.isDirListening = true;
+		if (!l_data.rturn.empty())
+			RequestData.isRedirect = true;
+		if (!server.values["server_name"].empty())
+			RequestData.serverName = server.values["server_name"];	
+	}	
+	getTypes(HeaderData.bigMap);
+		/**
+			check methods, if empty() use the default ones, else uses only the available onces -->
+		*/
+		// if (!location.values["methods"].size())
+		// is directory_listing is ON
+		// is return is exist (location.values["return"])
+		// the default val of "client_max_body_size" is 1
+		// save "server_name" server.values["server_name"], if empty make a default one
+	// std::cout << location.values["path"] << std::endl;
 }
 
 void Request::fillData(const string &key, const string &value)
@@ -172,16 +210,16 @@ void Request::fillData(const string &key, const string &value)
 	{
 		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
 		
-		std::vector<dt>::iterator it = geto().host_port.begin();
-		for(; it != geto().host_port.end(); it++)
-		{
-			if (it->val == HeaderData.port)
-			{
-				RequestData.codeStatus = 400; // check this
-				RequestData.requestStat = 2;
-				cout << RED << "OK\n" << RESET;
-			}
-		}	
+		// std::vector<dt>::iterator it = geto().host_port.begin();
+		// for(; it != geto().host_port.end(); it++)
+		// {
+		// 	if (it->val == HeaderData.port)
+		// 	{
+		// 		RequestData.codeStatus = 400; // check this
+		// 		RequestData.requestStat = 2;
+		// 		cout << RED << "OK\n" << RESET;
+		// 	}
+		// }	
 	}
 }
 

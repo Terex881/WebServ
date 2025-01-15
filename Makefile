@@ -22,6 +22,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm *.py /Users/sdemnati/goinfre/UP/*
+	rm -rf $(NAME) rm *.py /Users/sdemnati/goinfre/UP/* .DS_Store
 
 re: fclean all

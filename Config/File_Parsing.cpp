@@ -1,14 +1,15 @@
 #include "./File_Parsing.hpp"
 
 vector<dt> File_Parsing::host_port;
-
-
+DynamicStruct File_Parsing::servers[4000];
+DynamicStruct File_Parsing::locations[4000];
+int	File_Parsing::servers_count = 0;
+int	File_Parsing::port_count = 0;
 File_Parsing::File_Parsing()
 {
-
 }
 
-string	correct_url(string path)
+string	File_Parsing::correct_url(string path)
 {
 	string final_url;
 	int		slash = 0;
@@ -49,7 +50,6 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 		exit(2);
 	}
 	Checking_Hierarchy(&obj, servers, locations);
-	// recursive_call(servers[0], servers, locations);
 
 	if (!servers_count)
 	{
@@ -62,8 +62,17 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 	// DynamicStruct location;
 	// DynamicStruct server;
 
-	// getLocationByPortAndUrl("3000", correct_url("support"), location, server);
+	// getLocationByPortAndUrl("4455", correct_url("static/_Get_a_horse.__Washington.jpg"), location, server);
 
+	// recursive_call(server, servers, locations);
+	// if (!server.values.size())
+	// {
+	// 	cout << "SErver not found" << endl;
+	// }
+	// if (!location.values.size())
+	// {
+	// 	cout << "Location not found" << endl;
+	// }
 	// cout << "###########################################################################" << endl;
 	// cout << "error page : " << get_error_page("404", server) << endl;
 	// if (server.values.size() && location.values.size())
@@ -616,7 +625,7 @@ void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStru
 		{
 			if (it->first.find("listen") != string::npos)
 			{
-				if (it->second == port)
+				if (it->second.find(port) != string::npos)
 				{
 					server.values = servers[i].values;
 					for (map<string, vector<DynamicStruct> >::iterator it = servers[i].children.begin(); it != servers[i].children.end(); it++)

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 09:56:21 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/14 17:32:09 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 15:17:40 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,7 @@ class Client
 		return req_obj;
 	}
 
-	Client()
-	{
-		
-	}
+	Client() {}
 
 	Client(const Client &src)
 	{
