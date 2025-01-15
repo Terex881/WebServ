@@ -126,13 +126,16 @@ void Server::ft_start(int size, int *fd)
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
 
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
-					if (clientsMap[client_socket].getReq().getRequestData().file)
-					{
-						if (!(clientsMap[client_socket].getReq().getRequestData().file->is_open()))
+					// if (clientsMap[client_socket].getReq().getRequestData().codeStatus == 200)
+					// {
+						if (clientsMap[client_socket].getReq().getRequestData().file)
+						{
+							if (!(clientsMap[client_socket].getReq().getRequestData().file->is_open()))
+								clientsMap[client_socket].getReq().getRequestData().file = new std::ifstream("." + clientsMap[client_socket].getReq().getHeaderData().url, std::ios::binary);
+						}
+						else
 							clientsMap[client_socket].getReq().getRequestData().file = new std::ifstream("." + clientsMap[client_socket].getReq().getHeaderData().url, std::ios::binary);
-					}
-					else
-						clientsMap[client_socket].getReq().getRequestData().file = new std::ifstream("." + clientsMap[client_socket].getReq().getHeaderData().url, std::ios::binary);
+					// }
 					if(clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
 					{
 						std::cout << YELLOW << (double)(clock() - s) /CLOCKS_PER_SEC << "\n" << RESET;
@@ -145,14 +148,14 @@ void Server::ft_start(int size, int *fd)
 			else if (events[i].filter == EVFILT_WRITE)
 			{
 				Client *data = (Client *)events[i].udata;
-
+				// data->getReq().getRequestData().codeStatus;
 				int client_socket = events[i].ident;
 				// std::stringstream response;
 				// string wer = data->getReq().getHeaderData().url;
 				std::string responseStr;
-
+				cout <<  "+++ "<< data->getReq().getRequestData().codeStatus << endl;
 				if (data->getReq().getRequestData().first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getRequestData().file, data->getReq().getHeaderData().url);
+					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getRequestData().file, data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus);
 				data->getReq().getRequestData().first = "not empty";
 				
 				data->getRes().Res_get_chunk(data->getReq().getRequestData().sent_head);

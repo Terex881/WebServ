@@ -1,4 +1,6 @@
 #include "./Response.hpp"
+#include <cstddef>
+#include <string>
 
 size_t	Calculate_File_Size(std::ifstream &file)
 {
@@ -15,7 +17,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, std::ifstream *file, string Url):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, std::ifstream *file, string Url, int codeStatus):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -24,6 +26,8 @@ Response::Response(string content_type,\
 	this->file = file;
 	this->Url = Url;
 	this->end = 0;
+	this->Status_Code = (size_t)codeStatus;
+	std::cout << "==== "<< this->Status_Code << std::endl;
 }
 
 Response::Response(const Response& other)
@@ -60,7 +64,21 @@ void	Response::Res_get_chunk(int &sent_head)
 
 	if (Method == "GET")
 	{
-		if (isFile(Working_Path))
+		if (Status_Code != 200)
+		{
+				std::cout << "Nottttttt Open " << std::to_string(Status_Code) << std::endl;
+				header = 
+					"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+					"Content-Type: text/plain\r\n"
+					"Content-Length: 14\r\n"
+					"\r\n"
+					"Internal Error";
+				body = "";
+				responseStream.write(header.c_str(), header.length());
+				this->end = 1;
+				return	;
+		}
+		else if (isFile(Working_Path))
 		{
 			if (!(file)->is_open())   ////////////// SEGFAULT
 			{

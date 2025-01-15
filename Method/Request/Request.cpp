@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 10:35:16 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 10:41:36 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Request::Request()
 {
 	BodyData.bodySize = 0;
 	RequestData.requestStat = 0;
-	// BodyData.outFile = NULL;	
+	RequestData.codeStatus = 200;
 }
 
 Request::~Request()	{}

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 06:07:51 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 11:21:32 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,11 @@ void	Request::openFile(const string &fileName)
 	{
 		BodyData.outFile.open(fileName, ios::binary | ios::trunc);
 		if (!BodyData.outFile.is_open())
-			cout << RED << "FAILED OPEN" + fileName << endl, exit(1); // fix
+		{
+			RequestData.codeStatus = 505;
+			RequestData.requestStat = 2;
+			cout << RED << "FAILED OPEN" + fileName << endl;//, exit(1); // fix
+		}
 	}
 }
 

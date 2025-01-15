@@ -37,7 +37,7 @@ class Response
 		string			body;
 
 		Response();
-		Response(string content_type, string working_path, string method, std::ifstream *file, string Url);
+		Response(string content_type, string working_path, string method, std::ifstream *file, string Url, int codeStatus);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

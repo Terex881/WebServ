@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 10:35:26 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 10:41:13 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ typedef struct s_Request
 	string						first;
 	size_t						bytes_sent;
 	std::ifstream				*file;
+	int							codeStatus;
 	
 }	t_Request;
 

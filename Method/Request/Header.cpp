@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 10:35:00 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 11:20:12 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,12 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
+	{
+		RequestData.codeStatus = 400; // check default path
+		RequestData.requestStat = 2;
 		cout << RED << "bad URL" << std::endl;
+		return;
+	}
 
 	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
@@ -73,7 +78,12 @@ void Request::parseFirstLine(const string &line)
 	map<string, string>::iterator it;
 
 	if (isspace(line[0]))
+	{
+		RequestData.codeStatus = 400; // burp
+		RequestData.requestStat = 2;
 		cout << RED << "foud space in the begening\n";
+		return;
+	}
 
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;
@@ -85,11 +95,20 @@ void Request::parseFirstLine(const string &line)
 	// cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
 	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
+	{
+		RequestData.codeStatus = 501;
+		RequestData.requestStat = 2;
 		cout << RED << "501 Not Implemented" << std::endl;
+		return;
+	}
 	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
 		parseUri(it->second);
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
+	{
+		RequestData.codeStatus = 505;
+		RequestData.requestStat = 2;
 		cout << RED << "error: invalid version" << std::endl;
+	}
 }
 void Request::parseHeader(string &header, int isCgi)
 {
@@ -112,6 +131,8 @@ void Request::parseHeader(string &header, int isCgi)
 		colonPos = line.find(":");
 		
 		if(colonPos == string::npos || std::isspace(line[colonPos - 1]) || std:: isspace(line[0])) {
+			RequestData.codeStatus = 400; // check in burop
+			RequestData.requestStat = 2;
 			cout << RED << "foud space or doesn't find :";
 			break;
 		}
@@ -150,15 +171,16 @@ void Request::fillData(const string &key, const string &value)
 	if (key == "host")
 	{
 		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
-		std::vector<dt>::iterator it = geto().host_port.begin();
 		
-		cout << BLUE << HeaderData.port << RESET << endl;
-
-		cout << it->val << endl;
+		std::vector<dt>::iterator it = geto().host_port.begin();
 		for(; it != geto().host_port.end(); it++)
 		{
 			if (it->val == HeaderData.port)
+			{
+				RequestData.codeStatus = 400; // check this
+				RequestData.requestStat = 2;
 				cout << RED << "OK\n" << RESET;
+			}
 		}	
 	}
 }
@@ -170,7 +192,11 @@ void Request::getTypes(const std::map<string, string> &mp)
 	RequestData.requestStat = 1;
 	
 	if (HeaderData.port.empty())
+	{
+		RequestData.codeStatus = 400;
+		RequestData.requestStat = 2;
 		cout << RED << "no Host found !!\n" << RESET;
+	}
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -183,7 +209,11 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (chunked != mp.end())
 	{
 		if (chunked->second != "chunked")
+		{
+			RequestData.codeStatus = 501;
+			RequestData.requestStat = 2;
 			cout << RED << "not implemented\n" << RESET ;
+		}
 		else if (chunked->second == "chunked" && !bol)
 			BodyData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
