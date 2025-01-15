@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/14 16:58:28 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 06:08:37 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void Request::parseChunkedBody(string &body)
 				{
 					cout << RED << "error: strtol fails\n" << RESET;
 				}
-				// BodyData.outFile->close();
+				BodyData.outFile.close();
 				RequestData.requestStat = 2;
 				return;
 			}

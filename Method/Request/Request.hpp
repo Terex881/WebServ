@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/14 17:48:33 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 06:09:32 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,19 +84,19 @@ class Request
 		t_Header		HeaderData;
 		t_Body			BodyData;
 	public:
-		File_Parsing			configFileObj;
+		// File_Parsing			configFileObj;
 
-		File_Parsing& geto()
-		{
-			return configFileObj;
-		}
+		// File_Parsing& geto()
+		// {
+		// 	return configFileObj;
+		// }
 
 		
 
-	// Request(const Request &src)
-	// {
-	// 	*this = src;
-	// }
+	Request(const Request &src)
+	{
+		*this = src;
+	}
 
 
 	Request& operator=(const Request &copy)

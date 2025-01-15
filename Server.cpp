@@ -33,7 +33,7 @@ void Server::ft_start(int size, int *fd)
 		exit(1);
 	}
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-													// ofstream ss("tmp.py", ios::app | ios::binary);
+													ofstream ss("tmp.py", ios::app | ios::binary);
 
 													static int s = clock();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,8 +87,8 @@ void Server::ft_start(int size, int *fd)
 						}
 					}
 					//-----------------------------------------------------
-							// clientsMap[new_socket] = Client();
-							clientsMap.insert(make_pair(new_socket, Client()));
+							clientsMap[new_socket] = Client();
+							// clientsMap.insert(make_pair(new_socket, Client()));
 					//-----------------------------------------------------
 					is_new_connection = true;
 					break;
@@ -117,9 +117,9 @@ void Server::ft_start(int size, int *fd)
 				{
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-									// ss << "[" << client_socket << "]"  << endl;
-									// ss << msg;
-									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
+									ss << "[" << client_socket << "]"  << endl;
+									ss << msg;
+									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									clientsMap[client_socket].getReq().request(msg);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					// clientsMap[client_socket].getReq().getHeaderData().url = clientsMap[client_socket].getReq().getElement("uri");;

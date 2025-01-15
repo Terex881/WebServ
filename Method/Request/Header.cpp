@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/14 17:33:38 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/15 06:08:55 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,17 +146,17 @@ void Request::fillData(const string &key, const string &value)
 	if (key == "host")
 	{
 		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
-		std::vector<dt>::iterator it = geto().host_port.begin();
+		// std::vector<dt>::iterator it = geto().host_port.begin();
 		
-		cout << BLUE << HeaderData.port << RESET << endl;
+		// cout << BLUE << HeaderData.port << RESET << endl;
 
-		cout << &it << endl;
-		for(; it != geto().host_port.end(); it++)
-		{
-			if (it->val == HeaderData.port)
-				cout << RED << "OK\n" << RESET;
+		// cout << &it << endl;
+		// for(; it != geto().host_port.end(); it++)
+		// {
+		// 	if (it->val == HeaderData.port)
+		// 		cout << RED << "OK\n" << RESET;
 
-		}
+		// }
 		
 	}
 	
