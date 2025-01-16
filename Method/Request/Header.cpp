@@ -174,7 +174,7 @@ void Request::parseHeader(string &header)
 			RequestData.requestStat = 2;
 			return;
 		}
-		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on")
+		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
 		if (!l_data.rturn.empty())
 			RequestData.isRedirect = true;

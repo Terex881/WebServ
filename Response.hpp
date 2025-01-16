@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <vector>
+#include <dirent.h>
 
 using std::string;
 #define MAX_CLIENTS 128
@@ -36,9 +37,10 @@ class Response
 		std::stringstream	responseStream;
 		string			header;
 		string			body;
+		bool			isLesn;
 
 		Response();
-		Response(string content_type, string working_path, string method, std::ifstream *file, string Url, int codeStatus);
+		Response(string content_type, string working_path, string method, std::ifstream *file, string Url, int codeStatus, bool isLesn);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

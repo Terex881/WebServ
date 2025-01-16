@@ -18,7 +18,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, std::ifstream *file, string Url, int codeStatus):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, std::ifstream *file, string Url, int codeStatus, bool isLesn):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -28,6 +28,7 @@ Response::Response(string content_type,\
 	this->Url = Url;
 	this->end = 0;
 	this->Status_Code = (size_t)codeStatus;
+	this->isLesn = isLesn;
 }
 
 Response::Response(const Response& other)
@@ -53,6 +54,7 @@ Response& Response::operator=(const Response& other)
 		end = other.end;
 		file = other.file;
 		Status_Code = other.Status_Code;
+		isLesn = other.isLesn;
 	}
     return *this;
 }
@@ -143,6 +145,41 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 			}
 		}
+		else if (this->isLesn && isDirectory(Working_Path))
+		{
+			// Working_Path = "/Users/aibn-che/wbw/static";
+			cout << Working_Path << "   " << isLesn << endl;
+			DIR* dir = opendir(Working_Path.c_str());
+			std::string response = "<h1>Directory Listing: " + Working_Path + "</h1><ul>";
+			struct dirent* entry;
+			
+			if (!dir)
+			{
+				response = "<h1>404 Not Found</h1><p>Directory not found: " + Working_Path + "</p>";
+				header =
+				"HTTP/1.1 404 Not Found\r\n"
+				"Content-Type: text/html; charset=UTF-8\r\n"
+				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"\r\n"+ response;
+			}
+			else
+			{
+				while ((entry = readdir(dir)) != NULL) 
+				{
+					// response += "<li><a href=\"" + Working_Path + "/" + entry->d_name + "\">" + entry->d_name + "</a></li>";
+					response += "<li><a href=\"" + std::string(entry->d_name) + "\">" + entry->d_name + "</a></li>";
+				}
+				response += "</ul>";
+				closedir(dir);
+			}
+			header =
+				"HTTP/1.1 200 OK\r\n"
+				"Content-Type: text/html; charset=UTF-8\r\n"
+				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"\r\n"+ response;
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;
+		}
 		else if (isDirectory(Working_Path))
 		{
 			body =
@@ -164,6 +201,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
+			cout << Working_Path << "   " << isLesn << endl;
 			header =
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
