@@ -30,6 +30,9 @@ string	File_Parsing::correct_url(string path)
 			slash = 0;
 		}
 	}
+	// substract '/' from back
+	if (final_url.length() > 1 && final_url[final_url.length() - 1] == '/')
+		final_url = final_url.substr(0, final_url.length() - 1);
 	return final_url;
 }
 
@@ -294,7 +297,9 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			if (key == "listen" && !check_port(words))
 				(*file).close(), exit(9);
 			else if (!check_val(words))
+			{
 				(*file).close(), exit(10);
+			}
 			if (parent == "location" && key != "root" && key != "methods"
 				&& key != "directory_listing" && key != "return")
 				(*file).close(), exit(11);
@@ -552,10 +557,11 @@ location_data	File_Parsing::get_location_val(DynamicStruct location)
 {
 	location_data l_data;
 
-	l_data.root = location.values["root"];
+	l_data.root = location.values["root"].substr(0, location.values["root"].find(';'));
+	l_data.root = correct_url(l_data.root);
 	l_data.directory_listing = location.values["directory_listing"];
 	l_data.methods = split(location.values["methods"]);
-	l_data.path = location.values["path"];
+	l_data.path = correct_url(location.values["path"]);
 	l_data.rturn = location.values["return"];
 
 	return l_data;
@@ -566,6 +572,7 @@ server_data	File_Parsing::get_server_val(DynamicStruct server)
 	server_data s_data;
 
 	s_data.root = server.values["root"];
+	s_data.root = correct_url(s_data.root);
 	s_data.client_max_body_size = server.values["client_max_body_size"];
 	s_data.server_name = server.values["server_name"];
 	s_data.default_page = server.values["index"];
@@ -602,9 +609,9 @@ std::string matchUrl(const std::string& requestUrl, std::string Location_path)
 	if (normalizedUrl.find(Location_path) != string::npos)
 	{
 		if (normalizedUrl.length() == Location_path.length() || 
-			normalizedUrl[Location_path.length()] == '/')
+			normalizedUrl[Location_path.length()] == '/' || Location_path == "/")
 			{
-				if (Location_path.length() > bestMatLength)
+				if (Location_path.length() >= bestMatLength)
 				{
 					bestMatLength = Location_path.length();
 					bestMat = Location_path;
@@ -640,6 +647,7 @@ void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStru
 								{
 									location.values["root"] = servers[i].values["root"];
 								}
+								break;
 							}
 						}
 					}

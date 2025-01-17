@@ -94,7 +94,7 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-	// cout << RED << uri << RESET << endl;
+	cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
 	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
 	{
@@ -159,7 +159,7 @@ void Request::parseHeader(string &header)
 	fillHeaderMap(header);
 
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
-	if (!location.values.size() && !server.values.size())
+	if (!location.values.size() || !server.values.size())
 	{
 		RequestData.codeStatus = 404;
 		RequestData.requestStat = 2;
@@ -168,6 +168,16 @@ void Request::parseHeader(string &header)
 	else
 	{
 		location_data l_data = configFileObj.get_location_val(location);
+		HeaderData.url = configFileObj.correct_url(HeaderData.url);
+	
+		string	after_location = HeaderData.url.substr(l_data.path.length());
+		string	after_slash = after_location.substr(after_location.find_last_of('/') + 1);
+		string	final_url = configFileObj.correct_url(l_data.root + "/" + after_slash);
+
+		HeaderData.url = final_url;
+
+		std::cout << RED << "------------------------" << RESET<< std::endl;
+
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
 			RequestData.codeStatus = 501; //check this
@@ -180,7 +190,7 @@ void Request::parseHeader(string &header)
 			RequestData.isRedirect = true;
 		if (!server.values["server_name"].empty())
 			RequestData.serverName = server.values["server_name"];	
-	}	
+	}
 	getTypes(HeaderData.bigMap);
 		/**
 			check methods, if empty() use the default ones, else uses only the available onces -->
