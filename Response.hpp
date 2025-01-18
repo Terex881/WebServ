@@ -25,7 +25,7 @@ class Response
 		string			Working_Path;
 		string			Method;
 		std::streamsize current_read;
-		std::ifstream	*file;
+		std::ifstream	file;
 		string			Url;
 		string			first;
 		size_t			Res_Size;
@@ -38,9 +38,10 @@ class Response
 		string			header;
 		string			body;
 		bool			isLesn;
+		string			filename;
 
 		Response();
-		Response(string content_type, string working_path, string method, std::ifstream *file, string Url, int codeStatus, bool isLesn);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

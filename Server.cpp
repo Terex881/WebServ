@@ -126,17 +126,17 @@ void Server::ft_start(int size, int *fd)
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
 
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
-					// if (clientsMap[client_socket].getReq().getRequestData().codeStatus == 200)
-					// {
-						if (clientsMap[client_socket].getReq().getRequestData().file)
-						{
-							if (!(clientsMap[client_socket].getReq().getRequestData().file->is_open()))
-								clientsMap[client_socket].getReq().getRequestData().file = new std::ifstream("." + clientsMap[client_socket].getReq().getHeaderData().url, std::ios::binary);
-						}
-						else
-							clientsMap[client_socket].getReq().getRequestData().file = new std::ifstream("." + clientsMap[client_socket].getReq().getHeaderData().url, std::ios::binary);
-					// }
-					if(clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
+
+					////////-------CGI--------//////////////////
+					if (clientsMap[client_socket].getReq().getRequestData().isCgi)
+					{
+						// std::cout << "1 enter CGI --- " << client_socket << std::endl;
+						// clientsMap[client_socket].getReq().getHeaderData().extension;
+						// connections[client_socket].my_cgi = new Cgi();
+						clientsMap[client_socket].getCgi().execute_script(client_socket, "./cgi-bin/script.py", kq, &clientsMap[client_socket]);
+						// handleCGIRequest(client_socket, "./cgi-bin/script.py", kq);
+					}
+					else if(clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
 					{
 						std::cout << YELLOW << (double)(clock() - s) /CLOCKS_PER_SEC << "\n" << RESET;
 						cout << GREEN << "[--------------------------------DONE--------------------------------]" << RESET << endl;
@@ -160,7 +160,7 @@ void Server::ft_start(int size, int *fd)
 				// string wer = data->getReq().getHeaderData().url;
 				std::string responseStr;
 				if (data->getReq().getRequestData().first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getRequestData().file, data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus, data->getReq().getRequestData().isDirListening);
+					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus, data->getReq().getRequestData().isDirListening, "." + data->getReq().getHeaderData().url);
 				data->getReq().getRequestData().first = "not empty";
 
 
@@ -183,13 +183,8 @@ void Server::ft_start(int size, int *fd)
 					EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
-					if (data->getReq().getRequestData().file)
-					{
-						if (data->getReq().getRequestData().file->is_open())
-							data->getReq().getRequestData().file->close();
-						delete data->getReq().getRequestData().file;
-						data->getReq().getRequestData().file = NULL;
-					}
+					data->res_obj.file.close();
+
 					// Remove from the client list
 					for (int j = 0; j < MAX_CLIENTS; ++j)
 					{
@@ -211,21 +206,23 @@ void Server::ft_start(int size, int *fd)
 							data->getRes().bytesRead = 0;
 							data->getReq().getRequestData().sent_head = 0;
 
-
-							if (data->getReq().getRequestData().file)
-							{
-								if (data->getReq().getRequestData().file->is_open())
-									data->getReq().getRequestData().file->close();
-								delete data->getReq().getRequestData().file;
-								data->getReq().getRequestData().file = NULL;
-							}
+							data->res_obj.file.close();
 
 							close(client_socket);
 							EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
-							// delete clientsMap[client_socket].getReq().getBodyData().outFile;
 						}
 				}
+			}
+			else if (events[i].filter == EVFILT_PROC)
+			{
+				// std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
+				pid_t pid = (pid_t)events[i].ident;
+				// int client_socket = (int)events[i].udata;
+				Client* data = (Client*)events[i].udata;  // Get data from udata
+				// passing data it depend on you behavior
+				// std::cout << "2 entering EVFILT_PROC  :  " << pid << std::endl;
+				data->cgi_obj.handleProcessExit(pid, data->getReq().getRequestData().fd, kq, data);
 			}
 		}
 	}

@@ -94,7 +94,7 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-	cout << RED << uri << RESET << endl;
+
 	HeaderData.requestMethod = method;
 	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
 	{
@@ -176,8 +176,6 @@ void Request::parseHeader(string &header)
 
 		HeaderData.url = final_url;
 
-		std::cout << RED << "------------------------" << RESET<< std::endl;
-
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
 			RequestData.codeStatus = 501; //check this
@@ -207,9 +205,9 @@ void Request::fillData(const string &key, const string &value)
 {
 	if  (key == "content-type")
 	{
-		HeaderData.extention = value.substr(value.find("/") + 1, value.length());
-		if(HeaderData.extention == "octet-stream")
-			HeaderData.extention = "py";
+		HeaderData.extension = value.substr(value.find("/") + 1, value.length());
+		if(HeaderData.extension == "octet-stream")
+			HeaderData.extension = "py";
 	}
 	if (key == "content-length")
 	{

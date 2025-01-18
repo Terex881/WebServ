@@ -63,7 +63,7 @@ typedef struct s_Request
 typedef struct s_Header
 {
 	string 						port;
-	string						extention;
+	string						extension;
 	string						requestMethod;
 	std::map<string, string>	queryStringMap;
 	std::map<string, string>	bigMap;

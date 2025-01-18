@@ -4,8 +4,8 @@ thislist = ["My", "First", "Python", "Execution", "With CGI"]
 
 
 # /cgi-bin/hello.py/12345
-path_info = os.environ['PATH_INFO']
-print("Received PATH_INFO:", path_info) # 12345
+# path_info = os.environ['PATH_INFO']
+# print("Received PATH_INFO:", path_info) # 12345
 
 
 

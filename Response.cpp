@@ -18,17 +18,21 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, std::ifstream *file, string Url, int codeStatus, bool isLesn):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
 	this->Method =	method;
 	this->current_read = 0;
-	this->file = file;
+	// this->file = file;
 	this->Url = Url;
 	this->end = 0;
 	this->Status_Code = (size_t)codeStatus;
 	this->isLesn = isLesn;
+
+	if (this->filename.empty())
+		this->filename = filename;
+	// file.open(filename, std::ios::binary);
 }
 
 Response::Response(const Response& other)
@@ -36,10 +40,13 @@ Response::Response(const Response& other)
 			Working_Path(other.Working_Path),
 			Method(other.Method),
 			current_read(other.current_read),
-			file(other.file),  // Share the ifstream object
 			Url(other.Url),
 			end(other.end),
-			Chunk_Size(other.Chunk_Size) {
+			Chunk_Size(other.Chunk_Size),
+			filename(other.filename)
+			{
+		if (!filename.empty())
+			file.open(filename, std::ios::binary);
 }
 
 Response& Response::operator=(const Response& other)
@@ -52,9 +59,17 @@ Response& Response::operator=(const Response& other)
 		current_read = other.current_read;
 		Url = other.Url;
 		end = other.end;
-		file = other.file;
+		// file = other.file;
+
 		Status_Code = other.Status_Code;
 		isLesn = other.isLesn;
+
+		if (file.is_open())
+            file.close();
+
+        // Open new file
+        filename = other.filename;
+        file.open(filename, std::ios::binary);
 	}
     return *this;
 }
@@ -86,7 +101,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else if (isFile(Working_Path))
 		{
-			if (!(file)->is_open())   ////////////// SEGFAULT
+			if (!file.is_open())   ////////////// SEGFAULT
 			{
 				std::cout << "Not Open " << std::endl;
 				header = 
@@ -104,9 +119,9 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				if (!sent_head)
 				{
-					size_t file_size = Calculate_File_Size(*file);
+					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
-					std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
+					// std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
 					header =
 						"HTTP/1.1 200 OK\r\n"
 						"Content-Type: " + Content_Type + "\r\n"
@@ -120,8 +135,8 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 				else
 				{
-					(*file).read(buffer.data(), Chunk_Size); // Read a chunk
-					this->current_read = (*file).gcount();
+					file.read(buffer.data(), Chunk_Size); // Read a chunk
+					this->current_read = file.gcount();
 					if (current_read == 0)
 					{
 						sent_head = 0;

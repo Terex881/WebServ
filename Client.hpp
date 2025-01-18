@@ -15,12 +15,16 @@
 
 #include "Response.hpp"
 #include "Method/Request/Request.hpp"
+#include "./cgi-bin/Cgi.hpp"
+// class Cgi;
 
 class Client
 {
 	public:
 		Request		req_obj;
 		Response	res_obj;
+		Cgi			cgi_obj;
+
 	Response&	getRes()
 	{
 		return res_obj;
@@ -28,6 +32,10 @@ class Client
 	Request&	getReq()
 	{
 		return req_obj;
+	}
+	Cgi&	getCgi()
+	{
+		return cgi_obj;
 	}
 
 	Client() {}
@@ -43,6 +51,7 @@ class Client
 		{
 			req_obj = copy.req_obj;
 			res_obj = copy.res_obj;
+			cgi_obj = copy.cgi_obj;
 		}
 		return *this;
 	}
