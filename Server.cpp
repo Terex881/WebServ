@@ -217,7 +217,7 @@ void Server::ft_start(int size, int *fd)
 						}
 				}
 			}
-			else if (events[i].filter == EVFILT_PROC)
+			else if (events[i].filter == EVFILT_PROC && (((Client*)events[i].udata)->getReq().getRequestData().timeOut.empty()))
 			{
 				std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
 				pid_t pid = (pid_t)events[i].ident;

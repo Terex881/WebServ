@@ -84,6 +84,7 @@ void Cgi::execute_script(int client_socket, const std::string& script_path, int 
 
 void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 {
+	data->getReq().getRequestData().timeOut = "time_out";
 	struct kevent even;
 	EV_SET(&even, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
 	kevent(kq, &even, 1, NULL, 0, NULL);
@@ -135,7 +136,7 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 {
 	int status;
-	// int wait_result = waitpid(pid, &status, WNOHANG); // -1
+	int wait_result = waitpid(pid, &status, WNOHANG); // -1
 	// cout << "wait .." << endl;
 	// cout << "wait_resutl : " << wait_result << endl;
 
@@ -148,20 +149,20 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
     //         kill(pid, SIGKILL);
     //     }
     // }
-	// if (wait_result == -1)
-	// {
-	// 	std::cerr << "waitpid error: " << strerror(errno) << std::endl;
-	// 	// Try to kill the process anyway
-	// 	kill(pid, SIGTERM);
-	// 	usleep(100000); // Wait 100ms
+	if (wait_result == -1)
+	{
+		std::cerr << "waitpid error: " << strerror(errno) << std::endl;
+		// Try to kill the process anyway
+		kill(pid, SIGTERM);
+		usleep(100000); // Wait 100ms
 		
-	// 	// If still alive, force kill
-	// 	if (kill(pid, 0) == 0) {
-	// 		kill(pid, SIGKILL);
-	// 		// One final wait to clean up zombie
-	// 		waitpid(pid, NULL, 0);
-	// 	}
-	// }
+		// If still alive, force kill
+		if (kill(pid, 0) == 0) {
+			kill(pid, SIGKILL);
+			// One final wait to clean up zombie
+			waitpid(pid, NULL, 0);
+		}
+	}
 	// if (wait_result == 0)
 	// {
 	// 	// Child is still running, try to terminate it
@@ -200,8 +201,8 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 	// After CGI script execution, register for writing output to client
 	if (WIFEXITED(status))
 	{
-		// cout << "endlddd" << endl;
-		data->getReq().getHeaderData().url = "/cgi_output.txt";
+		cout << "endlddd" << endl;
+		data->getReq().getHeaderData().url = "./cgi_output.txt";
 		data->getReq().getRequestData().codeStatus = 200;
 
 		// struct kevent ev;

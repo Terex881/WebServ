@@ -57,6 +57,7 @@ typedef struct s_Request
 	size_t						maxBodySize;
 	string						serverName;
 	bool						isCgi;
+	string						timeOut;
 	
 }	t_Request;
 
@@ -116,7 +117,7 @@ class Request
 			BodyData.endBoundry = copy.BodyData.endBoundry;
 			BodyData.Vec = copy.BodyData.Vec;
 			BodyData.newStr = copy.BodyData.newStr;
-			BodyData.buffer = copy.BodyData.buffer;	
+			BodyData.buffer = copy.BodyData.buffer;
 			// BodyData.outFile = copy.BodyData.outFile;
 			RequestData = copy.RequestData;
 			HeaderData = copy.HeaderData;
