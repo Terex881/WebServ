@@ -88,6 +88,7 @@ void Server::ft_start(int size, int *fd)
 					}
 					//-----------------------------------------------------
 							clientsMap[new_socket] = Client();
+							clientsMap[new_socket].event = &event;
 							// clientsMap.insert(make_pair(new_socket, Client()));
 					//-----------------------------------------------------
 					is_new_connection = true;
@@ -133,6 +134,7 @@ void Server::ft_start(int size, int *fd)
 						// std::cout << "1 enter CGI --- " << client_socket << std::endl;
 						// clientsMap[client_socket].getReq().getHeaderData().extension;
 						// connections[client_socket].my_cgi = new Cgi();
+						// clientsMap[client_socket].event = event;
 						clientsMap[client_socket].getCgi().execute_script(client_socket, "./cgi-bin/script.py", kq, &clientsMap[client_socket]);
 						// handleCGIRequest(client_socket, "./cgi-bin/script.py", kq);
 					}
@@ -160,7 +162,7 @@ void Server::ft_start(int size, int *fd)
 				// string wer = data->getReq().getHeaderData().url;
 				std::string responseStr;
 				if (data->getReq().getRequestData().first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), "." + data->getReq().getHeaderData().url, "GET", data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus, data->getReq().getRequestData().isDirListening, "." + data->getReq().getHeaderData().url);
+					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), data->getReq().getHeaderData().url, "GET", data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus, data->getReq().getRequestData().isDirListening,  data->getReq().getHeaderData().url);
 				data->getReq().getRequestData().first = "not empty";
 
 
@@ -180,6 +182,7 @@ void Server::ft_start(int size, int *fd)
 					std::cerr << "send failed" << std::endl;
 					clearSocketBuffer(client_socket);
 					close(data->getReq().getRequestData().fd);
+					data->getReq().getRequestData().codeStatus = 200;
 					EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
@@ -207,7 +210,7 @@ void Server::ft_start(int size, int *fd)
 							data->getReq().getRequestData().sent_head = 0;
 
 							data->res_obj.file.close();
-
+							data->getReq().getRequestData().codeStatus = 200;
 							close(client_socket);
 							EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 							kevent(kq, &event, 1, NULL, 0, NULL);
@@ -216,13 +219,20 @@ void Server::ft_start(int size, int *fd)
 			}
 			else if (events[i].filter == EVFILT_PROC)
 			{
-				// std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
+				std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
 				pid_t pid = (pid_t)events[i].ident;
 				// int client_socket = (int)events[i].udata;
+				std::cout << "pid  :  -- " << pid  << std::endl;
 				Client* data = (Client*)events[i].udata;  // Get data from udata
 				// passing data it depend on you behavior
-				// std::cout << "2 entering EVFILT_PROC  :  " << pid << std::endl;
+				std::cout << "2 entering EVFILT_PROC  :  " << pid << std::endl;
 				data->cgi_obj.handleProcessExit(pid, data->getReq().getRequestData().fd, kq, data);
+			}
+			else if (events[i].filter == EVFILT_TIMER)
+			{
+				Client* data = (Client*)events[i].udata;
+				cout << "Timeout " << endl;
+				data->cgi_obj.handleTimeout(event.ident, data->getReq().getRequestData().fd, kq, data);
 			}
 		}
 	}

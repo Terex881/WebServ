@@ -24,6 +24,7 @@ class Client
 		Request		req_obj;
 		Response	res_obj;
 		Cgi			cgi_obj;
+		struct kevent *event;
 
 	Response&	getRes()
 	{
@@ -38,7 +39,11 @@ class Client
 		return cgi_obj;
 	}
 
-	Client() {}
+	Client()
+	{
+		// this->event = event;
+	}
+
 
 	Client(const Client &src)
 	{
@@ -52,6 +57,7 @@ class Client
 			req_obj = copy.req_obj;
 			res_obj = copy.res_obj;
 			cgi_obj = copy.cgi_obj;
+			// this->event = copy.event;
 		}
 		return *this;
 	}

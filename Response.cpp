@@ -24,15 +24,13 @@ Response::Response(string content_type,\
 	this->Working_Path = working_path;
 	this->Method =	method;
 	this->current_read = 0;
-	// this->file = file;
 	this->Url = Url;
 	this->end = 0;
 	this->Status_Code = (size_t)codeStatus;
 	this->isLesn = isLesn;
 
-	if (this->filename.empty())
+	if (!filename.empty())
 		this->filename = filename;
-	// file.open(filename, std::ios::binary);
 }
 
 Response::Response(const Response& other)
@@ -59,7 +57,6 @@ Response& Response::operator=(const Response& other)
 		current_read = other.current_read;
 		Url = other.Url;
 		end = other.end;
-		// file = other.file;
 
 		Status_Code = other.Status_Code;
 		isLesn = other.isLesn;
@@ -68,8 +65,12 @@ Response& Response::operator=(const Response& other)
             file.close();
 
         // Open new file
-        filename = other.filename;
-        file.open(filename, std::ios::binary);
+        if (!other.filename.empty())
+		{
+			filename = other.filename;
+			file.open(filename, std::ios::binary);
+
+		}
 	}
     return *this;
 }
@@ -103,7 +104,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		{
 			if (!file.is_open())   ////////////// SEGFAULT
 			{
-				std::cout << "Not Open " << std::endl;
+				std::cout << "Not Open : " << filename << std::endl;
 				header = 
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
@@ -222,7 +223,7 @@ void	Response::Res_get_chunk(int &sent_head)
 					"Content-Type: text/plain\r\n"
 					"Content-Length: 9\r\n"
 					"\r\n"
-					"Not Found";
+					"Noot Found";
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;

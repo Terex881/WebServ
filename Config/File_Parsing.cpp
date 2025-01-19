@@ -16,7 +16,7 @@ string	File_Parsing::correct_url(string path)
 
 	if (path[0] != '/')
 		final_url = "/";
-	for (int i = 0; i < path.size(); i++)
+	for (int i = 0; i < (int)path.size(); i++)
 	{
 		if (path[i] == '/')
 		{
@@ -119,6 +119,20 @@ int contain_bracket(string line)
 	if (line[i] == '{' && !line[i + 1])
 		return (1);
 	return (0);
+}
+
+std::vector<string> split_1(string s)
+{
+	stringstream ss(s);
+	vector<string> words;
+	string word;
+
+	while (ss >> word)
+	{
+		word =word.substr(0, word.find(';'));
+		words.push_back(word);
+	}
+	return words;
 }
 
 std::vector<string> split(string s)
@@ -495,6 +509,7 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct *block, DynamicStruct *serve
 
 void File_Parsing::recursive_call(DynamicStruct &block, DynamicStruct *server, DynamicStruct *locations, const string &name)
 {
+	(void)name;
 	map<string, string>::iterator it;
 
 	for (it = block.values.begin(); it != block.values.end(); it++)
@@ -522,7 +537,7 @@ void	File_Parsing::get_host_name(void)
 	string	port;
 	dt	data;
 	int i = 0;
-	int j = 0;
+	// int j = 0;
 
 	while (i < servers_count)
 	{
@@ -560,7 +575,7 @@ location_data	File_Parsing::get_location_val(DynamicStruct location)
 	l_data.root = location.values["root"].substr(0, location.values["root"].find(';'));
 	l_data.root = correct_url(l_data.root);
 	l_data.directory_listing = location.values["directory_listing"];
-	l_data.methods = split(location.values["methods"]);
+	l_data.methods = split_1(location.values["methods"]);
 	l_data.path = correct_url(location.values["path"]);
 	l_data.rturn = location.values["return"];
 

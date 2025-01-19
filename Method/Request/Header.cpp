@@ -94,7 +94,7 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-
+	cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
 	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
 	{
@@ -115,7 +115,7 @@ void Request::parseFirstLine(const string &line)
 
 void Request::fillHeaderMap(string &header)
 {
-	size_t colonPos, lineEnd;
+	size_t colonPos;
 
 	string key, line, value;
 
@@ -170,15 +170,18 @@ void Request::parseHeader(string &header)
 		location_data l_data = configFileObj.get_location_val(location);
 		HeaderData.url = configFileObj.correct_url(HeaderData.url);
 	
-		string	after_location = HeaderData.url.substr(l_data.path.length());
-		string	after_slash = after_location.substr(after_location.find_last_of('/') + 1);
-		string	final_url = configFileObj.correct_url(l_data.root + "/" + after_slash);
+		cout << RED << HeaderData.url << RESET << endl;
+		string	final_url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
 
 		HeaderData.url = final_url;
 
+		std::cout << RED << "------------------------" << RESET<< std::endl;
+
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			RequestData.codeStatus = 501; //check this
+			RequestData.codeStatus = 502; //check this
+			cout << HeaderData.requestMethod << endl;
+			cout <<" + " << endl;
 			RequestData.requestStat = 2;
 			return;
 		}
