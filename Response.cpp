@@ -302,7 +302,7 @@ std::string Response::GetMimeType(const std::string& filename)
 	// Script and Code Types
 	if (ext == "js") return "application/javascript";
 	if (ext == "json") return "application/json";
-	if (ext == "py") return "application/x-python-code";
+	if (ext == "py") return "text/plain";
 	if (ext == "cpp" || ext == "cxx") return "text/x-c++src";
 	if (ext == "c") return "text/x-csrc";
 

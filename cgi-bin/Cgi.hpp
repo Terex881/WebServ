@@ -33,7 +33,7 @@ class Cgi
 		int content_len;
 		Cgi();
 		Cgi(int socket_fd, string path);
-		void	execute_script(int client_socket, const std::string& script_path, int kq, Client* data);
+		void	execute_script(int client_socket, int kq, Client* data);
 		void	handleProcessExit(pid_t pid, int client_socket, int kq, Client* data);
 		void	handleTimeout(pid_t pid, int client_socket, int kq, Client* data);
 };

@@ -17,7 +17,7 @@ int	end_header(string header)
 }
 
 // Fork and execute the CGI process
-void Cgi::execute_script(int client_socket, const std::string& script_path, int kq, Client* data)
+void Cgi::execute_script(int client_socket, int kq, Client* data)
 {
 
 	pid_t pid = fork();
@@ -26,9 +26,9 @@ void Cgi::execute_script(int client_socket, const std::string& script_path, int 
 		close(client_socket);
 		return;
 	}
-	(void)script_path;
 	if (pid == 0)
 	{
+		string path_info = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open("cgi_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
@@ -43,15 +43,21 @@ void Cgi::execute_script(int client_socket, const std::string& script_path, int 
 			exit(1);
 		}
     	close(output_fd);
-		const char* py_path = "/usr/local/bin/python3";
-		const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
+		
+		// const char* py_path = "/usr/local/bin/python3";
 
-		char* envp[5];
+		const char* py_path = data->getReq().getRequestData().executable_file.c_str();
+		// data->getReq().getHeaderData().url
+		// const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
+		const char* py_script = data->getReq().getHeaderData().url.c_str();
+		
+		char* envp[6];
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
 		envp[3] = const_cast<char*>("param=sddd");
-		envp[4] = NULL;
+		envp[4] = const_cast<char*>(path_info.c_str());
+		envp[5] = NULL;
 
 		char* argv[] = {
 			const_cast<char*>(py_path),
@@ -67,7 +73,7 @@ void Cgi::execute_script(int client_socket, const std::string& script_path, int 
 	{
 		// std::cout << "Executing CGI" << std::endl;
 		// Parent process: register the child process for event handling
-		EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 10000, data);
+		EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 1000, data);
 		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {
 			std::cerr << "Failed to register EVFILT_TIMER : 11" << strerror(errno) << std::endl;
 		}
@@ -97,7 +103,7 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 		// One final wait to clean up zombie
 		waitpid(pid, NULL, 0);
 	}
-	std::cout << "CGI script timeout, terminating..." << std::endl;
+	// std::cout << "CGI script timeout, terminating..." << std::endl;
 	// EV_SET(&events[1], pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
 
 	struct kevent event;
@@ -105,7 +111,7 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 	kevent(kq, &event, 1, NULL, 0, NULL);
 
 	// data->getReq().getHeaderData().filename = "/cgi_output.txt";
-	data->getReq().getRequestData().codeStatus = 404;
+	data->getReq().getRequestData().codeStatus = 504;
 	// handleProcessExit(pid, client_socket, kq, data);
 }
 // EV_SET(&event, pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, (void*)client_socket);
@@ -201,7 +207,7 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 	// After CGI script execution, register for writing output to client
 	if (WIFEXITED(status))
 	{
-		cout << "endlddd" << endl;
+		// cout << "endlddd" << endl;
 		data->getReq().getHeaderData().url = "./cgi_output.txt";
 		data->getReq().getRequestData().codeStatus = 200;
 

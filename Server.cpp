@@ -135,7 +135,7 @@ void Server::ft_start(int size, int *fd)
 						// clientsMap[client_socket].getReq().getHeaderData().extension;
 						// connections[client_socket].my_cgi = new Cgi();
 						// clientsMap[client_socket].event = event;
-						clientsMap[client_socket].getCgi().execute_script(client_socket, "./cgi-bin/script.py", kq, &clientsMap[client_socket]);
+						clientsMap[client_socket].getCgi().execute_script(client_socket, kq, &clientsMap[client_socket]);
 						// handleCGIRequest(client_socket, "./cgi-bin/script.py", kq);
 					}
 					else if(clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
@@ -219,19 +219,19 @@ void Server::ft_start(int size, int *fd)
 			}
 			else if (events[i].filter == EVFILT_PROC && (((Client*)events[i].udata)->getReq().getRequestData().timeOut.empty()))
 			{
-				std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
+				// std::cout << "2 entering EVFILT_PROC  :  --"  << std::endl;
 				pid_t pid = (pid_t)events[i].ident;
 				// int client_socket = (int)events[i].udata;
-				std::cout << "pid  :  -- " << pid  << std::endl;
+				// std::cout << "pid  :  -- " << pid  << std::endl;
 				Client* data = (Client*)events[i].udata;  // Get data from udata
 				// passing data it depend on you behavior
-				std::cout << "2 entering EVFILT_PROC  :  " << pid << std::endl;
+				// std::cout << "2 entering EVFILT_PROC  :  " << pid << std::endl;
 				data->cgi_obj.handleProcessExit(pid, data->getReq().getRequestData().fd, kq, data);
 			}
 			else if (events[i].filter == EVFILT_TIMER)
 			{
 				Client* data = (Client*)events[i].udata;
-				cout << "Timeout " << endl;
+				// cout << "Timeout " << endl;
 				data->cgi_obj.handleTimeout(event.ident, data->getReq().getRequestData().fd, kq, data);
 			}
 		}

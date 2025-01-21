@@ -14,7 +14,7 @@
 
 void Request::parseChunkedBody(string &body)
 {
-	openFile("/Users/sdemnati/goinfre/UP/ok." + HeaderData.extension);
+	openFile(RequestData.fileLocation + HeaderData.extension);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -66,7 +66,7 @@ void Request::parseChunkedBody(string &body)
 
 void Request::parseBodyLength(string &body)
 {
-	openFile("/Users/sdemnati/goinfre/UP/ok." + HeaderData.extension);
+	openFile(RequestData.fileLocation + HeaderData.extension);
 	
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();

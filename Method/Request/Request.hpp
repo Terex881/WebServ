@@ -58,6 +58,10 @@ typedef struct s_Request
 	string						serverName;
 	bool						isCgi;
 	string						timeOut;
+	string						pathInfo;
+	string						extension;
+	string						fileLocation;
+	string						executable_file;
 	
 }	t_Request;
 
@@ -146,6 +150,8 @@ class Request
 		void		fillData(const string &key, const string &value);
 
 		void		fillHeaderMap(string &header);
+
+		void		achref();
 
 		//-----------------------------------------------------------------------------
 

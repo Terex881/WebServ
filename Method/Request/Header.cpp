@@ -70,8 +70,10 @@ void Request::parseUri(string &str)
 	if (QMPos != string::npos)
 		storeQueryString(str, QMPos);
 	HeaderData.url = str;
-	if (str.find("cgi-bin/") != string::npos)
-		RequestData.isCgi = true;
+	// if (str.find("cgi-bin/") != string::npos)
+	// {
+	// 	RequestData.isCgi = true;
+	// }
 }
 
 void Request::parseFirstLine(const string &line)
@@ -146,40 +148,75 @@ void Request::fillHeaderMap(string &header)
 	}
 }
 
-void Request::parseHeader(string &header)
+
+
+void Request::achref()
 {
-	size_t			pos = header.find(CRLF);
-	string			firstLine = header.substr(0, pos);
 	DynamicStruct	location;
 	DynamicStruct	server;
 	
-	parseFirstLine(firstLine);
-	header.erase(0, pos + 2);	
-	BodyData.bodyType = NONE;
-	fillHeaderMap(header);
-
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
 	if (!location.values.size() || !server.values.size())
 	{
-		RequestData.codeStatus = 404;
-		RequestData.requestStat = 2;
-		cout << RED << "location not found" << RESET << endl;
+		if (configFileObj.correct_url(HeaderData.url)[0] == '/')
+		{
+			string sub_route = configFileObj.correct_url(HeaderData.url).substr(1);
+			// cout <<GREEN << "sub_route : " << sub_route << RESET<< endl;
+			configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url("/"), location, server);
+			// HeaderData.url = 
+		}
 	}
-	else
+	if (location.values.size())
 	{
 		location_data l_data = configFileObj.get_location_val(location);
 		HeaderData.url = configFileObj.correct_url(HeaderData.url);
 	
-		cout << RED << HeaderData.url << RESET << endl;
 		string	final_url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
 
 		HeaderData.url = final_url;
+		string extension;
 
+		if (!location.values[".py"].empty() || !location.values[".php"].empty())
+		{
+			RequestData.isCgi = true;
+		}
+		// cout << RED << "1 "<< HeaderData.url << RESET << endl;
+		if (RequestData.isCgi)
+		{
+			// cout << location.values["path"] << " cgi : " << RequestData.isCgi << endl;
+			// cout << "ext : " <<  HeaderData.extension << endl;
+			size_t at = HeaderData.url.find(".");
+			if (at != string::npos)
+			{
+				// cout <<GREEN << HeaderData.url << RESET<< endl;
+				string current = HeaderData.url.substr(at);
+				// cout <<"... " << current << endl;
+				RequestData.extension = current.substr(0, (current.find("/") != string::npos ? current.find("/") : current.length()));
+				// cout << " -extension- " << RequestData.extension << endl;
+				RequestData.executable_file = location.values[RequestData.extension].substr(0, location.values[RequestData.extension].find(';'));
+				if (RequestData.executable_file.empty() || (RequestData.extension != ".py" && RequestData.extension != ".php"))
+				{
+					RequestData.isCgi = false;
+					return;
+				}
+				// cout << GREEN << " :: "<< RequestData.executable_file << RESET << endl;
+				RequestData.pathInfo = current.substr(current.find("/") != string::npos ? current.find("/") : RequestData.extension.length());
+				// cout << "pathInfo : " << RequestData.pathInfo << endl;
+				HeaderData.url = HeaderData.url.substr(0, at + RequestData.extension.length());
+				// cout << YELLOW << HeaderData.url << RESET<< endl;
+			}
+			else
+			{
+				cout << GREEN << "Index Oder autoIndex" << RESET << endl;
+			}
+		}
+
+		std::cout << GREEN << HeaderData.url << RESET<< std::endl;
 		std::cout << RED << "------------------------" << RESET<< std::endl;
 
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			RequestData.codeStatus = 502; //check this
+			RequestData.codeStatus = 405; //method not allowed
 			cout << HeaderData.requestMethod << endl;
 			cout <<" + " << endl;
 			RequestData.requestStat = 2;
@@ -191,17 +228,30 @@ void Request::parseHeader(string &header)
 			RequestData.isRedirect = true;
 		if (!server.values["server_name"].empty())
 			RequestData.serverName = server.values["server_name"];	
+		RequestData.fileLocation = l_data.root;
 	}
+	else
+	{
+		RequestData.codeStatus = 404;
+		RequestData.requestStat = 2;
+		cout << RED << "location not found" << RESET << endl;
+	}
+}
+
+void Request::parseHeader(string &header)
+{
+	size_t			pos = header.find(CRLF);
+	string			firstLine = header.substr(0, pos);
+
+	
+	parseFirstLine(firstLine);
+	header.erase(0, pos + 2);	
+	BodyData.bodyType = NONE;
+	fillHeaderMap(header);
+
+	achref();
+
 	getTypes(HeaderData.bigMap);
-		/**
-			check methods, if empty() use the default ones, else uses only the available onces -->
-		*/
-		// if (!location.values["methods"].size())
-		// is directory_listing is ON
-		// is return is exist (location.values["return"])
-		// the default val of "client_max_body_size" is 1
-		// save "server_name" server.values["server_name"], if empty make a default one
-	// std::cout << location.values["path"] << std::endl;
 }
 
 void Request::fillData(const string &key, const string &value)

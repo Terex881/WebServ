@@ -112,7 +112,7 @@ bool	Request::isBoundary(string &body)
 		else
 			contentEndtPos = body.length();
 
-		openFile("/Users/sdemnati/goinfre/UP/" + fileName);
+		openFile(RequestData.fileLocation + fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)

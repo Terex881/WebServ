@@ -64,8 +64,8 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 
 	// DynamicStruct location;
 	// DynamicStruct server;
-
-	// getLocationByPortAndUrl("4455", correct_url("static/_Get_a_horse.__Washington.jpg"), location, server);
+	// // /cgi-bin/script.py && /dsf
+	// getLocationByPortAndUrl("4455", correct_url("/c"), location, server); // WARNING
 
 	// recursive_call(server, servers, locations);
 	// if (!server.values.size())
@@ -74,13 +74,21 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 	// }
 	// if (!location.values.size())
 	// {
-	// 	cout << "Location not found" << endl;
+	// 	string my_url = "/bull_shit/d1";
+	// 	if (my_url[0] == '/')
+	// 	{
+	// 		cout << my_url.substr(1) << endl;
+	// 		getLocationByPortAndUrl("4455", correct_url("/"), location, server);
+	// 	}
+	// 	else
+	// 		cout << "Location not found" << endl;
 	// }
 	// cout << "###########################################################################" << endl;
 	// cout << "error page : " << get_error_page("404", server) << endl;
 	// if (server.values.size() && location.values.size())
 	// {
 	// 	cout << location.values["path"] << endl;
+	// 	cout << location.values[".py"] << endl;
 	// 	cout << location.values["root"] << endl;
 	// }
 	// else
@@ -200,7 +208,9 @@ int	check_val(vector<string> line)
 		return (0);
 	else if (line[0] == "error_page" && line.size() != 3)
 		return (0);
-	else if (line[0] != "error_page" && line[0] != "methods" && line[0] != "return")
+	else if (line[0] == "cgi" && line.size() != 3)
+		return (0);
+	else if (line[0] != "error_page" && line[0] != "methods" && line[0] != "return" && line[0] != "cgi")
 	{
 		if (line.size() != 2)
 			return (0);
@@ -315,7 +325,7 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 				(*file).close(), exit(10);
 			}
 			if (parent == "location" && key != "root" && key != "methods"
-				&& key != "directory_listing" && key != "return")
+				&& key != "directory_listing" && key != "return" && key != "cgi")
 				(*file).close(), exit(11);
 			if (parent == "server" && key != "listen" && key != "error_page" &&
 					key != "client_max_body_size" && key != "server_name" && key != "root" && key != "index")
@@ -341,6 +351,12 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			{
 				j++;
 				current.values[words[1]] = correct_url(words[2]);
+			}
+			else if (key == "cgi")
+			{
+				if (words[1] != ".py" && words[1] != ".php")
+					(*file).close(), exit(123);
+				current.values[words[1]] = words[2];
 			}
 			else
 				current.values[key] = words[1];
@@ -624,7 +640,7 @@ std::string matchUrl(const std::string& requestUrl, std::string Location_path)
 	if (normalizedUrl.find(Location_path) != string::npos)
 	{
 		if (normalizedUrl.length() == Location_path.length() || 
-			normalizedUrl[Location_path.length()] == '/' || Location_path == "/")
+			normalizedUrl[Location_path.length()] == '/')
 			{
 				if (Location_path.length() >= bestMatLength)
 				{
@@ -635,7 +651,6 @@ std::string matchUrl(const std::string& requestUrl, std::string Location_path)
 	}
 	return bestMat;
 }
-
 
 // allow us to find server based on Port and location based on URL
 void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStruct &location, DynamicStruct &server)
@@ -662,7 +677,6 @@ void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStru
 								{
 									location.values["root"] = servers[i].values["root"];
 								}
-								break;
 							}
 						}
 					}
