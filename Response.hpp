@@ -10,6 +10,7 @@
 #include <sstream>
 #include <vector>
 #include <dirent.h>
+using namespace std;
 
 using std::string;
 #define MAX_CLIENTS 128

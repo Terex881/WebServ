@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:52:46 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:03:38 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,12 @@ void	Request::parseBodyTypes(string &body)
 	BodyData.newStr.append(body.c_str(), body.length());
 	string last = BodyData.newStr.substr(std::max(0, (int)(BodyData.newStr.length() - BodyData.endBoundry.length())));
 
-	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == string::npos)
+	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;
-
+		
+	if (RequestData.isCgi && RequestData.requestStat == 1)
+		RequestData.isCgi = 0;
+		
 	switch (BodyData.bodyType)
 	{
 		case (BOUNDARY):parseBoundryBody(BodyData.newStr); break;
@@ -34,7 +37,7 @@ bool Request::hasOneMatch(const std::string& str1, const std::string& str2)
 {
 	for (size_t i = 0; i < str2.length(); ++i)
 	{
-		if (str1.find(str2[i]) != string::npos)
+		if (str1.find(str2[i]) != NP)
 			return true;
 	}
 	return false;

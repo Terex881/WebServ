@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 11:48:46 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:03:46 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,9 @@ void	Request::openFile(const string &fileName)
 	{
 		BodyData.outFile.open(fileName, ios::binary | ios::trunc);
 		if (!BodyData.outFile.is_open())
-		{
-			RequestData.codeStatus = 505;
-			RequestData.requestStat = 2;
-			cout << RED << "FAILED OPEN" + fileName << endl;//, exit(1); // fix
-		}
+			{RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileName);}
 	}
 }
-
-
 
 void	Request::getQweryString(string &body)
 {
@@ -46,9 +40,9 @@ void	Request::getQweryString(string &body)
 	key = body.substr(0, body.find(CRLF) - 1);
 	body.erase(0, body.find(DCRLF) + 4);
 	
-	if ((crlfPos = body.find(CRLF)) != std::string::npos)
+	if ((crlfPos = body.find(CRLF)) != NP)
 		contentEndtPos = crlfPos;
-	else if ((endBoundyPos = body.find(BodyData.endBoundry)) != std::string::npos)
+	else if ((endBoundyPos = body.find(BodyData.endBoundry)) != NP)
 		contentEndtPos = endBoundyPos;
 	else
 		contentEndtPos = body.length();
@@ -63,26 +57,26 @@ int	Request::getFileName(string &body, string &fileName)
 	string tmp = body.substr(body.find(BodyData.boundry) + BodyData.boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
-	if (first.find("\"\r\n") == string::npos || body.find(DCRLF) == string::npos)
+	if (first.find("\"\r\n") == NP || body.find(DCRLF) == NP)
 	{
 		cout << RED << "error: no CRLF founded\n" << RESET;
 		return 0;
 	}
 	size_t filePos = first.find(FILE_NAME);
-	if (filePos != std::string::npos)
+	if (filePos != NP)
 	{
 		first.erase(0, filePos + 12);
 		size_t end = first.rfind("\"\r\n");
 		size_t endV = first.rfind("\"; ");
-		if (end != string::npos)
+		if (end != NP)
 			fileName = first.substr(0, end);
-		else if (endV != string::npos)
+		else if (endV != NP)
 			fileName = first.substr(0, endV);
 		return (1);
 	}
 	else
 	{
-		if (tmp.find(BodyData.boundry) == string::npos && tmp.find(BodyData.endBoundry) == string::npos)
+		if (tmp.find(BodyData.boundry) == NP && tmp.find(BodyData.endBoundry) == NP)
 			return 0;
 		getQweryString(body);
 	}
@@ -105,14 +99,13 @@ bool	Request::isBoundary(string &body)
 		boundryPos = body.find(BodyData.boundry);
 		endboundryPos = body.find(BodyData.endBoundry);
 
-		if (boundryPos != std::string::npos)
+		if (boundryPos !=  NP)
 			contentEndtPos = boundryPos;
-		else if ( endboundryPos != std::string::npos )
+		else if ( endboundryPos !=  NP )
 			contentEndtPos = endboundryPos;
 		else
 			contentEndtPos = body.length();
-
-		openFile(RequestData.fileLocation + fileName);
+		openFile(RequestData.fileLocation + "/" + fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)
@@ -127,16 +120,16 @@ void	Request::parseBoundryBody(string &body)
 	while(!body.empty())
 	{
 		boundryPos = body.find(BodyData.boundry);
-		if (boundryPos == string::npos && endboundryPos == string::npos)
+		if (boundryPos == NP && endboundryPos == NP)
 		{
 			if (body == CRLF && BodyData.bodyType == CHUNKED_BOUNDARY) body.erase(0, 2);
 			else writeFile(body, 0, body.length(), 0);
 		}
-		if (boundryPos != string::npos)
+		if (boundryPos != NP)
 		{
 			if (!isBoundary(body)) return;
 		}
-		else if (endboundryPos != string::npos)
+		else if (endboundryPos != NP)
 		{
 			endboundryPos = body.find(BodyData.endBoundry);	
 			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());

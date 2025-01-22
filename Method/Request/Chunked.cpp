@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 06:08:37 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:04:02 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void Request::parseChunkedBody(string &body)
 {
-	openFile(RequestData.fileLocation + HeaderData.extension);
+	openFile(RequestData.fileLocation + "/HALLO." + HeaderData.extension);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -31,11 +31,11 @@ void Request::parseChunkedBody(string &body)
 				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());
-				if (str != CRLF && str.find_first_of(CRLF) == string::npos)
+				if (str != CRLF && str.find_first_of(CRLF) == NP)
 					writeFile(str, 0, str.length(), 0);
 			}
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
-			if (hexPos == string::npos)
+			if (hexPos == NP)
 			{
 				cout << RED << "error: no length founded\n" << RESET;
 				return;
@@ -66,12 +66,14 @@ void Request::parseChunkedBody(string &body)
 
 void Request::parseBodyLength(string &body)
 {
-	openFile(RequestData.fileLocation + HeaderData.extension);
+	// get name from time
+	openFile(RequestData.fileLocation + "/HELLO." + HeaderData.extension);
 	
+
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();
-	BodyData.bodySize = (tmp);
+	BodyData.bodySize = tmp;
 	if (!BodyData.bodySize)
-		RequestData.requestStat = (2);
+		RequestData.requestStat = 2;
 	writeFile(body, 0, body.length(), 0);
 }

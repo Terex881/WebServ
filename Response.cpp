@@ -1,7 +1,5 @@
 #include "./Response.hpp"
-#include "Method/Request/Request.hpp"
-#include <cstddef>
-#include <string>
+
 
 size_t	Calculate_File_Size(std::ifstream &file)
 {
@@ -163,8 +161,6 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else if (this->isLesn && isDirectory(Working_Path))
 		{
-			// Working_Path = "/Users/aibn-che/wbw/static";
-			cout << Working_Path << "   " << isLesn << endl;
 			DIR* dir = opendir(Working_Path.c_str());
 			std::string response = "<h1>Directory Listing: " + Working_Path + "</h1><ul>";
 			struct dirent* entry;
