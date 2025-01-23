@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 09:53:25 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 16:14:45 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ typedef struct s_Request
 	string						executable_file;
 	std::vector<string>			redirection;
 	string						default_page;
+	bool						isUpload;
 }	t_Request;
 
 typedef struct s_Header

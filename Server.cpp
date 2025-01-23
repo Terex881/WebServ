@@ -128,23 +128,16 @@ void Server::ft_start(int size, int *fd)
 									catch(const std::exception& e)
 									{
 										std::cerr << RED << e.what() << RESET << '\n';
+										clientsMap[client_socket].getReq().getRequestData().requestStat = 2;
 									}
 									
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-					// clientsMap[client_socket].getReq().getHeaderData().url = clientsMap[client_socket].getReq().getElement("uri");;
+						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
-
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
-
-					////////-------CGI--------//////////////////
 					if (clientsMap[client_socket].getReq().getRequestData().isCgi)
 					{
-						// std::cout << "1 enter CGI --- " << client_socket << std::endl;
-						// clientsMap[client_socket].getReq().getHeaderData().extension;
-						// connections[client_socket].my_cgi = new Cgi();
-						// clientsMap[client_socket].event = event;
 						clientsMap[client_socket].getCgi().execute_script(client_socket, kq, &clientsMap[client_socket]);
-						// handleCGIRequest(client_socket, "./cgi-bin/script.py", kq);
 					}
 					else if(clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
 					{
@@ -168,17 +161,20 @@ void Server::ft_start(int size, int *fd)
 				int client_socket = events[i].ident;
 				// std::stringstream response;
 				// string wer = data->getReq().getHeaderData().url;
+				// data->getReq().getRequestData().isUpload
+
 				std::string responseStr;
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
 												data->getReq().getHeaderData().url,
-												"GET",
+												data->getReq().getHeaderData().requestMethod,
 												data->getReq().getHeaderData().url,
 												data->getReq().getRequestData().codeStatus,
 												data->getReq().getRequestData().isDirListening,
 												data->getReq().getHeaderData().url,
 												data->getReq().getRequestData().redirection,
-												data->getReq().getRequestData().default_page);
+												data->getReq().getRequestData().default_page,
+												data->getReq().getRequestData().isUpload);
 				data->getReq().getRequestData().first = "not empty";
 
 
@@ -198,7 +194,7 @@ void Server::ft_start(int size, int *fd)
 					std::cerr << "send failed" << std::endl;
 					clearSocketBuffer(client_socket);
 					close(data->getReq().getRequestData().fd);
-					data->getReq().getRequestData().codeStatus = 200;
+					data->getReq().getRequestData().codeStatus = 200;//--------------------------------------------------why
 					EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 

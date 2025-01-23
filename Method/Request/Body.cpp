@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 18:03:38 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 19:21:49 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,25 @@ void	Request::parseBodyTypes(string &body)
 
 	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;
-		
-	if (RequestData.isCgi && RequestData.requestStat == 1)
-		RequestData.isCgi = 0;
-		
+
+	if (RequestData.isCgi && BodyData.bodyType != NONE)
+	{
+		cout << GREEN << BodyData.bodyType << RESET << endl;
+		// exit(99);
+		RequestData.isCgi = false;
+		// check chunked
+	}
 	switch (BodyData.bodyType)
 	{
 		case (BOUNDARY):parseBoundryBody(BodyData.newStr); break;
 		case (CHUNKED): parseChunkedBody(BodyData.newStr); break;
 		case (CHUNKED_BOUNDARY): parseChunkedBoundryBody(BodyData.newStr); break;
 		case (BODY_SIZE): parseBodyLength(BodyData.newStr); break;
-		case(NONE): break;
+		case(NONE):
+		{
+			RequestData.requestStat = 2;
+			break;
+		} 
 	}	
 }
 

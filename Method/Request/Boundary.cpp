@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 18:03:46 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 17:56:55 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ bool	Request::isBoundary(string &body)
 
 void	Request::parseBoundryBody(string &body)
 {
+	RequestData.isUpload = true;
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(BodyData.endBoundry);
 	while(!body.empty())

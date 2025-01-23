@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 09:57:03 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 17:57:08 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void Request::parseChunkedBoundryBody(string &body)
 {
+	RequestData.isUpload = true;
 	size_t hexPos, strPos;
 	string subBody, str;
 	static u_long	length = 0;

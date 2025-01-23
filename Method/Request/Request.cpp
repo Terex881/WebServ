@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 17:35:03 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 16:14:33 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Request::Request()
 	RequestData.isDirListening = false;
 	RequestData.isRedirect = false;
 	RequestData.isCgi = false;
+	RequestData.isUpload = false;
 	// RequestData.maxBodySize = 0;
 }
 

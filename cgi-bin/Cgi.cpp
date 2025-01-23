@@ -32,7 +32,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	}
 	if (pid == 0)
 	{
-		string path_info = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
+		string key_val = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open("cgi_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
@@ -54,15 +54,22 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		// data->getReq().getHeaderData().url
 		// const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
 		const char* py_script = data->getReq().getHeaderData().url.c_str();
-		
-		char* envp[6];
+		int i = 5;
+		char* envp[6 + data->getReq().getHeaderData().queryStringMap.size()];
+		map<string, string>::iterator it = data->getReq().getHeaderData().queryStringMap.begin();
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
 		envp[3] = const_cast<char*>("param=sddd");
-		envp[4] = const_cast<char*>(path_info.c_str());
-		envp[5] = NULL;
+		envp[4] = const_cast<char*>(key_val.c_str());
+		// envp[5] = NULL;
 
+		for (; it != data->getReq().getHeaderData().queryStringMap.end(); it++)
+		{
+			key_val = it->first + "="+ it->second;
+			envp[i++] = const_cast<char*>(key_val.c_str());
+		}
+		envp[i] = NULL;
 		char* argv[] = {
 			const_cast<char*>(py_path),
 			const_cast<char*>(py_script),

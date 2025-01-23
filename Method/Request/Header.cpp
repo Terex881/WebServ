@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 18:06:33 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 18:14:40 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	// print(HeaderData.queryStringMap);
+	print(HeaderData.queryStringMap);
 }
  
 void Request::parseUri(string &str)
@@ -213,8 +213,7 @@ void Request::achref()
 
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			RequestData.codeStatus = 405;	RequestData.requestStat = 2;
-			throw runtime_error("unimplemented method");
+			RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
@@ -242,9 +241,9 @@ void Request::parseHeader(string &header)
 	fillHeaderMap(header);
 
 	achref();
+	// if (RequestData.isCgi && HeaderData.requestMethod == "POST")
+	// 	RequestData.isCgi = false;
 	getTypes(HeaderData.bigMap);
-
-
 }
 
 void Request::fillData(const string &key, const string &value)
@@ -268,7 +267,7 @@ void Request::getTypes(const std::map<string, string> &mp)
 		BodyData.bodyType = BODY_SIZE;
 		
 	if (HeaderData.port.empty())
-		{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");}
+		{RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");} // chek
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -285,8 +284,8 @@ void Request::getTypes(const std::map<string, string> &mp)
 		else if (chunked->second == "chunked" && bol)
 			BodyData.bodyType = CHUNKED_BOUNDARY;
 		else
-			{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("Bad Request2");}
+			{RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request2");}
 	}
 	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
-		{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
+		{RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
 }

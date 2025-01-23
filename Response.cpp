@@ -16,7 +16,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -28,6 +28,7 @@ Response::Response(string content_type,\
 	this->isLesn = isLesn;
 	this->redirection = redirection;
 	this->default_page = default_page;
+	this->isUpload = isUpload;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -42,7 +43,8 @@ Response::Response(const Response& other)
 			Chunk_Size(other.Chunk_Size),
 			filename(other.filename),
 			redirection(other.redirection),
-			default_page(other.default_page)
+			default_page(other.default_page),
+			isUpload(other.isUpload)
 			{
 		if (!filename.empty())
 			file.open(filename, std::ios::binary);
@@ -63,6 +65,7 @@ Response& Response::operator=(const Response& other)
 		isLesn = other.isLesn;
 		redirection = other.redirection;
 		default_page = other.default_page;
+		isUpload = other.isUpload;
 		if (file.is_open())
             file.close();
 
@@ -95,7 +98,49 @@ void	Response::Res_get_chunk(int &sent_head)
 		this->end = 1;
 		return;
 	}
-	if (Method == "GET")
+	if (Status_Code != 200)
+	{
+		std::cout << Status_Code << std::endl;
+		
+			header = 
+				"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+				"Content-Type: text/plain\r\n"
+				"Content-Length: 15\r\n"
+				"\r\n"
+				"Internal Errorr";
+			body = "";
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;
+			return	;
+	}
+	else if (Method == "POST")
+	{
+		if (isUpload)
+		{
+			header =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 21\r\n"
+			"\r\n"
+			"Uploaded Successfully";
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;
+			return;
+		}
+		else
+		{
+			header =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 21\r\n"
+			"\r\n"
+			"Need some checks";
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;
+			return;
+		}
+	}
+	else if (Method == "GET")
 	{
 		if ((isDirectory(Working_Path) && !default_page.empty()))
 		{
@@ -105,21 +150,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			Content_Type = GetMimeType(default_page);
 			file.open(default_page, std::ios::binary);
 			default_page = "";
-		}
-		if (Status_Code != 200)
-		{
-			std::cout << Status_Code << std::endl;
-			
-				header = 
-					"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
-					"Content-Type: text/plain\r\n"
-					"Content-Length: 14\r\n"
-					"\r\n"
-					"Internal Error";
-				body = "";
-				responseStream.write(header.c_str(), header.length());
-				this->end = 1;
-				return	;
 		}
 		else if (isFile(Working_Path))
 		{
