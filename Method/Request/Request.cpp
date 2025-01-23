@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 15:29:44 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 17:35:03 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,10 @@ t_Body&		Request::getBodyData()		{ return BodyData; }
 void Request::request(string &request)
 {
 
-	// if (!BodyData.outFile)
-	// 	BodyData.outFile = new ofstream;
 	if (!RequestData.requestStat)
 	{		
 		size_t pos = request.find(DCRLF);
-		if (pos != string::npos)
+		if (pos != NP)
 		{
 			RequestData.header.append(request.c_str(), 0, pos);
 			parseHeader(RequestData.header);

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/12 18:27:01 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 09:57:03 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ void Request::parseChunkedBoundryBody(string &body)
 				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());;
-				if (str != CRLF && str.find_first_of(CRLF) == string::npos)
+				if (str != CRLF && str.find_first_of(CRLF) == NP)
 					parseBoundryBody(str);
 			}
 			/* */
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
-			if (hexPos == string::npos)
+			if (hexPos == NP)
 			{
 				cout << RED << "error: no length founded\n" << RESET;
 				return;

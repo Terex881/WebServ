@@ -6,13 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 16:04:20 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 18:06:33 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../../Config/File_Parsing.hpp"
-#include <algorithm>
+
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -45,12 +45,9 @@ void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 	{
-		RequestData.codeStatus = 400; // check default path
-		RequestData.requestStat = 2;
-		cout << RED << "bad URL" << std::endl;
-		return;
+		RequestData.codeStatus = 400;	RequestData.requestStat = 2;
+		throw runtime_error("bad URL");
 	}
-
 	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
 	{
@@ -63,17 +60,10 @@ void Request::parseUri(string &str)
 		else if (str[i] == '+')
 			str[i] = ' ';
 	}
-	// cout << BLUE << str << RESET << endl;
-
-	/* search for is there any query strigs*/
 	size_t QMPos = str.find("?");
 	if (QMPos != string::npos)
 		storeQueryString(str, QMPos);
 	HeaderData.url = str;
-	// if (str.find("cgi-bin/") != string::npos)
-	// {
-	// 	RequestData.isCgi = true;
-	// }
 }
 
 void Request::parseFirstLine(const string &line)
@@ -83,10 +73,7 @@ void Request::parseFirstLine(const string &line)
 
 	if (isspace(line[0]))
 	{
-		RequestData.codeStatus = 400; // burp
-		RequestData.requestStat = 2;
-		cout << RED << "foud space in the begening\n";
-		return;
+		RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("foud space in the begening");
 	}
 
 	std::istringstream ss(line);
@@ -98,20 +85,15 @@ void Request::parseFirstLine(const string &line)
 
 	cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
-	if (HeaderData.requestMethod != "POST" && HeaderData.requestMethod != "GET" && HeaderData.requestMethod != "DELETE")
-	{
-		RequestData.codeStatus = 501;
-		RequestData.requestStat = 2;
-		cout << RED << "501 Not Implemented" << std::endl;
-		return;
+	if (method != "POST" && method != "GET" && method != "DELETE")
+	{	
+		RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("501 Not Implementedddd");
 	}
 	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
 		parseUri(it->second);
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 	{
-		RequestData.codeStatus = 505;
-		RequestData.requestStat = 2;
-		cout << RED << "error: invalid version" << std::endl;
+		RequestData.codeStatus = 505;	RequestData.requestStat = 2;	throw runtime_error("error: invalid version");
 	}
 }
 
@@ -126,16 +108,14 @@ void Request::fillHeaderMap(string &header)
 		line = header.substr(0, header.find(CRLF));
 		colonPos = line.find(":");
 		
-		if(colonPos == string::npos || std::isspace(line[colonPos - 1]) || std:: isspace(line[0])) {
-			RequestData.codeStatus = 400; // check in burop
-			RequestData.requestStat = 2;
-			cout << RED << "foud space or doesn't find :";
-			break;
-		}
-		// check mli7
 		key = line.substr(0, colonPos);
+		if(key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0])) {
+			RequestData.codeStatus = 400;	RequestData.requestStat = 2;
+			throw runtime_error("foud space or doesn't find :");
+		}
+
 		size_t valEndPos  = line.find_first_not_of(' ', colonPos + 1);
-		if (valEndPos == string::npos)	valEndPos = 0;
+		if (valEndPos == NP)	valEndPos = 0;
 		value = line.substr(valEndPos, line.find_last_not_of(' ') - valEndPos + 1);
 	
 		std::transform(key.begin(), key.end(), key.begin(), ::tolower); // check this 
@@ -147,8 +127,6 @@ void Request::fillHeaderMap(string &header)
 		header.erase(0, line.length() + 2);
 	}
 }
-
-
 
 void Request::achref()
 {
@@ -189,12 +167,12 @@ void Request::achref()
 			// cout << location.values["path"] << " cgi : " << RequestData.isCgi << endl;
 			// cout << "ext : " <<  HeaderData.extension << endl;
 			size_t at = HeaderData.url.find(".");
-			if (at != string::npos)
+			if (at != NP)
 			{
 				// cout <<GREEN << HeaderData.url << RESET<< endl;
 				string current = HeaderData.url.substr(at);
 				// cout <<"... " << current << endl;
-				RequestData.extension = current.substr(0, (current.find("/") != string::npos ? current.find("/") : current.length()));
+				RequestData.extension = current.substr(0, (current.find("/") != NP ? current.find("/") : current.length()));
 				// cout << " -extension- " << RequestData.extension << endl;
 				RequestData.executable_file = location.values[RequestData.extension].substr(0, location.values[RequestData.extension].find(';'));
 				if (RequestData.executable_file.empty() || (RequestData.extension != ".py" && RequestData.extension != ".php"))
@@ -203,7 +181,7 @@ void Request::achref()
 					return;
 				}
 				// cout << GREEN << " :: "<< RequestData.executable_file << RESET << endl;
-				RequestData.pathInfo = current.substr(current.find("/") != string::npos ? current.find("/") : RequestData.extension.length());
+				RequestData.pathInfo = current.substr(current.find("/") != NP ? current.find("/") : RequestData.extension.length());
 				// cout << "pathInfo : " << RequestData.pathInfo << endl;
 				HeaderData.url = HeaderData.url.substr(0, at + RequestData.extension.length());
 				// cout << YELLOW << HeaderData.url << RESET<< endl;
@@ -233,16 +211,10 @@ void Request::achref()
 			cout << GREEN << "Index Oder autoIndex" << RESET << endl;
 		}
 
-		std::cout << GREEN << HeaderData.url << RESET<< std::endl;
-		std::cout << RED << "------------------------" << RESET<< std::endl;
-
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			RequestData.codeStatus = 405; //method not allowed
-			cout << HeaderData.requestMethod << endl;
-			cout <<" + " << endl;
-			RequestData.requestStat = 2;
-			return;
+			RequestData.codeStatus = 405;	RequestData.requestStat = 2;
+			throw runtime_error("unimplemented method");
 		}
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
@@ -254,9 +226,7 @@ void Request::achref()
 	}
 	else
 	{
-		RequestData.codeStatus = 404;
-		RequestData.requestStat = 2;
-		cout << RED << "location not found" << RESET << endl;
+		RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("location not found");
 	}
 }
 
@@ -264,46 +234,28 @@ void Request::parseHeader(string &header)
 {
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
-
 	
+
 	parseFirstLine(firstLine);
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
 
 	achref();
-
 	getTypes(HeaderData.bigMap);
+
+
 }
 
 void Request::fillData(const string &key, const string &value)
 {
-	if  (key == "content-type")
-	{
-		HeaderData.extension = value.substr(value.find("/") + 1, value.length());
-		if(HeaderData.extension == "octet-stream")
-			HeaderData.extension = "py";
-	}
+	size_t Pos = 0;
+	if  (key == "content-type" && (Pos = value.find("/")) && Pos != NP)
+		HeaderData.extension = value.substr(Pos + 1, value.length());
 	if (key == "content-length")
-	{
 		BodyData.bodySize = (std::atol(value.c_str()));
-		if (BodyData.bodySize > 0)	BodyData.bodyType = BODY_SIZE;
-	}
-	if (key == "host")
-	{
-		HeaderData.port = value.substr(value.find(":") + 1, 10); // check if there no :
-		
-		// std::vector<dt>::iterator it = geto().host_port.begin();
-		// for(; it != geto().host_port.end(); it++)
-		// {
-		// 	if (it->val == HeaderData.port)
-		// 	{
-		// 		RequestData.codeStatus = 400; // check this
-		// 		RequestData.requestStat = 2;
-		// 		cout << RED << "OK\n" << RESET;
-		// 	}
-		// }	
-	}
+	if (key == "host" && (Pos = value.find(":")) != NP)
+		HeaderData.port = value.substr(Pos + 1, 10);
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
@@ -311,13 +263,12 @@ void Request::getTypes(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
 	RequestData.requestStat = 1;
-	
+
+	if (BodyData.bodySize && RequestData.isCgi)
+		BodyData.bodyType = BODY_SIZE;
+		
 	if (HeaderData.port.empty())
-	{
-		RequestData.codeStatus = 400;
-		RequestData.requestStat = 2;
-		cout << RED << "no Host found !!\n" << RESET;
-	}
+		{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");}
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -329,15 +280,13 @@ void Request::getTypes(const std::map<string, string> &mp)
 	}
 	if (chunked != mp.end())
 	{
-		if (chunked->second != "chunked")
-		{
-			RequestData.codeStatus = 501;
-			RequestData.requestStat = 2;
-			cout << RED << "not implemented\n" << RESET ;
-		}
-		else if (chunked->second == "chunked" && !bol)
+		if (chunked->second == "chunked" && !bol && RequestData.isCgi)
 			BodyData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
 			BodyData.bodyType = CHUNKED_BOUNDARY;
+		else
+			{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("Bad Request2");}
 	}
+	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
+		{RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
 }

@@ -33,7 +33,7 @@ void Server::ft_start(int size, int *fd)
 		exit(1);
 	}
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-													ofstream ss("tmp.py", ios::app | ios::binary);
+													// ofstream ss("tmp.py", ios::app | ios::binary);
 
 													static int s = clock();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,10 +118,18 @@ void Server::ft_start(int size, int *fd)
 				{
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-									ss << "[" << client_socket << "]"  << endl;
-									ss << msg;
-									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
-									clientsMap[client_socket].getReq().request(msg);
+									// ss << "[" << client_socket << "]"  << endl;
+									// ss << msg;
+									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
+									try
+									{
+										clientsMap[client_socket].getReq().request(msg);
+									}
+									catch(const std::exception& e)
+									{
+										std::cerr << RED << e.what() << RESET << '\n';
+									}
+									
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					// clientsMap[client_socket].getReq().getHeaderData().url = clientsMap[client_socket].getReq().getElement("uri");;
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;

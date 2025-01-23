@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 16:04:22 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/22 09:53:25 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ using namespace std;
 #define CRLF "\r\n"
 #define DCRLF "\r\n\r\n"
 #define FILE_NAME "; filename=\""
+#define NP string::npos
 
 
 enum type

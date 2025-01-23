@@ -65,7 +65,7 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 	// DynamicStruct location;
 	// DynamicStruct server;
 	// // /cgi-bin/script.py && /dsf
-	// getLocationByPortAndUrl("4455", correct_url("/c"), location, server); // WARNING
+	// getLocationByPortAndUrl("2432", correct_url("/c"), location, server); // WARNING
 
 	// recursive_call(server, servers, locations);
 	// if (!server.values.size())
@@ -78,7 +78,7 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 	// 	if (my_url[0] == '/')
 	// 	{
 	// 		cout << my_url.substr(1) << endl;
-	// 		getLocationByPortAndUrl("4455", correct_url("/"), location, server);
+	// 		getLocationByPortAndUrl("2432", correct_url("/"), location, server);
 	// 	}
 	// 	else
 	// 		cout << "Location not found" << endl;
@@ -392,6 +392,8 @@ string	get_port_index(DynamicStruct *server, string port)
 	{
 		if (it->first.find("listen") != string::npos)
 		{
+			if (it->second.find(":") != string::npos)
+				it->second = it->second.substr(it->second.find(":") + 1);
 			port_1 = strtod(it->second.c_str(), NULL);
 			port_2 = strtod(port.c_str(), NULL);
 			if (port_1 == port_2)
@@ -417,10 +419,12 @@ void	File_Parsing::override_server(int index, DynamicStruct *server)
 		{
 			if (it->first.find("listen") != string::npos)
 			{
+				if (it->second.find(":") != string::npos)
+					it->second = it->second.substr(it->second.find(":") + 1);
 				if (isPortInString(server[index].values["ports"], it->second))
 				{
 					port_count--;
-					port_index = get_port_index(&server[index], it->second.substr(it->second.find(':') + 1));
+					port_index = get_port_index(&server[index], it->second);
 					server[index].values["listen_"+port_index] = "override";
 				}
 			}
