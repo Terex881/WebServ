@@ -156,13 +156,21 @@ void Server::ft_start(int size, int *fd)
 				// data->getReq().getRequestData().serverName
 				// data->getReq().getRequestData().isDirListening;
 				// 
-
+				// data->getReq().getRequestData().redirection;
 				int client_socket = events[i].ident;
 				// std::stringstream response;
 				// string wer = data->getReq().getHeaderData().url;
 				std::string responseStr;
 				if (data->getReq().getRequestData().first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url), data->getReq().getHeaderData().url, "GET", data->getReq().getHeaderData().url, data->getReq().getRequestData().codeStatus, data->getReq().getRequestData().isDirListening,  data->getReq().getHeaderData().url);
+					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
+												data->getReq().getHeaderData().url,
+												"GET",
+												data->getReq().getHeaderData().url,
+												data->getReq().getRequestData().codeStatus,
+												data->getReq().getRequestData().isDirListening,
+												data->getReq().getHeaderData().url,
+												data->getReq().getRequestData().redirection,
+												data->getReq().getRequestData().default_page);
 				data->getReq().getRequestData().first = "not empty";
 
 

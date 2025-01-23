@@ -10,7 +10,7 @@ thislist = ["My", "First", "Python", "Execution", "With CGI"]
 
 
 # # print('Content-Type: ' + os.environ['REQUEST_METHOD']+'\r\n', end="")
-print(" ".join(thislist))
+# print(" ".join(thislist))
 # print('name : ' + os.environ['name'])
 # while True:
 # 	pass
@@ -27,13 +27,13 @@ print(" ".join(thislist))
 # response = requests.get(url)
 
 
-# import subprocess
+import subprocess
 
-# # Example curl command
-# curl_command = "curl -X GET http://0.0.0.0:3344/cgi-bin/script.py"
+# Example curl command
+curl_command = "curl -X GET http://0.0.0.0:3344/script.py"
 
-# # Execute the curl command
-# result = subprocess.run(curl_command, shell=True, capture_output=True, text=True)
+# Execute the curl command
+result = subprocess.run(curl_command, shell=True, capture_output=True, text=True)
 
 # # Check if the request was successful
 # if response.status_code == 200:

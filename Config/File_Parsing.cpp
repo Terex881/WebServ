@@ -129,7 +129,7 @@ int contain_bracket(string line)
 	return (0);
 }
 
-std::vector<string> split_1(string s)
+std::vector<string> File_Parsing::split_1(string s)
 {
 	stringstream ss(s);
 	vector<string> words;
@@ -335,6 +335,8 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			{
 				line = line.substr(key.length() + 1, (line.length() - key.length()));
 				current.values[key] = line;
+				if (key == "return" && words[1] != "302")
+					(*file).close(), exit(122);
 			}
 			else if (key == "listen")
 			{

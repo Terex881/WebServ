@@ -68,6 +68,7 @@ class File_Parsing
 		static void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server);
 
 		string	correct_url(string path);
+		std::vector<string>	split_1(string s);
 
 };
 

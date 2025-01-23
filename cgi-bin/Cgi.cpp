@@ -16,10 +16,14 @@ int	end_header(string header)
 	return (0);
 }
 
+bool fileExists(const std::string& filename)
+{
+	return (access(filename.c_str(), F_OK) == 0);  // F_OK checks for existence
+}
+
 // Fork and execute the CGI process
 void Cgi::execute_script(int client_socket, int kq, Client* data)
 {
-
 	pid_t pid = fork();
 	if (pid == -1) {
 		std::cerr << "Fork failed!" << std::endl;
@@ -65,12 +69,15 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 			NULL
 		};
 
-		execve(py_path, argv, envp);
+		if (fileExists(py_script))
+			execve(py_path, argv, envp);
+		unlink("cgi_output.txt");
 		perror("Execution failed");
 		exit(1);
 	}
 	else
 	{
+
 		// std::cout << "Executing CGI" << std::endl;
 		// Parent process: register the child process for event handling
 		EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 1000, data);
@@ -207,7 +214,7 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 	// After CGI script execution, register for writing output to client
 	if (WIFEXITED(status))
 	{
-		// cout << "endlddd" << endl;
+		cout << "endlddd" << endl;
 		data->getReq().getHeaderData().url = "./cgi_output.txt";
 		data->getReq().getRequestData().codeStatus = 200;
 

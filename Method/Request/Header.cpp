@@ -154,7 +154,8 @@ void Request::achref()
 {
 	DynamicStruct	location;
 	DynamicStruct	server;
-	
+	// std::vector<string> redirection;
+
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
 	if (!location.values.size() || !server.values.size())
 	{
@@ -169,13 +170,15 @@ void Request::achref()
 	if (location.values.size())
 	{
 		location_data l_data = configFileObj.get_location_val(location);
+		// redirection
+		if (!l_data.rturn.empty())
+			RequestData.redirection = configFileObj.split_1(l_data.rturn);
 		HeaderData.url = configFileObj.correct_url(HeaderData.url);
 	
 		string	final_url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
-
 		HeaderData.url = final_url;
-		string extension;
 
+		string extension;
 		if (!location.values[".py"].empty() || !location.values[".php"].empty())
 		{
 			RequestData.isCgi = true;
@@ -207,8 +210,27 @@ void Request::achref()
 			}
 			else
 			{
-				cout << GREEN << "Index Oder autoIndex" << RESET << endl;
+				RequestData.isCgi = false;
+				// default_page
+				if (!server.values["index"].empty())
+				{
+					RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
+					cout << GREEN << "root : " << location.values["root"] << endl;
+					cout << GREEN << "Default : "<< RequestData.default_page << endl;
+				}
+				cout << GREEN << "Index Oder autoIndexxx" << RESET << endl;
 			}
+		}
+		else
+		{
+			// default_page
+			if (!server.values["index"].empty())
+			{
+				RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
+				cout << GREEN << "root : " << location.values["root"] << endl;
+				cout << GREEN << "Default : "<< RequestData.default_page << endl;
+			}
+			cout << GREEN << "Index Oder autoIndex" << RESET << endl;
 		}
 
 		std::cout << GREEN << HeaderData.url << RESET<< std::endl;

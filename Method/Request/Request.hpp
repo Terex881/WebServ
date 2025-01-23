@@ -62,7 +62,8 @@ typedef struct s_Request
 	string						extension;
 	string						fileLocation;
 	string						executable_file;
-	
+	std::vector<string>			redirection;
+	string						default_page;
 }	t_Request;
 
 typedef struct s_Header

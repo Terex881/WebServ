@@ -12,6 +12,7 @@
 #include <dirent.h>
 
 using std::string;
+using std::vector;
 #define MAX_CLIENTS 128
 
 class Response
@@ -39,9 +40,11 @@ class Response
 		string			body;
 		bool			isLesn;
 		string			filename;
+		vector<string> redirection;
+		string			default_page;
 
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

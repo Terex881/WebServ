@@ -18,7 +18,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -28,7 +28,8 @@ Response::Response(string content_type,\
 	this->end = 0;
 	this->Status_Code = (size_t)codeStatus;
 	this->isLesn = isLesn;
-
+	this->redirection = redirection;
+	this->default_page = default_page;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -41,7 +42,9 @@ Response::Response(const Response& other)
 			Url(other.Url),
 			end(other.end),
 			Chunk_Size(other.Chunk_Size),
-			filename(other.filename)
+			filename(other.filename),
+			redirection(other.redirection),
+			default_page(other.default_page)
 			{
 		if (!filename.empty())
 			file.open(filename, std::ios::binary);
@@ -60,7 +63,8 @@ Response& Response::operator=(const Response& other)
 
 		Status_Code = other.Status_Code;
 		isLesn = other.isLesn;
-
+		redirection = other.redirection;
+		default_page = other.default_page;
 		if (file.is_open())
             file.close();
 
@@ -69,7 +73,6 @@ Response& Response::operator=(const Response& other)
 		{
 			filename = other.filename;
 			file.open(filename, std::ios::binary);
-
 		}
 	}
     return *this;
@@ -82,9 +85,29 @@ void	Response::Res_get_chunk(int &sent_head)
 	responseStream.clear(); // Clear any error flags
 
 
-
+	if (redirection.size())
+	{
+		header = 
+		"HTTP/1.1 "+ redirection[0] +"Found\r\n"
+		"Location: " + redirection[1] + "\r\n"
+		"Content-Type: text/html\r\n"
+		"Content-Length: 0\r\n"
+		"Connection: close\r\n\r\n";
+		responseStream.write(header.c_str(), header.length());
+		this->end = 1;
+		return;
+	}
 	if (Method == "GET")
 	{
+		if ((isDirectory(Working_Path) && !default_page.empty()))
+		{
+			Working_Path = default_page;
+			file.close();
+			filename = default_page;
+			Content_Type = GetMimeType(default_page);
+			file.open(default_page, std::ios::binary);
+			default_page = "";
+		}
 		if (Status_Code != 200)
 		{
 			std::cout << Status_Code << std::endl;
@@ -196,34 +219,15 @@ void	Response::Res_get_chunk(int &sent_head)
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 		}
-		else if (isDirectory(Working_Path))
-		{
-			body =
-				"<html>"
-					"<head>"
-						"<title>default page</title>"
-					"</head>"
-					"<body>"
-						"<h1>Default page</h1>"
-					"</body>"
-				"</html>";
-			header =
-				"HTTP/1.1 200 OK\r\n"
-				"Content-Type: text/html; charset=UTF-8\r\n"
-				"Content-Length: "+std::to_string(body.length())+"\r\n"
-				"\r\n"+ body;
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-		}
 		else
 		{
-			cout << Working_Path << "   " << isLesn << endl;
+			cout << Working_Path << " + " << isLesn << endl;
 			header =
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
-					"Content-Length: 9\r\n"
+					"Content-Length: 12\r\n"
 					"\r\n"
-					"Noot Found";
+					"Not :( Found";
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;
