@@ -199,7 +199,7 @@ int	check_port(vector<string> line)
 int	check_val(vector<string> line)
 {
 	char	*end = NULL;
-	size_t	mb;
+	long	mb;
 	size_t	index;
 
 	if (line[0] == "return" && line.size() != 3)
@@ -220,7 +220,7 @@ int	check_val(vector<string> line)
 		if (!is_num(line[1].substr(0, line[1].length() - 1)) || !line[1].substr(0, line[1].length() - 1).length())
 			return (0);
 		mb = strtod(line[1].c_str(), &end);
-		if (*end && *end != ';' && strlen(end) > 1)
+		if ((*end && *end != ';' && strlen(end) > 1) || mb > INT_MAX || line[1].length() > 11 || !mb)
 		{
 			return (0);
 		}
