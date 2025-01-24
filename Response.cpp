@@ -195,7 +195,7 @@ void	Response::Res_get_chunk(int &sent_head)
 						responseStream.str(""); // Clear previous content
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
-						responseStream.write("0\r\n\r\n", 6);
+						responseStream << "0\r\n\r\n";
 						return ;  // End of file or read error
 					}
 					responseStream << std::hex << current_read << "\r\n";
@@ -204,7 +204,7 @@ void	Response::Res_get_chunk(int &sent_head)
 					this->bytesRead += current_read;
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
-						responseStream.write("0\r\n\r\n", 6);
+						 responseStream << "0\r\n\r\n";
 						this->end = 1;
 						sent_head = 0;
 					}
