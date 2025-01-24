@@ -66,9 +66,21 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 		for (; it != data->getReq().getHeaderData().queryStringMap.end(); it++)
 		{
-			key_val = it->first + "="+ it->second;
-			envp[i++] = const_cast<char*>(key_val.c_str());
+
+			// it->first = it->first + it->second;
+			envp[i++] = const_cast<char*>(it->second.c_str());
 		}
+		// i = 0;
+		// while(i < 8)
+		// {
+		// 	cout << "-->" << envp[i] <<endl;
+		// 	i++;
+
+		// }
+		// cout << ">> 5 "<< envp[5] << endl;
+		// cout << ">> 6 "<< envp[6] << endl;
+		// cout << ">> 7 "<< envp[7] << endl;
+
 		envp[i] = NULL;
 		char* argv[] = {
 			const_cast<char*>(py_path),

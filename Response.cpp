@@ -130,14 +130,16 @@ void	Response::Res_get_chunk(int &sent_head)
 		else
 		{
 			header =
-			"HTTP/1.1 200 OK\r\n"
-			"Content-Type: text/plain\r\n"
-			"Content-Length: 21\r\n"
-			"\r\n"
-			"Need some checks";
+				"HTTP/1.1 200 OK\r\n"
+				"Content-Type: " + Content_Type + "\r\n"
+				"Transfer-Encoding: chunked\r\n"
+				"Connection: keep-alive\r\n"
+				"\r\n";
+			sent_head = 1;
+			this->bytesRead = 0;
 			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return;
+			Method = "GET";
+			return	;
 		}
 	}
 	else if (Method == "GET")
@@ -196,6 +198,7 @@ void	Response::Res_get_chunk(int &sent_head)
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
 						responseStream << "0\r\n\r\n";
+						this->end = 1;
 						return ;  // End of file or read error
 					}
 					responseStream << std::hex << current_read << "\r\n";

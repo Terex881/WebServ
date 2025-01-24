@@ -6,23 +6,17 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 14:03:26 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 18:55:19 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include <fstream>
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
-	ofstream ss("tmp.py", ios::app);
 	string content = body.substr(start, end);
 	if (BodyData.outFile.is_open())
-	{
 		BodyData.outFile.write(content.c_str(), content.length()); BodyData.outFile.flush();
-		// ss.write(content.c_str(), content.length()); ss.flush();
-		
-	}
 	body.erase(0, end + len);
 }
 
@@ -53,8 +47,10 @@ void	Request::getQweryString(string &body)
 	else
 		contentEndtPos = body.length();
 	
-	val = body.substr(0, contentEndtPos);
-	BodyData.Vec.push_back(make_pair(key, val));
+	val = key + "=" + body.substr(0, contentEndtPos);
+	HeaderData.queryStringMap.insert(make_pair(key, val));
+
+	// BodyData.Vec.push_back(make_pair(key, val));
 	body.erase(0, val.length());
 }
 
@@ -120,7 +116,7 @@ bool	Request::isBoundary(string &body)
 
 void	Request::parseBoundryBody(string &body)
 {
-	RequestData.isUpload = true;
+	// RequestData.isUpload = true;
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(BodyData.endBoundry);
 	while(!body.empty())
@@ -141,6 +137,7 @@ void	Request::parseBoundryBody(string &body)
 			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());
 			// printV(BodyData.Vec);
 			RequestData.requestStat = 2;
+			BodyData.outFile.close();
 		}
 	}
 }

@@ -129,8 +129,8 @@ void Server::ft_start(int size, int *fd)
 									{
 										std::cerr << RED << e.what() << RESET << '\n';
 										clientsMap[client_socket].getReq().getRequestData().requestStat = 2;
-						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 									}
+						// cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 									
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;

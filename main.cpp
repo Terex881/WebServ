@@ -4,9 +4,9 @@
 
 int main(int argc, char **argv)
 {
-	// try{
-		signal(SIGPIPE, SIG_IGN);
-	///////////////////////////////////////
+
+	signal(SIGPIPE, SIG_IGN);
+
 		if (argc != 2)
 			return 0;
 		char *end = NULL;
@@ -39,13 +39,5 @@ int main(int argc, char **argv)
 		{
 			server[i]->ft_start(size, fd);
 		}
-	// }
-	// catch(const std::exception &e)
-	// {
-	//     std::cout << e.what() << std::endl;
-	// }
-
-
-
 	return 0;
 }

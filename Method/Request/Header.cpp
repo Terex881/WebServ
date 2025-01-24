@@ -6,13 +6,12 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 13:38:40 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 18:47:37 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../../Config/File_Parsing.hpp"
-
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -32,7 +31,7 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		if (equalPos != string::npos && equalPos < endPos) 
 		{
 			key = queryStrings.substr(0, equalPos);
-			value = queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
+			value = key + "=" + queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
 			HeaderData.queryStringMap.insert(make_pair(key, value));
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
@@ -148,7 +147,7 @@ void Request::achref()
 	{
 		// get max bosy size 
 		location_data l_data = configFileObj.get_location_val(location);
-		RequestData.maxBodySize = std::strtol(server.values["client_max_body_size"].c_str(), NULL, 10) * 10000000;
+		RequestData.maxBodySize = atol(server.values["client_max_body_size"].c_str()) * 10000000;
 		RequestData.fileLocation = l_data.root;
 		// redirection
 		if (!l_data.rturn.empty())
@@ -243,8 +242,6 @@ void Request::parseHeader(string &header)
 	fillHeaderMap(header);
 
 	achref();
-	// if (RequestData.isCgi && HeaderData.requestMethod == "POST")
-	// 	RequestData.isCgi = false;
 	getTypes(HeaderData.bigMap);
 }
 

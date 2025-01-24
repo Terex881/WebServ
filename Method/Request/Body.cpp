@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 14:27:59 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 18:43:01 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@ void	Request::parseBodyTypes(string &body)
 
 	static u_long totalBodySize;
 	totalBodySize += body.length();
-	
-	cout << YELLOW << "-->" << BodyData.bodyType << RESET << endl;
+
+	if (BodyData.bodyType == CHUNKED && body == "0\r\n\r\n")
+		BodyData.bodyType = NONE;
 
 	if (totalBodySize > RequestData.maxBodySize)
 	{
@@ -34,25 +35,21 @@ void	Request::parseBodyTypes(string &body)
 	}
 
 
-	if (RequestData.isCgi && BodyData.bodyType != NONE)
-	{
+	if (RequestData.isCgi &&  (BodyData.bodyType == BODY_SIZE || BodyData.bodyType == CHUNKED))
 		RequestData.isCgi = false;
-		// check chunked
-	}
+	
 	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;
 	switch (BodyData.bodyType)
 	{
-		case (BOUNDARY):parseBoundryBody(BodyData.newStr); break;
-		case (CHUNKED): parseChunkedBody(BodyData.newStr); break;
-		case (CHUNKED_BOUNDARY): parseChunkedBoundryBody(BodyData.newStr); break;
-		case (BODY_SIZE): parseBodyLength(BodyData.newStr); break;
-		case(NONE):
-		{
-			RequestData.requestStat = 2;	break;
-		} 
-	}	
+		case (BOUNDARY):parseBoundryBody(BodyData.newStr);	break;
+		case (CHUNKED): parseChunkedBody(BodyData.newStr);	break;
+		case (CHUNKED_BOUNDARY): parseChunkedBoundryBody(BodyData.newStr);	break;
+		case (BODY_SIZE): parseBodyLength(BodyData.newStr);	break;
+		case(NONE):	RequestData.requestStat = 2;	break;
+	}
 }
+// 150 0 000 000
 
 bool Request::hasOneMatch(const std::string& str1, const std::string& str2)
 {
