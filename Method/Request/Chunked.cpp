@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/22 18:04:02 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/23 17:57:17 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void Request::parseChunkedBody(string &body)
 {
+	RequestData.isUpload = true;
 	openFile(RequestData.fileLocation + "/HALLO." + HeaderData.extension);
 
 	size_t hexPos, strPos;
@@ -67,6 +68,7 @@ void Request::parseChunkedBody(string &body)
 void Request::parseBodyLength(string &body)
 {
 	// get name from time
+	RequestData.isUpload = true;
 	openFile(RequestData.fileLocation + "/HELLO." + HeaderData.extension);
 	
 

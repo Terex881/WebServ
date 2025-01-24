@@ -43,9 +43,9 @@ class Response
 		string			filename;
 		vector<string> redirection;
 		string			default_page;
-
+		bool			isUpload;
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 
