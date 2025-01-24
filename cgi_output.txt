@@ -1,0 +1,3 @@
+
+My first PHP script with CGI ! 6     
+param 1 = 

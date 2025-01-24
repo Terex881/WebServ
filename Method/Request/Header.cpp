@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 18:14:40 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 13:38:40 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-	cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
 	if (method != "POST" && method != "GET" && method != "DELETE")
 	{	
@@ -147,7 +146,10 @@ void Request::achref()
 	}
 	if (location.values.size())
 	{
+		// get max bosy size 
 		location_data l_data = configFileObj.get_location_val(location);
+		RequestData.maxBodySize = std::strtol(server.values["client_max_body_size"].c_str(), NULL, 10) * 10000000;
+		RequestData.fileLocation = l_data.root;
 		// redirection
 		if (!l_data.rturn.empty())
 			RequestData.redirection = configFileObj.split_1(l_data.rturn);
@@ -221,7 +223,7 @@ void Request::achref()
 			RequestData.isRedirect = true;
 		if (!server.values["server_name"].empty())
 			RequestData.serverName = server.values["server_name"];	
-		RequestData.fileLocation = l_data.root;
+		
 	}
 	else
 	{
@@ -265,6 +267,16 @@ void Request::getTypes(const std::map<string, string> &mp)
 
 	if (BodyData.bodySize && RequestData.isCgi)
 		BodyData.bodyType = BODY_SIZE;
+	
+	cout << RED << RequestData.maxBodySize << RESET << endl;
+	cout << RED << BodyData.bodySize << RESET << endl;
+	if (BodyData.bodySize > RequestData.maxBodySize)
+	{
+		RequestData.codeStatus = 400;
+		RequestData.requestStat = 2;
+		RequestData.isCgi = false;
+		throw runtime_error("MAX bady szie");
+	}
 		
 	if (HeaderData.port.empty())
 		{RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");} // chek

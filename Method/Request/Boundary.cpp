@@ -6,27 +6,33 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 17:56:55 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 14:03:26 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include <fstream>
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
+	ofstream ss("tmp.py", ios::app);
 	string content = body.substr(start, end);
 	if (BodyData.outFile.is_open())
+	{
 		BodyData.outFile.write(content.c_str(), content.length()); BodyData.outFile.flush();
+		// ss.write(content.c_str(), content.length()); ss.flush();
+		
+	}
 	body.erase(0, end + len);
 }
 
-void	Request::openFile(const string &fileName)
+void	Request::openFile(const string &fileNamee)
 {
 	if (!BodyData.outFile.is_open())
 	{
-		BodyData.outFile.open(fileName, ios::binary | ios::trunc);
+		BodyData.outFile.open(fileNamee, ios::binary | ios::trunc);
 		if (!BodyData.outFile.is_open())
-			{RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileName);}
+			{RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileNamee);}
 	}
 }
 
@@ -52,7 +58,7 @@ void	Request::getQweryString(string &body)
 	body.erase(0, val.length());
 }
 
-int	Request::getFileName(string &body, string &fileName)
+int	Request::getFileName(string &body)
 {
 	string tmp = body.substr(body.find(BodyData.boundry) + BodyData.boundry.length(), body.length());
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
@@ -69,9 +75,9 @@ int	Request::getFileName(string &body, string &fileName)
 		size_t end = first.rfind("\"\r\n");
 		size_t endV = first.rfind("\"; ");
 		if (end != NP)
-			fileName = first.substr(0, end);
+			BodyData.fileName = first.substr(0, end);
 		else if (endV != NP)
-			fileName = first.substr(0, endV);
+			BodyData.fileName = first.substr(0, endV);
 		return (1);
 	}
 	else
@@ -86,13 +92,12 @@ int	Request::getFileName(string &body, string &fileName)
 bool	Request::isBoundary(string &body)
 {
 	size_t	contentEndtPos = 0, endboundryPos = 0, boundryPos = body.find(BodyData.boundry);
-	string	fileName;
 
 	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
 	else writeFile(body, 0, boundryPos, 0);
 	BodyData.outFile.close();
 	
-	int i = getFileName(body, fileName);
+	int i = getFileName(body);
 	if (i == 1)
 	{
 		body.erase(0, body.find(DCRLF) + 4);
@@ -105,7 +110,7 @@ bool	Request::isBoundary(string &body)
 			contentEndtPos = endboundryPos;
 		else
 			contentEndtPos = body.length();
-		openFile(RequestData.fileLocation + "/" + fileName);
+		openFile(RequestData.fileLocation + "/" + BodyData.fileName);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)
@@ -134,7 +139,7 @@ void	Request::parseBoundryBody(string &body)
 		{
 			endboundryPos = body.find(BodyData.endBoundry);	
 			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());
-			printV(BodyData.Vec);
+			// printV(BodyData.Vec);
 			RequestData.requestStat = 2;
 		}
 	}

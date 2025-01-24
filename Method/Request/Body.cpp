@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 19:21:49 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 14:27:59 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,30 @@ void	Request::parseBodyTypes(string &body)
 	BodyData.newStr.append(body.c_str(), body.length());
 	string last = BodyData.newStr.substr(std::max(0, (int)(BodyData.newStr.length() - BodyData.endBoundry.length())));
 
-	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
-		return;
+	static u_long totalBodySize;
+	totalBodySize += body.length();
+	
+	cout << YELLOW << "-->" << BodyData.bodyType << RESET << endl;
+
+	if (totalBodySize > RequestData.maxBodySize)
+	{
+		RequestData.codeStatus = 400;
+		RequestData.requestStat = 2;
+		RequestData.isCgi = false;
+		BodyData.outFile.close();
+		string name = RequestData.fileLocation + "/" + BodyData.fileName;
+		std::remove(name.c_str());
+		throw runtime_error("MAX bady szie1");
+	}
+
 
 	if (RequestData.isCgi && BodyData.bodyType != NONE)
 	{
-		cout << GREEN << BodyData.bodyType << RESET << endl;
-		// exit(99);
 		RequestData.isCgi = false;
 		// check chunked
 	}
+	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
+		return;
 	switch (BodyData.bodyType)
 	{
 		case (BOUNDARY):parseBoundryBody(BodyData.newStr); break;
@@ -35,8 +49,7 @@ void	Request::parseBodyTypes(string &body)
 		case (BODY_SIZE): parseBodyLength(BodyData.newStr); break;
 		case(NONE):
 		{
-			RequestData.requestStat = 2;
-			break;
+			RequestData.requestStat = 2;	break;
 		} 
 	}	
 }

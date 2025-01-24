@@ -22,6 +22,8 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm *.py /Users/sdemnati/goinfre/UP/* .DS_Store *.jpeg *.txt *.pdf *.jpg
+	rm -rf $(NAME) rm *.py /Users/sdemnati/goinfre/UP/* .DS_Store *.jpeg *.txt *.pdf *.jpg *.png\
+	rm /Users/sdemnati/Desktop/Webserv/Upload/*;
+
 
 re: fclean all

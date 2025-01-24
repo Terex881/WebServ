@@ -6,11 +6,12 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 17:57:17 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 14:29:05 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+#include <stdexcept>
 
 void Request::parseChunkedBody(string &body)
 {
@@ -71,7 +72,6 @@ void Request::parseBodyLength(string &body)
 	RequestData.isUpload = true;
 	openFile(RequestData.fileLocation + "/HELLO." + HeaderData.extension);
 	
-
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();
 	BodyData.bodySize = tmp;

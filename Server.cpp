@@ -129,13 +129,13 @@ void Server::ft_start(int size, int *fd)
 									{
 										std::cerr << RED << e.what() << RESET << '\n';
 										clientsMap[client_socket].getReq().getRequestData().requestStat = 2;
+						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 									}
 									
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
-					if (clientsMap[client_socket].getReq().getRequestData().isCgi)
+					if (clientsMap[client_socket].getReq().getRequestData().isCgi && clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
 					{
 						clientsMap[client_socket].getCgi().execute_script(client_socket, kq, &clientsMap[client_socket]);
 					}
