@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 18:55:19 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 10:24:04 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,14 @@ void	Request::writeFile(string &body, int start, size_t end, size_t len)
 	body.erase(0, end + len);
 }
 
-void	Request::openFile(const string &fileNamee)
+void	Request::openFile(const string &name)
 {
 	if (!BodyData.outFile.is_open())
 	{
-		BodyData.outFile.open(fileNamee, ios::binary | ios::trunc);
+		BodyData.outFile.open(name, ios::binary | ios::trunc);
 		if (!BodyData.outFile.is_open())
-			{RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileNamee);}
+			clean(505, "FAILED OPEN " + name);
+			// {RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileNamee);}
 	}
 }
 

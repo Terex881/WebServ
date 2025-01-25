@@ -60,7 +60,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
-		envp[3] = const_cast<char*>("param=sddd");
+		envp[3] = const_cast<char*>("para-m=sddd");
 		envp[4] = const_cast<char*>(key_val.c_str());
 		// envp[5] = NULL;
 

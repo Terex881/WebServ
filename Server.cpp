@@ -4,7 +4,7 @@
 #include "Method/Request/Request.hpp"
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 4096 *2
 
 // Function to clear socket's incoming buffer
 void clearSocketBuffer(int socket) {
@@ -33,7 +33,6 @@ void Server::ft_start(int size, int *fd)
 		exit(1);
 	}
 	//---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
-													// ofstream ss("tmp.py", ios::app | ios::binary);
 
 													static int s = clock();
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,7 +117,10 @@ void Server::ft_start(int size, int *fd)
 				{
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
+									
+									// ofstream ss("tmp.py", ios::app | ios::binary);
 									// ss << "[" << client_socket << "]"  << endl;
+									// // ss << clientsMap[client_socket].getReq().getHeaderData().url;
 									// ss << msg;
 									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									try
@@ -151,6 +153,7 @@ void Server::ft_start(int size, int *fd)
 			else if (events[i].filter == EVFILT_WRITE)
 			{
 				Client *data = (Client *)events[i].udata;
+				// cout << data->getReq().getRequestData().
 				// data->getReq().getRequestData().isDirListening
 				// data->getReq().getRequestData().codeStatus;
 				// data->getReq().getRequestData().isRedirect
@@ -223,9 +226,24 @@ void Server::ft_start(int size, int *fd)
 
 							data->res_obj.file.close();
 							data->getReq().getRequestData().codeStatus = 200;
-							close(client_socket);
-							EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-							kevent(kq, &event, 1, NULL, 0, NULL);
+							
+							if (data->getReq().getHeaderData().isAlive == 0)
+				 			{
+								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+								kevent(kq, &event, 1, NULL, 0, NULL);
+								cout << YELLOW << "connection close \n" << RESET;
+								close(client_socket);
+								data->getReq().clearData();
+							}
+							else
+							{
+								cout << YELLOW << "connection open " << data->getReq().getRequestData().fd << "\n" << RESET;
+								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+								kevent(kq, &event, 1, NULL, 0, NULL);
+								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+								kevent(kq, &event, 1, NULL, 0, NULL);
+								data->getReq().clearData();
+							}
 						}
 				}
 			}

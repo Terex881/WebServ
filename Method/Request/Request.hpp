@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 16:52:52 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 12:09:07 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ typedef struct s_Header
 	std::map<string, string>	queryStringMap;
 	std::map<string, string>	bigMap;
 	string						url;
+	bool						isAlive;
 }	t_Header;
 
 typedef struct s_Body
@@ -145,6 +146,9 @@ class Request
 		t_Request&	getRequestData();
 		t_Header&	getHeaderData();
 		t_Body&		getBodyData();
+		void		clean(int code, string message);
+		void		clearData();
+
 
 		//---------------------------------------HEADER---------------------------------------
 

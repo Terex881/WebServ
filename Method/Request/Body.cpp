@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 18:43:01 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 15:26:58 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,21 @@ void	Request::parseBodyTypes(string &body)
 	static u_long totalBodySize;
 	totalBodySize += body.length();
 
+	// cout << BLUE << BodyData.bodyType << RESET << endl;
+
 	if (BodyData.bodyType == CHUNKED && body == "0\r\n\r\n")
 		BodyData.bodyType = NONE;
 
 	if (totalBodySize > RequestData.maxBodySize)
 	{
-		RequestData.codeStatus = 400;
-		RequestData.requestStat = 2;
 		RequestData.isCgi = false;
 		BodyData.outFile.close();
 		string name = RequestData.fileLocation + "/" + BodyData.fileName;
 		std::remove(name.c_str());
-		throw runtime_error("MAX bady szie1");
+		clean(400, "MAX bady szie1");
+		// RequestData.codeStatus = 400;
+		// RequestData.requestStat = 2;
+		// throw runtime_error("MAX bady szie1");
 	}
 
 
