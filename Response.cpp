@@ -1,4 +1,5 @@
 #include "./Response.hpp"
+#include "Method/Request/Request.hpp"
 
 
 size_t	Calculate_File_Size(std::ifstream &file)
@@ -97,6 +98,15 @@ void	Response::Res_get_chunk(int &sent_head)
 		this->end = 1;
 		return;
 	}
+	if ((isDirectory(Working_Path) && !default_page.empty()))
+	{
+		Working_Path = default_page;
+		file.close();
+		filename = default_page;
+		Content_Type = GetMimeType(default_page);
+		file.open(default_page, std::ios::binary);
+		default_page = "";
+	}
 	if (Status_Code != 200)
 	{
 		std::cout << Status_Code << std::endl;
@@ -128,31 +138,25 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
+			cout << YELLOW<<"Working_Path : " << Working_Path << endl;
 			header =
-			"HTTP/1.1 200 OK\r\n"
-			"Content-Type: text/plain\r\n"
-			"Content-Length: 21\r\n"
-			"\r\n"
-			"Need some checks";
+				"HTTP/1.1 201 OK\r\n"
+				"Content-Type: " + GetMimeType(Working_Path) + "\r\n"
+				"Transfer-Encoding: chunked\r\n"
+				"Connection: keep-alive\r\n"
+				"\r\n";
+			sent_head = 1;
+			this->bytesRead = 0;
 			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return;
+			Method = "GET";
+			return	;
 		}
 	}
 	else if (Method == "GET")
 	{
-		if ((isDirectory(Working_Path) && !default_page.empty()))
+		if (isFile(Working_Path))
 		{
-			Working_Path = default_page;
-			file.close();
-			filename = default_page;
-			Content_Type = GetMimeType(default_page);
-			file.open(default_page, std::ios::binary);
-			default_page = "";
-		}
-		else if (isFile(Working_Path))
-		{
-			if (!file.is_open())   ////////////// SEGFAULT
+			if (!file.is_open())
 			{
 				std::cout << "Not Open : " << filename << std::endl;
 				header = 
@@ -169,8 +173,8 @@ void	Response::Res_get_chunk(int &sent_head)
 			else
 			{
 				if (!sent_head)
-				{
-					cout <<"path :: " << Working_Path << endl;
+				{					
+					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					// std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
@@ -196,6 +200,7 @@ void	Response::Res_get_chunk(int &sent_head)
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
 						responseStream << "0\r\n\r\n";
+						this->end = 1;
 						return ;  // End of file or read error
 					}
 					responseStream << std::hex << current_read << "\r\n";
@@ -247,7 +252,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
-			cout << Working_Path << " + " << isLesn << endl;
+			// cout << Working_Path << " + " << isLesn << endl;
 			header =
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
@@ -300,7 +305,7 @@ std::string Response::GetMimeType(const std::string& filename)
 
 	// Document Types
 	if (ext == "html" || ext == "htm") return "text/html";
-	if (ext == "txt") return "text/plain";
+	if (ext == "txt") return "text/html";
 	if (ext == "css") return "text/css";
 	if (ext == "csv") return "text/csv";
 	if (ext == "xml") return "text/xml";

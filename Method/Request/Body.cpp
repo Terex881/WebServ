@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 19:21:49 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 15:26:58 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,29 +17,42 @@ void	Request::parseBodyTypes(string &body)
 	BodyData.newStr.append(body.c_str(), body.length());
 	string last = BodyData.newStr.substr(std::max(0, (int)(BodyData.newStr.length() - BodyData.endBoundry.length())));
 
+	static u_long totalBodySize;
+	totalBodySize += body.length();
+
+	// cout << BLUE << BodyData.bodyType << RESET << endl;
+
+	if (BodyData.bodyType == CHUNKED && body == "0\r\n\r\n")
+		BodyData.bodyType = NONE;
+
+	if (totalBodySize > RequestData.maxBodySize)
+	{
+		RequestData.isCgi = false;
+		BodyData.outFile.close();
+		string name = RequestData.fileLocation + "/" + BodyData.fileName;
+		std::remove(name.c_str());
+		clean(400, "MAX bady szie1");
+		// RequestData.codeStatus = 400;
+		// RequestData.requestStat = 2;
+		// throw runtime_error("MAX bady szie1");
+	}
+
+
+	if (RequestData.isCgi &&  (BodyData.bodyType == BODY_SIZE || BodyData.bodyType == CHUNKED))
+		RequestData.isCgi = false;
+	
 	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;
-
-	if (RequestData.isCgi && BodyData.bodyType != NONE)
-	{
-		cout << GREEN << BodyData.bodyType << RESET << endl;
-		// exit(99);
-		RequestData.isCgi = false;
-		// check chunked
-	}
 	switch (BodyData.bodyType)
 	{
-		case (BOUNDARY):parseBoundryBody(BodyData.newStr); break;
-		case (CHUNKED): parseChunkedBody(BodyData.newStr); break;
-		case (CHUNKED_BOUNDARY): parseChunkedBoundryBody(BodyData.newStr); break;
-		case (BODY_SIZE): parseBodyLength(BodyData.newStr); break;
-		case(NONE):
-		{
-			RequestData.requestStat = 2;
-			break;
-		} 
-	}	
+		case (BOUNDARY):parseBoundryBody(BodyData.newStr);	break;
+		case (CHUNKED): parseChunkedBody(BodyData.newStr);	break;
+		case (CHUNKED_BOUNDARY): parseChunkedBoundryBody(BodyData.newStr);	break;
+		case (BODY_SIZE): parseBodyLength(BodyData.newStr);	break;
+		case(NONE):	RequestData.requestStat = 2;	break;
+	}
 }
+// 150 0 000 000
 
 bool Request::hasOneMatch(const std::string& str1, const std::string& str2)
 {

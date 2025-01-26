@@ -60,15 +60,27 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
-		envp[3] = const_cast<char*>("param=sddd");
+		envp[3] = const_cast<char*>("para-m=sddd");
 		envp[4] = const_cast<char*>(key_val.c_str());
 		// envp[5] = NULL;
 
 		for (; it != data->getReq().getHeaderData().queryStringMap.end(); it++)
 		{
-			key_val = it->first + "="+ it->second;
-			envp[i++] = const_cast<char*>(key_val.c_str());
+
+			// it->first = it->first + it->second;
+			envp[i++] = const_cast<char*>(it->second.c_str());
 		}
+		// i = 0;
+		// while(i < 8)
+		// {
+		// 	cout << "-->" << envp[i] <<endl;
+		// 	i++;
+
+		// }
+		// cout << ">> 5 "<< envp[5] << endl;
+		// cout << ">> 6 "<< envp[6] << endl;
+		// cout << ">> 7 "<< envp[7] << endl;
+
 		envp[i] = NULL;
 		char* argv[] = {
 			const_cast<char*>(py_path),

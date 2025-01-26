@@ -6,13 +6,12 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 18:14:40 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 15:38:12 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../../Config/File_Parsing.hpp"
-
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -32,7 +31,7 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		if (equalPos != string::npos && equalPos < endPos) 
 		{
 			key = queryStrings.substr(0, equalPos);
-			value = queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
+			value = key + "=" + queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
 			HeaderData.queryStringMap.insert(make_pair(key, value));
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
@@ -45,8 +44,9 @@ void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 	{
-		RequestData.codeStatus = 400;	RequestData.requestStat = 2;
-		throw runtime_error("bad URL");
+		clean(400, "bad URL");
+		// RequestData.codeStatus = 400;	RequestData.requestStat = 2;
+		// throw runtime_error("bad URL");
 	}
 	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
@@ -73,7 +73,8 @@ void Request::parseFirstLine(const string &line)
 
 	if (isspace(line[0]))
 	{
-		RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("foud space in the begening");
+		clean(400, "foud space in the begening");
+		// RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("foud space in the begening");
 	}
 
 	std::istringstream ss(line);
@@ -83,17 +84,18 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
 
-	cout << RED << uri << RESET << endl;
 	HeaderData.requestMethod = method;
 	if (method != "POST" && method != "GET" && method != "DELETE")
-	{	
-		RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("501 Not Implementedddd");
+	{
+		clean(501, "501 Not Implementedddd");
+		// RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("501 Not Implementedddd");
 	}
 	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
 		parseUri(it->second);
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 	{
-		RequestData.codeStatus = 505;	RequestData.requestStat = 2;	throw runtime_error("error: invalid version");
+		clean(505, "error: invalid version");
+		// RequestData.codeStatus = 505;	RequestData.requestStat = 2;	throw runtime_error("error: invalid version");
 	}
 }
 
@@ -110,8 +112,9 @@ void Request::fillHeaderMap(string &header)
 		
 		key = line.substr(0, colonPos);
 		if(key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0])) {
-			RequestData.codeStatus = 400;	RequestData.requestStat = 2;
-			throw runtime_error("foud space or doesn't find :");
+			clean(400, "foud space or doesn't find :");
+			// RequestData.codeStatus = 400;	RequestData.requestStat = 2;
+			// throw runtime_error("foud space or doesn't find :");
 		}
 
 		size_t valEndPos  = line.find_first_not_of(' ', colonPos + 1);
@@ -122,7 +125,7 @@ void Request::fillHeaderMap(string &header)
 		if (key == "transfer-encoding") // check other
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower); // check this 
 
-		fillData(key, value);		
+		fillData(key, value);
 		HeaderData.bigMap.insert(std::make_pair(key, value));	
 		header.erase(0, line.length() + 2);
 	}
@@ -147,7 +150,10 @@ void Request::achref()
 	}
 	if (location.values.size())
 	{
+		// get max bosy size 
 		location_data l_data = configFileObj.get_location_val(location);
+		RequestData.maxBodySize = atol(server.values["client_max_body_size"].c_str()) * 10000000;
+		RequestData.fileLocation = l_data.root;
 		// redirection
 		if (!l_data.rturn.empty())
 			RequestData.redirection = configFileObj.split_1(l_data.rturn);
@@ -213,7 +219,8 @@ void Request::achref()
 
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
+			clean(405, "Method Not Allowed");
+			// RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
@@ -221,11 +228,12 @@ void Request::achref()
 			RequestData.isRedirect = true;
 		if (!server.values["server_name"].empty())
 			RequestData.serverName = server.values["server_name"];	
-		RequestData.fileLocation = l_data.root;
+		
 	}
 	else
 	{
-		RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("location not found");
+		// RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("location not found");
+		clean(404, "location not found");
 	}
 }
 
@@ -233,17 +241,21 @@ void Request::parseHeader(string &header)
 {
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
+
+
+	cout << BLUE << "\n-------------------------------------------------------------------------------------\n" << RESET;
 	
 
 	parseFirstLine(firstLine);
+	cout << YELLOW << firstLine << RESET << endl;
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
 
 	achref();
-	// if (RequestData.isCgi && HeaderData.requestMethod == "POST")
-	// 	RequestData.isCgi = false;
+	// print(HeaderData.bigMap);
 	getTypes(HeaderData.bigMap);
+	
 }
 
 void Request::fillData(const string &key, const string &value)
@@ -255,19 +267,51 @@ void Request::fillData(const string &key, const string &value)
 		BodyData.bodySize = (std::atol(value.c_str()));
 	if (key == "host" && (Pos = value.find(":")) != NP)
 		HeaderData.port = value.substr(Pos + 1, 10);
+	// if (key == "connection" && value == "keep-alive")//:keep-alive
+	// {
+	// 	cout << RED << "HERE\n" << RESET ;
+	// 	HeaderData.isAlive = true;
+	// }
+	// if (key == "connection" && value == "close")
+	// {
+	// 	cout << BLUE << "OK\n" << RESET ;
+	// 	HeaderData.isAlive = false;
+	// }
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
 {
 	map<string, string>::const_iterator	multiPart = mp.find("content-type");
 	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
+	map<string, string>::const_iterator	alive = mp.find("connection");
+	
+	if (alive != mp.end() && alive->second == "close")
+		HeaderData.isAlive = false;
+	else if (alive != mp.end())
+		HeaderData.isAlive = true;
+		
 	RequestData.requestStat = 1;
 
 	if (BodyData.bodySize && RequestData.isCgi)
 		BodyData.bodyType = BODY_SIZE;
-		
+	
+	// cout << RED << RequestData.maxBodySize << RESET << endl;
+	// cout << RED << BodyData.bodySize << RESET << endl;
+
+	
+
+	if (BodyData.bodySize > RequestData.maxBodySize)
+	{
+		RequestData.isCgi = false;
+		clean(400, "MAX bady szie");
+		// RequestData.codeStatus = 400;
+		// RequestData.requestStat = 2;
+		// throw runtime_error("MAX bady szie");
+	}
+
 	if (HeaderData.port.empty())
-		{RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");} // chek
+		clean(404, "no Host found !!");
+		// {RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");} // chek
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -284,8 +328,12 @@ void Request::getTypes(const std::map<string, string> &mp)
 		else if (chunked->second == "chunked" && bol)
 			BodyData.bodyType = CHUNKED_BOUNDARY;
 		else
-			{RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request2");}
+			clean(501, "Bad Request2");
+			// {RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request2");}
 	}
 	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
-		{RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
+			clean(501, "Bad Request1");
+		// {RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
+
+	cout << RED << "HERE:" << HeaderData.url << RESET << endl;
 }

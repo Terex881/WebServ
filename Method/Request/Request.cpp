@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 16:14:33 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/25 16:18:47 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,71 @@ Request::Request()
 	RequestData.isRedirect = false;
 	RequestData.isCgi = false;
 	RequestData.isUpload = false;
+	HeaderData.isAlive = true;
+	cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
 	// RequestData.maxBodySize = 0;
 }
 
 Request::~Request()	{}
 
+
+void Request::clean(int code, string message)
+{
+	RequestData.codeStatus = code;
+	RequestData.requestStat = 2;
+	throw runtime_error(message);
+}
+
+
+void Request::clearData()
+{
+	BodyData.bodySize = 0;
+	RequestData.requestStat = 0;
+	RequestData.codeStatus = 200;
+	RequestData.isDirListening = false;
+	RequestData.isRedirect = false;
+	RequestData.isCgi = false;
+	RequestData.isUpload = false;
+	HeaderData.isAlive = true;
+	HeaderData.requestMethod.clear();
+	HeaderData.bigMap.clear();
+	HeaderData.queryStringMap.clear();
+	// HeaderData.url.clear();
+
+	RequestData.header.clear();
+	// RequestData.requestStat.clear();
+	// RequestData.fd.clear();
+	// RequestData.is_server.clear();
+	// RequestData.is_client.clear();
+	// RequestData.sent_head.clear();
+	RequestData.first.clear();
+	// RequestData.bytes_sent.clear();
+	// RequestData.file.clear();
+	// RequestData.codeStatus.clear();
+	// RequestData.isDirListening.clear();
+	// RequestData.isRedirect.clear();
+	// RequestData.maxBodySize.clear();
+	RequestData.serverName.clear();
+	// RequestData.isCgi.clear();
+	RequestData.timeOut.clear();
+	RequestData.pathInfo.clear();
+	RequestData.extension.clear();
+	RequestData.fileLocation.clear();
+	RequestData.executable_file.clear();
+	RequestData.redirection.clear();
+	RequestData.default_page.clear();
+	// RequestData.isUpload.clear();
+
+	// BodyData.bodyType = NONE;
+	// BodyData.bodySize.clear();
+	BodyData.boundry.clear();
+	BodyData.endBoundry.clear();
+	BodyData.Vec.clear();
+	BodyData.outFile.clear();
+	BodyData.newStr.clear();
+	BodyData.buffer.clear()	;
+	BodyData.fileName.clear();
+}
 
 
 void Request::print(map<string, string> &mp)
@@ -51,7 +111,9 @@ t_Body&		Request::getBodyData()		{ return BodyData; }
 
 void Request::request(string &request)
 {
-
+	// ofstream ss("tmp.py", ios::app | ios::binary);
+	// ss << request;
+	// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 	if (!RequestData.requestStat)
 	{		
 		size_t pos = request.find(DCRLF);
@@ -84,3 +146,5 @@ void Request::request(string &request)
 			
 	}
 }
+// sala-h
+// SALA_H

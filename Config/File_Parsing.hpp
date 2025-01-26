@@ -11,7 +11,7 @@ using std::ifstream;
 using std::stringstream;
 using std::cout;
 using std::endl;
-#define NP string::npos
+#define NP std::string::npos
 
 
 struct dt

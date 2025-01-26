@@ -11,7 +11,8 @@ thislist = ["My", "First", "Python", "Execution", "With CGI"]
 
 # # print('Content-Type: ' + os.environ['REQUEST_METHOD']+'\r\n', end="")
 print(" ".join(thislist))
-# print('name : ' + os.environ['test'])
+print('first name : ' + os.environ['fname'])
+print('last name : ' + os.environ['lname'])
 # while True:
 # 	pass
 # for i in range(1001):

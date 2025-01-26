@@ -6,16 +6,27 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 17:57:17 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/24 17:53:28 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
+string getNameFromTime()
+{
+	std::time_t now = std::time(nullptr);
+    std::tm* localTime = std::localtime(&now);
+    
+    std::stringstream buffer;
+    buffer << std::put_time(localTime, "%H:%M:%S");
+    
+    return buffer.str();
+
+}
 void Request::parseChunkedBody(string &body)
 {
 	RequestData.isUpload = true;
-	openFile(RequestData.fileLocation + "/HALLO." + HeaderData.extension);
+	openFile(RequestData.fileLocation + "/" + getNameFromTime());
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -65,17 +76,20 @@ void Request::parseChunkedBody(string &body)
 	}
 }
 
+
 void Request::parseBodyLength(string &body)
 {
 	// get name from time
 	RequestData.isUpload = true;
-	openFile(RequestData.fileLocation + "/HELLO." + HeaderData.extension);
+	openFile(RequestData.fileLocation + "/" + getNameFromTime());
 	
-
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();
 	BodyData.bodySize = tmp;
 	if (!BodyData.bodySize)
+	{
 		RequestData.requestStat = 2;
+		BodyData.outFile.close();
+	}
 	writeFile(body, 0, body.length(), 0);
 }

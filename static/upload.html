@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="upload-container">
+      <h1>Upload Your File</h1>
+      <form
+        action="http://0.0.0.0:3344/"
+        method="POST"
+        enctype="multipart/form-data"
+        headers="Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW; transfer-encoding: chunked"
+      >
+        <label class="upload-label" for="file">
+          Click to Choose File
+          <input class="file-input" type="file" name="file" id="file" />
+        </label>
+        <br /><br />
+        <button class="upload-btn" type="submit">Upload</button>
+      </form>
+    </div>
+  </body>
+</html>
