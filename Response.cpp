@@ -85,7 +85,6 @@ void	Response::Res_get_chunk(int &sent_head)
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
-
 	if (redirection.size())
 	{
 		header = 
@@ -171,6 +170,7 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				if (!sent_head)
 				{
+					cout <<"path :: " << Working_Path << endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					// std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
