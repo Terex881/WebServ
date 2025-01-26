@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 15:38:12 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 17:27:01 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,12 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		{
 			key = queryStrings.substr(0, equalPos);
 			value = key + "=" + queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
-			HeaderData.queryStringMap.insert(make_pair(key, value));
+			HeaderData.queryStringVec.push_back(value);
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	print(HeaderData.queryStringMap);
+	print(HeaderData.queryStringVec);
 }
  
 void Request::parseUri(string &str)
@@ -303,7 +303,7 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (BodyData.bodySize > RequestData.maxBodySize)
 	{
 		RequestData.isCgi = false;
-		clean(400, "MAX bady szie");
+		clean(413, "Content Too Large");
 		// RequestData.codeStatus = 400;
 		// RequestData.requestStat = 2;
 		// throw runtime_error("MAX bady szie");

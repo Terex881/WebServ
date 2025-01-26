@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 12:09:07 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 17:47:22 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ typedef struct s_Header
 	string 						port;
 	string						extension;
 	string						requestMethod;
-	std::map<string, string>	queryStringMap;
+	std::vector<string>			queryStringVec;
 	std::map<string, string>	bigMap;
 	string						url;
 	bool						isAlive;
@@ -85,7 +85,7 @@ typedef struct s_Body
 	size_t									bodySize;
 	string									boundry;
 	string									endBoundry;
-	std::vector<std::pair<string, string> >	Vec;
+	// std::vector<std::pair<string, string> >	Vec;
 	ofstream								outFile;
 	string									newStr;
 	string									buffer;	
@@ -124,7 +124,6 @@ class Request
 			BodyData.bodySize = copy.BodyData.bodySize;
 			BodyData.boundry = copy.BodyData.boundry;
 			BodyData.endBoundry = copy.BodyData.endBoundry;
-			BodyData.Vec = copy.BodyData.Vec;
 			BodyData.newStr = copy.BodyData.newStr;
 			BodyData.buffer = copy.BodyData.buffer;
 			// BodyData.outFile = copy.BodyData.outFile;
@@ -141,7 +140,7 @@ class Request
 		//---------------------------------------REQUEST---------------------------------------
 
 		void		request(string &body);
-		void		print(map<string, string> &headerMap);
+		void		print(vector<string> &headerMap);
 		void		printV(vector<pair<string, string> > &mp);
 		t_Request&	getRequestData();
 		t_Header&	getHeaderData();

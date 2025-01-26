@@ -147,6 +147,8 @@ void Server::ft_start(int size, int *fd)
 						cout << GREEN << "[--------------------------------DONE--------------------------------]" << RESET << endl;
 						EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &clientsMap[client_socket]);
 						kevent(kq, &event, 1, NULL, 0, NULL);
+						EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+						kevent(kq, &event, 1, NULL, 0, NULL);
 					}
 				}
 			}

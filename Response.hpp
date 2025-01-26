@@ -53,6 +53,8 @@ class Response
 		bool	isDirectory(const std::string& path);
 		void	Res_get_chunk(int &sent_head);
 		static string	GetMimeType(const std::string& filename);
+
+		void salah();
 };
 
 #endif

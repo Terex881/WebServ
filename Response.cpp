@@ -80,6 +80,12 @@ Response& Response::operator=(const Response& other)
     return *this;
 }
 
+
+void Response::salah()
+{
+
+}
+
 void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
@@ -107,24 +113,24 @@ void	Response::Res_get_chunk(int &sent_head)
 		file.open(default_page, std::ios::binary);
 		default_page = "";
 	}
-	if (Status_Code != 200)
-	{
-		std::cout << Status_Code << std::endl;
+	// if (Status_Code != 200)
+	// {
+	// 	std::cout << Status_Code << std::endl;
 		
-			header = 
-				"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
-				"Content-Type: text/plain\r\n"
-				"Content-Length: 15\r\n"
-				"\r\n"
-				"Internal Errorr";
-			body = "";
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return	;
-	}
-	else if (Method == "POST")
+	// 		header = 
+	// 			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+	// 			"Content-Type: text/plain\r\n"
+	// 			"Content-Length: 15\r\n"
+	// 			"\r\n"
+	// 			"Internal Errorr";
+	// 		body = "";
+	// 		responseStream.write(header.c_str(), header.length());
+	// 		this->end = 1;
+	// 		return	;
+	// }
+	if (Method == "POST")
 	{
-		if (isUpload)
+		if (isUpload && Status_Code == 200)
 		{
 			header =
 			"HTTP/1.1 200 OK\r\n"
@@ -138,19 +144,31 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
-			cout << YELLOW<<"Working_Path : " << Working_Path << endl;
 			header =
-				"HTTP/1.1 201 OK\r\n"
-				"Content-Type: " + GetMimeType(Working_Path) + "\r\n"
-				"Transfer-Encoding: chunked\r\n"
-				"Connection: keep-alive\r\n"
-				"\r\n";
-			sent_head = 1;
-			this->bytesRead = 0;
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 15\r\n"
+			"\r\n"
+			"Error in upload";
 			responseStream.write(header.c_str(), header.length());
-			Method = "GET";
-			return	;
+			this->end = 1;
+			return;
 		}
+		// else
+		// {
+			// cout << YELLOW<<"Working_Path : " << Working_Path << endl;
+			// header =
+			// 	"HTTP/1.1 201 OK\r\n"
+			// 	"Content-Type: " + GetMimeType(Working_Path) + "\r\n"
+			// 	"Transfer-Encoding: chunked\r\n"
+			// 	"Connection: keep-alive\r\n"
+			// 	"\r\n";
+			// sent_head = 1;
+			// this->bytesRead = 0;
+			// responseStream.write(header.c_str(), header.length());
+			// Method = "GET";
+			// return	;
+		// }
 	}
 	else if (Method == "GET")
 	{
@@ -174,7 +192,7 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				if (!sent_head)
 				{					
-					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
+					// cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					// std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
