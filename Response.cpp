@@ -108,7 +108,7 @@ string	Response::send_response_with_cookie(int client_socket)
 	(void)client_socket;
 	cookie_gen++;
 	client_cookie = cookie_gen;
-	std::string cookie_header = generate_set_cookie_header("user", std::to_string(cookie_gen));
+	std::string cookie_header = generate_set_cookie_header("user", _to_string(cookie_gen));
 	std::string response = "HTTP/1.1 200 OK\r\n";
 	response += "Content-Type: text/html\r\n";
 	response += cookie_header;
@@ -131,7 +131,7 @@ void	Response::handle_cgi_response(int &sent_head)
 	if (offset == std::string::npos)
 	{
 		header = 
-			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
 			"Content-Length: 15\r\n"
 			"\r\n"
@@ -159,7 +159,7 @@ void	Response::Res_get_chunk(int &sent_head)
 	if (Method != "GET" && Method != "POST")
 	{
 		header = 
-			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
 			"Content-Length: 15\r\n"
 			"\r\n"
@@ -301,7 +301,7 @@ void	Response::Res_get_chunk(int &sent_head)
 				header =
 				"HTTP/1.1 404 Not Found\r\n"
 				"Content-Type: text/html; charset=UTF-8\r\n"
-				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"Content-Length: "+_to_string(response.length())+"\r\n"
 				"\r\n"+ response;
 			}
 			else
@@ -317,7 +317,7 @@ void	Response::Res_get_chunk(int &sent_head)
 			header =
 				"HTTP/1.1 200 OK\r\n"
 				"Content-Type: text/html; charset=UTF-8\r\n"
-				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"Content-Length: "+_to_string(response.length())+"\r\n"
 				"\r\n"+ response;
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;

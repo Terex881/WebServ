@@ -44,3 +44,8 @@ delete check test
 
 adding upload_path key
 
+
+run nginx and test
+
+code status 201
+

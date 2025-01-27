@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/26 17:27:01 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/27 20:13:06 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 	{
-		clean(400, "bad URL");
+		clean(400, "Bad Request : bad URL");
 		// RequestData.codeStatus = 400;	RequestData.requestStat = 2;
 		// throw runtime_error("bad URL");
 	}
@@ -73,7 +73,7 @@ void Request::parseFirstLine(const string &line)
 
 	if (isspace(line[0]))
 	{
-		clean(400, "foud space in the begening");
+		clean(400, "Bad Request : foud space in the begening");
 		// RequestData.codeStatus = 400;	RequestData.requestStat = 2;	throw runtime_error("foud space in the begening");
 	}
 
@@ -87,14 +87,15 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.requestMethod = method;
 	if (method != "POST" && method != "GET" && method != "DELETE")
 	{
-		clean(501, "501 Not Implementedddd");
+		// check if 501
+		clean(400, "Bad Request : 501 Not Implement");
 		// RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("501 Not Implementedddd");
 	}
 	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
 		parseUri(it->second);
 	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
 	{
-		clean(505, "error: invalid version");
+		clean(505, "HTTP Version Not Supported");
 		// RequestData.codeStatus = 505;	RequestData.requestStat = 2;	throw runtime_error("error: invalid version");
 	}
 }
@@ -112,7 +113,7 @@ void Request::fillHeaderMap(string &header)
 		
 		key = line.substr(0, colonPos);
 		if(key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0])) {
-			clean(400, "foud space or doesn't find :");
+			clean(400, "Bad Request : foud space or doesn't find :");
 			// RequestData.codeStatus = 400;	RequestData.requestStat = 2;
 			// throw runtime_error("foud space or doesn't find :");
 		}
@@ -219,7 +220,8 @@ void Request::achref()
 
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
-			clean(405, "Method Not Allowed");
+			// / check with nginx
+			clean(405, "405 Method Not Allowed");
 			// RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
@@ -232,6 +234,7 @@ void Request::achref()
 	}
 	else
 	{
+		// check with nginx
 		// RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("location not found");
 		clean(404, "location not found");
 	}
@@ -242,17 +245,12 @@ void Request::parseHeader(string &header)
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
 
-	
-
-	// cout << YELLOW << firstLine << RESET << endl;
 	parseFirstLine(firstLine);
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
-	// cout << RED << "HEREE:" << HeaderData.url << RESET << endl;
 
 	achref();
-	// print(HeaderData.bigMap);
 	getTypes(HeaderData.bigMap);
 	
 }
@@ -268,6 +266,7 @@ void Request::fillData(const string &key, const string &value)
 		HeaderData.port = value.substr(Pos + 1, 10);
 	if (key == "cookie")
 		HeaderData.queryStringVec.push_back("Cookie=" + value);
+	
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
@@ -286,22 +285,15 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (BodyData.bodySize && RequestData.isCgi)
 		BodyData.bodyType = BODY_SIZE;
 	
-	// cout << RED << RequestData.maxBodySize << RESET << endl;
-	// cout << RED << BodyData.bodySize << RESET << endl;
-
-	
-
 	if (BodyData.bodySize > RequestData.maxBodySize)
 	{
+		// check with nginx
 		RequestData.isCgi = false;
 		clean(413, "Content Too Large");
-		// RequestData.codeStatus = 400;
-		// RequestData.requestStat = 2;
-		// throw runtime_error("MAX bady szie");
 	}
 
 	if (HeaderData.port.empty())
-		clean(404, "no Host found !!");
+		clean(400, "Bad Request : no Host found !!");
 		// {RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("no Host found !!");} // chek
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
@@ -325,6 +317,5 @@ void Request::getTypes(const std::map<string, string> &mp)
 	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
 			clean(501, "Bad Request1");
 		// {RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
-
-	cout << RED << "HERE:" << HeaderData.url << RESET << endl;
 }
+// check 201 

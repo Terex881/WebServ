@@ -6,23 +6,26 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/24 17:53:28 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/27 19:29:15 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
+string _to_string(int number)
+{
+	std::stringstream ss;
+	ss << number;
+	return ss.str();
+}
+
 string getNameFromTime()
 {
 	std::time_t now = std::time(nullptr);
-    std::tm* localTime = std::localtime(&now);
-    
-    std::stringstream buffer;
-    buffer << std::put_time(localTime, "%H:%M:%S");
-    
-    return buffer.str();
-
+	std::tm* localTime = std::localtime(&now);
+	return (_to_string(localTime->tm_hour) + ":" + _to_string(localTime->tm_min) + ":" + _to_string(localTime->tm_sec));
 }
+
 void Request::parseChunkedBody(string &body)
 {
 	RequestData.isUpload = true;
@@ -79,7 +82,6 @@ void Request::parseChunkedBody(string &body)
 
 void Request::parseBodyLength(string &body)
 {
-	// get name from time
 	RequestData.isUpload = true;
 	openFile(RequestData.fileLocation + "/" + getNameFromTime());
 	
