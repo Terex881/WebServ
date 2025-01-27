@@ -121,7 +121,7 @@ void Server::ft_start(int size, int *fd)
 									// ofstream ss("tmp.py", ios::app | ios::binary);
 									// ss << "[" << client_socket << "]"  << endl;
 									// // ss << clientsMap[client_socket].getReq().getHeaderData().url;
-									// ss << msg;
+									cout  << BLUE<<  msg << endl;
 									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									try
 									{
@@ -147,25 +147,15 @@ void Server::ft_start(int size, int *fd)
 						cout << GREEN << "[--------------------------------DONE--------------------------------]" << RESET << endl;
 						EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, &clientsMap[client_socket]);
 						kevent(kq, &event, 1, NULL, 0, NULL);
+						EV_SET(&event, client_socket, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+						kevent(kq, &event, 1, NULL, 0, NULL);
 					}
 				}
 			}
 			else if (events[i].filter == EVFILT_WRITE)
 			{
 				Client *data = (Client *)events[i].udata;
-				// cout << data->getReq().getRequestData().
-				// data->getReq().getRequestData().isDirListening
-				// data->getReq().getRequestData().codeStatus;
-				// data->getReq().getRequestData().isRedirect
-				// data->getReq().getRequestData().serverName
-				// data->getReq().getRequestData().isDirListening;
-				// 
-				// data->getReq().getRequestData().redirection;
 				int client_socket = events[i].ident;
-				// std::stringstream response;
-				// string wer = data->getReq().getHeaderData().url;
-				// data->getReq().getRequestData().isUpload
-
 				std::string responseStr;
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
@@ -219,7 +209,6 @@ void Server::ft_start(int size, int *fd)
 						data->getReq().getRequestData().bytes_sent += bytes_sent;
 						if ((size_t)data->getRes().bytesRead >= data->getRes().Res_Size || data->getRes().end)
 						{
-
 							data->getReq().getRequestData().first = "";
 							clearSocketBuffer(client_socket);
 							data->getRes().bytesRead = 0;

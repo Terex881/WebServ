@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 15:26:58 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 17:47:30 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	Request::parseBodyTypes(string &body)
 		BodyData.outFile.close();
 		string name = RequestData.fileLocation + "/" + BodyData.fileName;
 		std::remove(name.c_str());
-		clean(400, "MAX bady szie1");
+		clean(413, "Content Too Large");
 		// RequestData.codeStatus = 400;
 		// RequestData.requestStat = 2;
 		// throw runtime_error("MAX bady szie1");

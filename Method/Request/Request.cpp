@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 16:18:47 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 15:48:52 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ Request::Request()
 	RequestData.isCgi = false;
 	RequestData.isUpload = false;
 	HeaderData.isAlive = true;
-	cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
-	// RequestData.maxBodySize = 0;
 }
 
 Request::~Request()	{}
@@ -50,7 +48,7 @@ void Request::clearData()
 	HeaderData.isAlive = true;
 	HeaderData.requestMethod.clear();
 	HeaderData.bigMap.clear();
-	HeaderData.queryStringMap.clear();
+	HeaderData.queryStringVec.clear();
 	// HeaderData.url.clear();
 
 	RequestData.header.clear();
@@ -70,7 +68,7 @@ void Request::clearData()
 	// RequestData.isCgi.clear();
 	RequestData.timeOut.clear();
 	RequestData.pathInfo.clear();
-	RequestData.extension.clear();
+	// RequestData.extension.clear();
 	RequestData.fileLocation.clear();
 	RequestData.executable_file.clear();
 	RequestData.redirection.clear();
@@ -81,7 +79,6 @@ void Request::clearData()
 	// BodyData.bodySize.clear();
 	BodyData.boundry.clear();
 	BodyData.endBoundry.clear();
-	BodyData.Vec.clear();
 	BodyData.outFile.clear();
 	BodyData.newStr.clear();
 	BodyData.buffer.clear()	;
@@ -89,10 +86,10 @@ void Request::clearData()
 }
 
 
-void Request::print(map<string, string> &mp)
+void Request::print(vector<string> &mp)
 {
-	for(map<string, string>::iterator it = mp.begin(); it!=mp.end(); it++)
-		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << endl;
+	for(vector<string>::iterator it = mp.begin(); it!=mp.end(); it++)
+		cout << RED << ":" << *it << ":" << endl;
 }
 
 void Request::printV(vector<pair<string, string> > &mp)
@@ -138,7 +135,7 @@ void Request::request(string &request)
 		}
 		else if (HeaderData.requestMethod == "DELETE")
 		{
-			Delete d(HeaderData.url,"/Users/sdemnati/Desktop/Webserv/" , 1, 0);
+			Delete d(HeaderData.url, RequestData.fileLocation, 1, RequestData.isCgi);
 			if (d.Can_Be_Deleted())
 				d.Delete_File();
 			RequestData.requestStat = 2;
@@ -146,5 +143,3 @@ void Request::request(string &request)
 			
 	}
 }
-// sala-h
-// SALA_H

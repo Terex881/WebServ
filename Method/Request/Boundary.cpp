@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 10:24:04 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 15:34:55 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,8 @@ void	Request::getQweryString(string &body)
 		contentEndtPos = body.length();
 	
 	val = key + "=" + body.substr(0, contentEndtPos);
-	HeaderData.queryStringMap.insert(make_pair(key, val));
-
-	// BodyData.Vec.push_back(make_pair(key, val));
-	body.erase(0, val.length());
+	HeaderData.queryStringVec.push_back(val);
+	body.erase(0, val.length() - key.length() - 1);
 }
 
 int	Request::getFileName(string &body)
@@ -117,7 +115,7 @@ bool	Request::isBoundary(string &body)
 
 void	Request::parseBoundryBody(string &body)
 {
-	// RequestData.isUpload = true;
+	RequestData.isUpload = true;
 	size_t boundryPos, endboundryPos;
 	endboundryPos = body.find(BodyData.endBoundry);
 	while(!body.empty())

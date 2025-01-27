@@ -118,38 +118,59 @@ string	Response::send_response_with_cookie(int client_socket)
 	return response;
 }
 
+
+void	Response::handle_cgi_response(int &sent_head)
+{
+	std::string content;
+	char ch;
+	isCgi = false;
+	while (file.get(ch))
+		content += ch;
+
+	size_t offset = content.find("\r\n\r\n");
+	if (offset == std::string::npos)
+	{
+		header = 
+			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 15\r\n"
+			"\r\n"
+			"Internal Errorr";
+		responseStream.write(header.c_str(), header.length());
+		this->end = 1;
+		return;
+	}
+	sent_head = 1;
+	this->bytesRead = 0;
+	header = content.substr(0, offset + 4);
+	responseStream.write(header.c_str(), header.length());
+	file.clear();
+	file.seekg(offset, std::ios::beg);
+	return;
+}
+
+
 void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
-	// if (isCgi)
-	// {
-	// 	// cout << "******|||*** "<< endl;
-	// 	sent_head = 1;
-	// 	// // Read the file into a string and search for the string
-	// 	// std::string content;
-	// 	// char ch;
-	// 	// while (file.get(ch))
-	// 	// {
-	// 	// 	content += ch;
-	// 	// }
+	if (Method != "GET" && Method != "POST")
+	{
+		header = 
+			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 15\r\n"
+			"\r\n"
+			"Internal Errorr";
 
-	// 	// // Find the position of the search string
-	// 	// size_t offset = content.find("\r\n\r\n");
+		body = "";
+		responseStream.write(header.c_str(), header.length());
+		this->end = 1;
+		return;
+	}
 
-	// 	// if (offset == std::string::npos) {
-	// 	// 	std::cerr << "String '" << "\r\n\r\n" << "' not found in the file." << std::endl;
-	// 	// 	return;
-	// 	// }
-
-	// 	// std::cout << "String '" << "\r\n\r\n" << "' found at offset: " << offset << std::endl;
-
-	// 	// // Seek to the offset in the file and read from there
-	// 	// file.clear();  // Clear any EOF flag or errors
-	// 	file.seekg(100, std::ios::beg);
-	// }
 	if (redirection.size())
 	{
 		header = 
@@ -171,24 +192,9 @@ void	Response::Res_get_chunk(int &sent_head)
 		file.open(default_page, std::ios::binary);
 		default_page = "";
 	}
-	if (Status_Code != 200)
+	if (Method == "POST")
 	{
-		std::cout << Status_Code << std::endl;
-		
-			header = 
-				"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
-				"Content-Type: text/plain\r\n"
-				"Content-Length: 15\r\n"
-				"\r\n"
-				"Internal Errorr";
-			body = "";
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return	;
-	}
-	else if (Method == "POST")
-	{
-		if (isUpload)
+		if (isUpload && Status_Code == 200)
 		{
 			header =
 			"HTTP/1.1 200 OK\r\n"
@@ -202,18 +208,15 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
-			cout << YELLOW<<"Working_Path : " << Working_Path << endl;
 			header =
-				"HTTP/1.1 201 OK\r\n"
-				"Content-Type: " + GetMimeType(Working_Path) + "\r\n"
-				"Transfer-Encoding: chunked\r\n"
-				"Connection: keep-alive\r\n"
-				"\r\n";
-			sent_head = 1;
-			this->bytesRead = 0;
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: 15\r\n"
+			"\r\n"
+			"Error in upload";
 			responseStream.write(header.c_str(), header.length());
-			Method = "GET";
-			return	;
+			this->end = 1;
+			return ;
 		}
 	}
 	else if (Method == "GET")
@@ -236,7 +239,12 @@ void	Response::Res_get_chunk(int &sent_head)
 			}
 			else
 			{
-				if (!sent_head && !isCgi)
+				if (isCgi)
+				{
+					handle_cgi_response(sent_head);
+					return;
+				}
+				if (!sent_head)
 				{
 					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
 					size_t file_size = Calculate_File_Size(file);
@@ -255,58 +263,6 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 				else
 				{
-					if (isCgi)
-					{
-						isCgi = false;
-						// file.seekg(100, std::ios::beg);
-						sent_head = 1;
-						this->bytesRead = 0;
-
-						std::string content;
-						char ch;
-						while (file.get(ch)) {
-							content += ch;
-						}
-
-						// Find the position of the search string
-						size_t offset = content.find("\r\n\r\n");
-
-						if (offset == std::string::npos) {
-							std::cerr << "String '" << "\r\n\r\n" << "' not found in the file." << std::endl;
-							header = 
-								"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
-								"Content-Type: text/plain\r\n"
-								"Content-Length: 15\r\n"
-								"\r\n"
-								"Internal Errorr";
-							cout << "----------------------------------------\n";
-							cout << content << endl;
-							cout << "----------------------------------------\n";
-
-							body = "";
-							responseStream.write(header.c_str(), header.length());
-							this->end = 1;
-							return;
-						}
-
-						std::cout << "String '" << "\r\n\r\n" << "' found at offset: " << offset << std::endl;
-						
-
-						cout << "----------------------------------------\n";
-						cout << content << endl;
-						cout << "----------------------------------------\n";
-						// Seek to the offset in the file and read from there
-						sent_head = 1;
-						header = content.substr(0, offset+4);
-						cout << "-----------------++++-----------------------\n";
-						cout << header << endl;
-						cout << "----------------------------------------\n";
-						this->bytesRead = 0;
-						responseStream.write(header.c_str(), header.length());
-						file.clear();  // Clear any EOF flag or errors
-						file.seekg(offset, std::ios::beg);
-						return	;
-					}
 					file.read(buffer.data(), Chunk_Size); // Read a chunk
 					this->current_read = file.gcount();
 					if (current_read == 0)

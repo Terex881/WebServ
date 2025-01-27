@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/25 15:38:12 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/26 17:27:01 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,12 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		{
 			key = queryStrings.substr(0, equalPos);
 			value = key + "=" + queryStrings.substr(equalPos + 1, endPos - equalPos - 1);
-			HeaderData.queryStringMap.insert(make_pair(key, value));
+			HeaderData.queryStringVec.push_back(value);
 		}
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	print(HeaderData.queryStringMap);
+	print(HeaderData.queryStringVec);
 }
  
 void Request::parseUri(string &str)
@@ -178,18 +178,18 @@ void Request::achref()
 				// cout <<GREEN << HeaderData.url << RESET<< endl;
 				string current = HeaderData.url.substr(at);
 				// cout <<"... " << current << endl;
-				RequestData.extension = current.substr(0, (current.find("/") != NP ? current.find("/") : current.length()));
-				// cout << " -extension- " << RequestData.extension << endl;
-				RequestData.executable_file = location.values[RequestData.extension].substr(0, location.values[RequestData.extension].find(';'));
-				if (RequestData.executable_file.empty() || (RequestData.extension != ".py" && RequestData.extension != ".php"))
+				HeaderData.extension = current.substr(0, (current.find("/") != NP ? current.find("/") : current.length()));
+				// cout << " -extension- " << HeaderData.extension << endl;
+				RequestData.executable_file = location.values[HeaderData.extension].substr(0, location.values[HeaderData.extension].find(';'));
+				if (RequestData.executable_file.empty() || (HeaderData.extension != ".py" && HeaderData.extension != ".php"))
 				{
 					RequestData.isCgi = false;
 					return;
 				}
 				// cout << GREEN << " :: "<< RequestData.executable_file << RESET << endl;
-				RequestData.pathInfo = current.substr(current.find("/") != NP ? current.find("/") : RequestData.extension.length());
+				RequestData.pathInfo = current.substr(current.find("/") != NP ? current.find("/") : HeaderData.extension.length());
 				// cout << "pathInfo : " << RequestData.pathInfo << endl;
-				HeaderData.url = HeaderData.url.substr(0, at + RequestData.extension.length());
+				HeaderData.url = HeaderData.url.substr(0, at + HeaderData.extension.length());
 				// cout << YELLOW << HeaderData.url << RESET<< endl;
 			}
 			else
@@ -242,15 +242,14 @@ void Request::parseHeader(string &header)
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
 
-
-	cout << BLUE << "\n-------------------------------------------------------------------------------------\n" << RESET;
 	
 
+	// cout << YELLOW << firstLine << RESET << endl;
 	parseFirstLine(firstLine);
-	cout << YELLOW << firstLine << RESET << endl;
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
+	// cout << RED << "HEREE:" << HeaderData.url << RESET << endl;
 
 	achref();
 	// print(HeaderData.bigMap);
@@ -261,22 +260,14 @@ void Request::parseHeader(string &header)
 void Request::fillData(const string &key, const string &value)
 {
 	size_t Pos = 0;
-	if  (key == "content-type" && (Pos = value.find("/")) && Pos != NP)
-		HeaderData.extension = value.substr(Pos + 1, value.length());
+	// if  (key == "content-type" && (Pos = value.find("/")) && Pos != NP)
+	// 	HeaderData.extension = value.substr(Pos + 1, value.length());
 	if (key == "content-length")
 		BodyData.bodySize = (std::atol(value.c_str()));
 	if (key == "host" && (Pos = value.find(":")) != NP)
 		HeaderData.port = value.substr(Pos + 1, 10);
-	// if (key == "connection" && value == "keep-alive")//:keep-alive
-	// {
-	// 	cout << RED << "HERE\n" << RESET ;
-	// 	HeaderData.isAlive = true;
-	// }
-	// if (key == "connection" && value == "close")
-	// {
-	// 	cout << BLUE << "OK\n" << RESET ;
-	// 	HeaderData.isAlive = false;
-	// }
+	if (key == "cookie")
+		HeaderData.queryStringVec.push_back("Cookie=" + value);
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
@@ -303,7 +294,7 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (BodyData.bodySize > RequestData.maxBodySize)
 	{
 		RequestData.isCgi = false;
-		clean(400, "MAX bady szie");
+		clean(413, "Content Too Large");
 		// RequestData.codeStatus = 400;
 		// RequestData.requestStat = 2;
 		// throw runtime_error("MAX bady szie");

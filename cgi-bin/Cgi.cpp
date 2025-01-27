@@ -55,8 +55,8 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		// const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
 		const char* py_script = data->getReq().getHeaderData().url.c_str();
 		int i = 5;
-		char* envp[6 + data->getReq().getHeaderData().queryStringMap.size()];
-		map<string, string>::iterator it = data->getReq().getHeaderData().queryStringMap.begin();
+		char* envp[6 + data->getReq().getHeaderData().queryStringVec.size()];
+		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
@@ -64,11 +64,11 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		envp[4] = const_cast<char*>(key_val.c_str());
 		// envp[5] = NULL;
 
-		for (; it != data->getReq().getHeaderData().queryStringMap.end(); it++)
+		for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
 		{
 
 			// it->first = it->first + it->second;
-			envp[i++] = const_cast<char*>(it->second.c_str());
+			envp[i++] = const_cast<char*>(it->c_str());
 		}
 		// i = 0;
 		// while(i < 8)
@@ -116,6 +116,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 {
+	cout <<BLUE << "Time out " <<RESET<< endl;
 	data->getReq().getRequestData().timeOut = "time_out";
 	struct kevent even;
 	EV_SET(&even, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
