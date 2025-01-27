@@ -177,7 +177,8 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getHeaderData().url,
 												data->getReq().getRequestData().redirection,
 												data->getReq().getRequestData().default_page,
-												data->getReq().getRequestData().isUpload);
+												data->getReq().getRequestData().isUpload,
+												data->getReq().getRequestData().isCgi);
 				data->getReq().getRequestData().first = "not empty";
 
 

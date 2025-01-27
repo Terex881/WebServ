@@ -1,6 +1,7 @@
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
 
+int Response::cookie_gen = 0;
 
 size_t	Calculate_File_Size(std::ifstream &file)
 {
@@ -17,7 +18,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi):Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -30,6 +31,7 @@ Response::Response(string content_type,\
 	this->redirection = redirection;
 	this->default_page = default_page;
 	this->isUpload = isUpload;
+	this->isCgi = isCgi;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -45,7 +47,8 @@ Response::Response(const Response& other)
 			filename(other.filename),
 			redirection(other.redirection),
 			default_page(other.default_page),
-			isUpload(other.isUpload)
+			isUpload(other.isUpload),
+			isCgi(other.isCgi)
 			{
 		if (!filename.empty())
 			file.open(filename, std::ios::binary);
@@ -67,6 +70,7 @@ Response& Response::operator=(const Response& other)
 		redirection = other.redirection;
 		default_page = other.default_page;
 		isUpload = other.isUpload;
+		isCgi = other.isCgi;
 		if (file.is_open())
             file.close();
 
@@ -80,12 +84,72 @@ Response& Response::operator=(const Response& other)
     return *this;
 }
 
+std::string	get_http_date()
+{
+	std::time_t now = std::time(nullptr);
+	std::tm* gmt_time = std::gmtime(&now);
+
+	std::ostringstream oss;
+	oss << std::put_time(gmt_time, "%a, %d %b %Y %H:%M:%S GMT");
+	return oss.str();
+}
+
+std::string	generate_set_cookie_header(const std::string& cookie_name, const std::string& cookie_value)
+{
+	std::ostringstream oss;
+	oss << "Set-Cookie: " << cookie_name << "=" << cookie_value << "; ";
+	oss << "Expires=" << get_http_date() << "; ";
+	oss << "Path=/; HttpOnly\r\n";
+	return oss.str();
+}
+
+string	Response::send_response_with_cookie(int client_socket)
+{
+	(void)client_socket;
+	cookie_gen++;
+	client_cookie = cookie_gen;
+	std::string cookie_header = generate_set_cookie_header("user", std::to_string(cookie_gen));
+	std::string response = "HTTP/1.1 200 OK\r\n";
+	response += "Content-Type: text/html\r\n";
+	response += cookie_header;
+	response += "\r\n";
+	response += "<html><body>Cookie set!</body></html>";
+
+	return response;
+}
+
 void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
+	// if (isCgi)
+	// {
+	// 	// cout << "******|||*** "<< endl;
+	// 	sent_head = 1;
+	// 	// // Read the file into a string and search for the string
+	// 	// std::string content;
+	// 	// char ch;
+	// 	// while (file.get(ch))
+	// 	// {
+	// 	// 	content += ch;
+	// 	// }
+
+	// 	// // Find the position of the search string
+	// 	// size_t offset = content.find("\r\n\r\n");
+
+	// 	// if (offset == std::string::npos) {
+	// 	// 	std::cerr << "String '" << "\r\n\r\n" << "' not found in the file." << std::endl;
+	// 	// 	return;
+	// 	// }
+
+	// 	// std::cout << "String '" << "\r\n\r\n" << "' found at offset: " << offset << std::endl;
+
+	// 	// // Seek to the offset in the file and read from there
+	// 	// file.clear();  // Clear any EOF flag or errors
+	// 	file.seekg(100, std::ios::beg);
+	// }
 	if (redirection.size())
 	{
 		header = 
@@ -98,7 +162,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		this->end = 1;
 		return;
 	}
-	if ((isDirectory(Working_Path) && !default_page.empty()))
+	if (!isUpload && (isDirectory(Working_Path) && !default_page.empty()))
 	{
 		Working_Path = default_page;
 		file.close();
@@ -172,8 +236,8 @@ void	Response::Res_get_chunk(int &sent_head)
 			}
 			else
 			{
-				if (!sent_head)
-				{					
+				if (!sent_head && !isCgi)
+				{
 					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
@@ -191,6 +255,58 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 				else
 				{
+					if (isCgi)
+					{
+						isCgi = false;
+						// file.seekg(100, std::ios::beg);
+						sent_head = 1;
+						this->bytesRead = 0;
+
+						std::string content;
+						char ch;
+						while (file.get(ch)) {
+							content += ch;
+						}
+
+						// Find the position of the search string
+						size_t offset = content.find("\r\n\r\n");
+
+						if (offset == std::string::npos) {
+							std::cerr << "String '" << "\r\n\r\n" << "' not found in the file." << std::endl;
+							header = 
+								"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+								"Content-Type: text/plain\r\n"
+								"Content-Length: 15\r\n"
+								"\r\n"
+								"Internal Errorr";
+							cout << "----------------------------------------\n";
+							cout << content << endl;
+							cout << "----------------------------------------\n";
+
+							body = "";
+							responseStream.write(header.c_str(), header.length());
+							this->end = 1;
+							return;
+						}
+
+						std::cout << "String '" << "\r\n\r\n" << "' found at offset: " << offset << std::endl;
+						
+
+						cout << "----------------------------------------\n";
+						cout << content << endl;
+						cout << "----------------------------------------\n";
+						// Seek to the offset in the file and read from there
+						sent_head = 1;
+						header = content.substr(0, offset+4);
+						cout << "-----------------++++-----------------------\n";
+						cout << header << endl;
+						cout << "----------------------------------------\n";
+						this->bytesRead = 0;
+						responseStream.write(header.c_str(), header.length());
+						file.clear();  // Clear any EOF flag or errors
+						file.seekg(offset, std::ios::beg);
+						return	;
+					}
 					file.read(buffer.data(), Chunk_Size); // Read a chunk
 					this->current_read = file.gcount();
 					if (current_read == 0)
@@ -305,7 +421,7 @@ std::string Response::GetMimeType(const std::string& filename)
 
 	// Document Types
 	if (ext == "html" || ext == "htm") return "text/html";
-	if (ext == "txt") return "text/html";
+	if (ext == "txt") return "text/plain";
 	if (ext == "css") return "text/css";
 	if (ext == "csv") return "text/csv";
 	if (ext == "xml") return "text/xml";

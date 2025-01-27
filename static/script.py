@@ -10,9 +10,16 @@ thislist = ["My", "First", "Python", "Execution", "With CGI"]
 
 
 # # print('Content-Type: ' + os.environ['REQUEST_METHOD']+'\r\n', end="")
-print(" ".join(thislist))
-print('first name : ' + os.environ['fname'])
-print('last name : ' + os.environ['lname'])
+# print("Set-Cookie: prov=f0d02f8c-733c-4d5a-9494-1797b9c45205 \r\n", end="")
+# A valid HTTP response with chunked transfer encoding
+print("HTTP/1.1 200 OK\r\n", end="")
+print("Transfer-Encoding: chunked\r\n", end="")
+print("Connection: keep-alive\r\n", end="")
+print("Content-Type: text/plain\r\n\r\n", end="")
+
+print("<h1>hello</h1>")
+# print('first name : ' + os.environ['fname'])
+# print('last name : ' + os.environ['lname'])
 # while True:
 # 	pass
 # for i in range(1001):

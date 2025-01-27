@@ -44,11 +44,16 @@ class Response
 		vector<string> redirection;
 		string			default_page;
 		bool			isUpload;
+		static int		cookie_gen;
+		int				client_cookie;
+		bool			isCgi;
+	
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 
+		string	send_response_with_cookie(int client_socket);
 		bool	isFile(const std::string& path);
 		bool	isDirectory(const std::string& path);
 		void	Res_get_chunk(int &sent_head);
