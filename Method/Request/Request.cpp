@@ -38,51 +38,51 @@ void Request::clean(int code, string message)
 
 void Request::clearData()
 {
-	// BodyData.bodySize = 0;
-	// RequestData.requestStat = 0;
-	// RequestData.codeStatus = 200;
-	// RequestData.isDirListening = false;
-	// RequestData.isRedirect = false;
-	// RequestData.isCgi = false;
-	// RequestData.isUpload = false;
-	// HeaderData.isAlive = true;
-	// HeaderData.requestMethod.clear();
-	// HeaderData.bigMap.clear();
-	// HeaderData.queryStringVec.clear();
-	// // HeaderData.url.clear();
+	BodyData.bodySize = 0;
+	RequestData.requestStat = 0;
+	RequestData.codeStatus = 200;
+	RequestData.isDirListening = false;
+	RequestData.isRedirect = false;
+	RequestData.isCgi = false;
+	RequestData.isUpload = false;
+	HeaderData.isAlive = true;
+	HeaderData.requestMethod.clear();
+	HeaderData.bigMap.clear();
+	HeaderData.queryStringVec.clear();
+	// HeaderData.url.clear();
 
-	// RequestData.header.clear();
-	// // RequestData.requestStat.clear();
-	// // RequestData.fd.clear();
-	// // RequestData.is_server.clear();
-	// // RequestData.is_client.clear();
-	// // RequestData.sent_head.clear();
-	// RequestData.first.clear();
-	// // RequestData.bytes_sent.clear();
-	// // RequestData.file.clear();
-	// // RequestData.codeStatus.clear();
-	// // RequestData.isDirListening.clear();
-	// // RequestData.isRedirect.clear();
-	// // RequestData.maxBodySize.clear();
-	// RequestData.serverName.clear();
-	// // RequestData.isCgi.clear();
-	// RequestData.timeOut.clear();
-	// RequestData.pathInfo.clear();
-	// // RequestData.extension.clear();
-	// RequestData.fileLocation.clear();
-	// RequestData.executable_file.clear();
-	// RequestData.redirection.clear();
-	// RequestData.default_page.clear();
-	// // RequestData.isUpload.clear();
+	RequestData.header.clear();
+	// RequestData.requestStat.clear();
+	// RequestData.fd.clear();
+	// RequestData.is_server.clear();
+	// RequestData.is_client.clear();
+	// RequestData.sent_head.clear();
+	RequestData.first.clear();
+	// RequestData.bytes_sent.clear();
+	// RequestData.file.clear();
+	// RequestData.codeStatus.clear();
+	// RequestData.isDirListening.clear();
+	// RequestData.isRedirect.clear();
+	// RequestData.maxBodySize.clear();
+	RequestData.serverName.clear();
+	// RequestData.isCgi.clear();
+	RequestData.timeOut.clear();
+	RequestData.pathInfo.clear();
+	// RequestData.extension.clear();
+	RequestData.fileLocation.clear();
+	RequestData.executable_file.clear();
+	RequestData.redirection.clear();
+	RequestData.default_page.clear();
+	// RequestData.isUpload.clear();
 
-	// // BodyData.bodyType = NONE;
-	// // BodyData.bodySize.clear();
-	// BodyData.boundry.clear();
-	// BodyData.endBoundry.clear();
-	// BodyData.outFile.clear();
-	// BodyData.newStr.clear();
-	// BodyData.buffer.clear()	;
-	// BodyData.fileName.clear();
+	// BodyData.bodyType = NONE;
+	// BodyData.bodySize.clear();
+	BodyData.boundry.clear();
+	BodyData.endBoundry.clear();
+	BodyData.outFile.clear();
+	BodyData.newStr.clear();
+	BodyData.buffer.clear()	;
+	BodyData.fileName.clear();
 }
 
 

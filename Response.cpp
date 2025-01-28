@@ -105,7 +105,7 @@ void	Response::handle_cgi_response(int &sent_head)
 	if (offset == std::string::npos)
 	{
 		header = 
-			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
 			"Content-Length: 15\r\n"
 			"\r\n"
@@ -134,7 +134,7 @@ void	Response::Res_get_chunk(int &sent_head)
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
 		header = 
-			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
 			"Content-Length: 15\r\n"
 			"\r\n"
@@ -161,7 +161,7 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	if (isCgi)
 	{
-		cout << "33333333333333333" << endl;
+		// cout << "33333333333333333" << endl;
 		handle_cgi_response(sent_head);
 		return;
 	}
@@ -190,7 +190,7 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	else if (Method == "GET")
 	{
-		cout << "11111111111" << endl;
+		// cout << "11111111111" << endl;
 		if (Status_Code == 200 && (isDirectory(Working_Path) && !default_page.empty()))
 		{
 			cout << RED<< "!!!!! "<<  default_page << endl;
@@ -203,7 +203,7 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		if (isFile(Working_Path))
 		{
-			cout << "2222222222222" << endl; 
+			// cout << "2222222222222" << endl; 
 			if (!file.is_open())
 			{
 				std::cout << "Not Open : " << filename << std::endl;
@@ -276,7 +276,7 @@ void	Response::Res_get_chunk(int &sent_head)
 				header =
 				"HTTP/1.1 404 Not Found\r\n"
 				"Content-Type: text/html; charset=UTF-8\r\n"
-				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"Content-Length: "+_to_string(response.length())+"\r\n"
 				"\r\n"+ response;
 			}
 			else
@@ -292,7 +292,7 @@ void	Response::Res_get_chunk(int &sent_head)
 			header =
 				"HTTP/1.1 200 OK\r\n"
 				"Content-Type: text/html; charset=UTF-8\r\n"
-				"Content-Length: "+std::to_string(response.length())+"\r\n"
+				"Content-Length: "+_to_string(response.length())+"\r\n"
 				"\r\n"+ response;
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
