@@ -120,10 +120,10 @@ void Delete::Delete_File()
 			std::cout << "failed deleting the file\n";
 			this->flag_response = 400;
 			this->response = "HTTP/1.1 4000 Internal Server Error\r\n"
-                                          "Content-Type: text/plain\r\n"
-                                          "Content-Length: " + std::to_string(28) + "\r\n"
-                                          "\r\n" +  // Blank line separating headers and body
-                                          "Error Internal Server Error";
+											"Content-Type: text/plain\r\n"
+											"Content-Length: " + std::to_string(28) + "\r\n"
+											"\r\n" +  // Blank line separating headers and body
+											"Error Internal Server Error";
 		}
 	}
 	else 

@@ -89,9 +89,13 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		};
 
 		if (fileExists(py_script))
+		{
+			std::cerr << "test ----------------------------------------------------------\n";
 			execve(py_path, argv, envp);
+		}
 		unlink("cgi_output.txt");
 		perror("Execution failed");
+		data->getReq().getRequestData().isCgi = false;
 		exit(1);
 	}
 	else
@@ -170,18 +174,7 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 {
 	int status;
 	int wait_result = waitpid(pid, &status, WNOHANG); // -1
-	// cout << "wait .." << endl;
-	// cout << "wait_resutl : " << wait_result << endl;
 
-	    // Try SIGTERM first
-    // if (kill(pid, SIGTERM) == 0) {
-    //     usleep(100000); // Wait 100ms
-        
-    //     // If still running, use SIGKILL
-    //     if (kill(pid, 0) == 0) {
-    //         kill(pid, SIGKILL);
-    //     }
-    // }
 	if (wait_result == -1)
 	{
 		std::cerr << "waitpid error: " << strerror(errno) << std::endl;
@@ -196,30 +189,6 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 			waitpid(pid, NULL, 0);
 		}
 	}
-	// if (wait_result == 0)
-	// {
-	// 	// Child is still running, try to terminate it
-	// 	kill(pid, SIGTERM);
-	// 	int retries = 0;
-
-	// 	while (wait_result == 0 && retries < 10)  // Retry up to 10 times
-	// 	{
-	// 		std::cout << "1,,,,,,,,, "<< wait_result << std::endl;
-	// 		wait_result = waitpid(pid, &status, WNOHANG);
-	// 		std::cout << "2,,,,,,,,, "<< wait_result << std::endl;
-	// 		sleep(1);  // Wait for 100ms before retry
-	// 		retries++;
-	// 	}
-	// 	if (retries == 10)
-	// 	{
-	// 		std::cout << "dddddddddddddd:::::::::::::::::" << std::endl;
-	// 		kill(pid, SIGTERM);  // Forcefully terminate if it still doesn't exit
-	// 		// usleep(100000);  // Give it some time to be killed
-	// 	}
-	// }
-
-	// struct kevent events[2];
-	// EV_SET(&data->events[0], pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
 	EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
 	// kevent(kq, data->events, 2, NULL, 0, NULL);
 	if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {
@@ -237,13 +206,12 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 		cout << "endlddd" << endl;
 		data->getReq().getHeaderData().url = "./cgi_output.txt";
 		data->getReq().getRequestData().codeStatus = 200;
+		if (!fileExists("./cgi_output.txt"))
+		{
+			data->getReq().getRequestData().isCgi = false;
+			data->getReq().getRequestData().codeStatus = 500;
+		}
 
-		// struct kevent ev;
-		// EV_SET(&ev, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
-		// // kevent(kq, data->events, 2, NULL, 0, NULL);
-		// if (kevent(kq, &ev, 1, NULL, 0, NULL) == -1) {
-		// 	std::cerr << "Failed to register EVFILT_PROC 0 : " << strerror(errno) << std::endl;
-		// }
 		struct kevent event;
 		EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, data);
 		kevent(kq, &event, 1, NULL, 0, NULL);

@@ -1,9 +1,20 @@
 #ifndef DELETE_HPP 
 #define DELETE_HPP 
 
-#include "../Server.hpp"
 #include <dirent.h>
-
+#include <iostream>
+#include <cstdlib>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/event.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <exception>
+#include <iostream>
+#include <sys/event.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <iostream>
 class Delete
 {
 	public:

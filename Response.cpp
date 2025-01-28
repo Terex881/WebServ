@@ -1,5 +1,6 @@
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
+#include "./Method/Delete.hpp"
 
 int Response::cookie_gen = 0;
 
@@ -18,7 +19,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi):Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -84,50 +85,23 @@ Response& Response::operator=(const Response& other)
     return *this;
 }
 
-std::string	get_http_date()
-{
-	std::time_t now = std::time(nullptr);
-	std::tm* gmt_time = std::gmtime(&now);
-
-	std::ostringstream oss;
-	oss << std::put_time(gmt_time, "%a, %d %b %Y %H:%M:%S GMT");
-	return oss.str();
-}
-
-std::string	generate_set_cookie_header(const std::string& cookie_name, const std::string& cookie_value)
-{
-	std::ostringstream oss;
-	oss << "Set-Cookie: " << cookie_name << "=" << cookie_value << "; ";
-	oss << "Expires=" << get_http_date() << "; ";
-	oss << "Path=/; HttpOnly\r\n";
-	return oss.str();
-}
-
-string	Response::send_response_with_cookie(int client_socket)
-{
-	(void)client_socket;
-	cookie_gen++;
-	client_cookie = cookie_gen;
-	std::string cookie_header = generate_set_cookie_header("user", std::to_string(cookie_gen));
-	std::string response = "HTTP/1.1 200 OK\r\n";
-	response += "Content-Type: text/html\r\n";
-	response += cookie_header;
-	response += "\r\n";
-	response += "<html><body>Cookie set!</body></html>";
-
-	return response;
-}
-
-
 void	Response::handle_cgi_response(int &sent_head)
 {
+	char buffer[1024];
 	std::string content;
-	char ch;
-	isCgi = false;
-	while (file.get(ch))
-		content += ch;
+	size_t offset;
 
-	size_t offset = content.find("\r\n\r\n");
+	isCgi = false;
+    while (file.read(buffer, 1024) || file.gcount() > 0)
+	{
+        size_t bytesRead = file.gcount();
+
+        // Append the read data to content
+        content.insert(content.end(), buffer, buffer + bytesRead);
+		offset = content.find("\r\n\r\n");
+		if (offset != string::npos)
+			break ;
+	}
 	if (offset == std::string::npos)
 	{
 		header = 
@@ -156,7 +130,8 @@ void	Response::Res_get_chunk(int &sent_head)
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
-	if (Method != "GET" && Method != "POST")
+	cout << "FFFFFF : " << Status_Code << "  Method : " << Method << endl;
+	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
 		header = 
 			"HTTP/1.1 " + std::to_string(Status_Code) +" Internal Error\r\n"
@@ -164,17 +139,14 @@ void	Response::Res_get_chunk(int &sent_head)
 			"Content-Length: 15\r\n"
 			"\r\n"
 			"Internal Errorr";
-
-		body = "";
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;
 		return;
 	}
-
 	if (redirection.size())
 	{
 		header = 
-		"HTTP/1.1 "+ redirection[0] +"Found\r\n"
+		"HTTP/1.1 "+ redirection[0] +" Found\r\n"
 		"Location: " + redirection[1] + "\r\n"
 		"Content-Type: text/html\r\n"
 		"Content-Length: 0\r\n"
@@ -183,14 +155,15 @@ void	Response::Res_get_chunk(int &sent_head)
 		this->end = 1;
 		return;
 	}
-	if (!isUpload && (isDirectory(Working_Path) && !default_page.empty()))
+	if (Method == "Delete")
 	{
-		Working_Path = default_page;
-		file.close();
-		filename = default_page;
-		Content_Type = GetMimeType(default_page);
-		file.open(default_page, std::ios::binary);
-		default_page = "";
+		Delete_File();		
+	}
+	if (isCgi)
+	{
+		cout << "33333333333333333" << endl;
+		handle_cgi_response(sent_head);
+		return;
 	}
 	if (Method == "POST")
 	{
@@ -202,9 +175,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			"Content-Length: 21\r\n"
 			"\r\n"
 			"Uploaded Successfully";
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return;
 		}
 		else
 		{
@@ -214,15 +184,26 @@ void	Response::Res_get_chunk(int &sent_head)
 			"Content-Length: 15\r\n"
 			"\r\n"
 			"Error in upload";
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return ;
 		}
+		responseStream.write(header.c_str(), header.length());
+		this->end = 1;	return ;
 	}
 	else if (Method == "GET")
 	{
+		cout << "11111111111" << endl;
+		if (Status_Code == 200 && (isDirectory(Working_Path) && !default_page.empty()))
+		{
+			cout << RED<< "!!!!! "<<  default_page << endl;
+			Working_Path = default_page;
+			file.close();
+			filename = default_page;
+			Content_Type = GetMimeType(default_page);
+			file.open(default_page, std::ios::binary);
+			default_page = "";
+		}
 		if (isFile(Working_Path))
 		{
+			cout << "2222222222222" << endl; 
 			if (!file.is_open())
 			{
 				std::cout << "Not Open : " << filename << std::endl;
@@ -239,17 +220,11 @@ void	Response::Res_get_chunk(int &sent_head)
 			}
 			else
 			{
-				if (isCgi)
-				{
-					handle_cgi_response(sent_head);
-					return;
-				}
 				if (!sent_head)
 				{
 					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
-					// std::cout << "######## file_size = " <<  file_size << " ##########" << std::endl;
 					header =
 						"HTTP/1.1 200 OK\r\n"
 						"Content-Type: " + Content_Type + "\r\n"
@@ -281,7 +256,7 @@ void	Response::Res_get_chunk(int &sent_head)
 					this->bytesRead += current_read;
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
-						 responseStream << "0\r\n\r\n";
+						responseStream << "0\r\n\r\n";
 						this->end = 1;
 						sent_head = 0;
 					}
@@ -289,7 +264,7 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 			}
 		}
-		else if (this->isLesn && isDirectory(Working_Path))
+		else if (Status_Code == 200 && this->isLesn && isDirectory(Working_Path))
 		{
 			DIR* dir = opendir(Working_Path.c_str());
 			std::string response = "<h1>Directory Listing: " + Working_Path + "</h1><ul>";
@@ -321,16 +296,16 @@ void	Response::Res_get_chunk(int &sent_head)
 				"\r\n"+ response;
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
+			return;
 		}
 		else
 		{
-			// cout << Working_Path << " + " << isLesn << endl;
-			header =
-					"HTTP/1.1 404 Not Found\r\n"
-					"Content-Type: text/plain\r\n"
-					"Content-Length: 12\r\n"
-					"\r\n"
-					"Not :( Found";
+			cout << "endddddddddddd "<< endl;
+			responseStream << "HTTP/1.1 " << Status_Code << " Not Found\r\n"
+							<< "Content-Type: text/plain\r\n"
+								"Content-Length: 16\r\n"
+								"\r\n"
+								"Not :( Found "<< Status_Code;
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;

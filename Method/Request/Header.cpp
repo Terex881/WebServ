@@ -131,12 +131,30 @@ void Request::fillHeaderMap(string &header)
 	}
 }
 
+string	find_extension(string url)
+{
+	size_t at = url.find(".");
+	string extension;
+
+	if (at != NP)
+	{
+		// cout <<GREEN << HeaderData.url << RESET<< endl;
+		string current = url.substr(at);
+		// cout <<"... " << current << endl;
+		extension = current.substr(0, (current.find("/") != NP ? current.find("/") : current.length()));
+		cout <<YELLOW << extension << RESET<< endl;
+	}
+	return extension;
+}
+
+
 void Request::achref()
 {
 	DynamicStruct	location;
 	DynamicStruct	server;
 	// std::vector<string> redirection;
 
+	
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
 	if (!location.values.size() || !server.values.size())
 	{
@@ -150,6 +168,8 @@ void Request::achref()
 	}
 	if (location.values.size())
 	{
+		cout << GREEN << "Checking_1 ...."<< RESET << endl;
+
 		// get max bosy size 
 		location_data l_data = configFileObj.get_location_val(location);
 		RequestData.maxBodySize = atol(server.values["client_max_body_size"].c_str()) * 10000000;
@@ -162,15 +182,15 @@ void Request::achref()
 		string	final_url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
 		HeaderData.url = final_url;
 
-		string extension;
-		if (!location.values[".py"].empty() || !location.values[".php"].empty())
+		string extension = find_extension(HeaderData.url);
+		if ((!location.values[".py"].empty() && extension == ".py") || (!location.values[".php"].empty() && extension == ".php"))
 		{
 			RequestData.isCgi = true;
 		}
-		// cout << RED << "1 "<< HeaderData.url << RESET << endl;
+		cout << RED << "1 "<< HeaderData.url << RESET << endl;
 		if (RequestData.isCgi)
 		{
-			// cout << location.values["path"] << " cgi : " << RequestData.isCgi << endl;
+			cout << location.values["path"] << " cgi : " << RequestData.isCgi << endl;
 			// cout << "ext : " <<  HeaderData.extension << endl;
 			size_t at = HeaderData.url.find(".");
 			if (at != NP)
@@ -217,8 +237,11 @@ void Request::achref()
 			cout << GREEN << "Index Oder autoIndex" << RESET << endl;
 		}
 
+		
+			cout << GREEN << "Checking ...."<< RESET << endl;
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
+			cout << GREEN << "NOT ALLOWED"<< RESET << endl;
 			clean(405, "Method Not Allowed");
 			// RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}

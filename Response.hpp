@@ -10,13 +10,14 @@
 #include <sstream>
 #include <vector>
 #include <dirent.h>
+#include "Method/Delete.hpp"
 using namespace std;
 
 using std::string;
 using std::vector;
 #define MAX_CLIENTS 128
 
-class Response
+class Response : public Delete
 {
 	public :
 		size_t			Status_Code;
@@ -53,7 +54,6 @@ class Response
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 
-		string	send_response_with_cookie(int client_socket);
 		bool	isFile(const std::string& path);
 		bool	isDirectory(const std::string& path);
 		void	Res_get_chunk(int &sent_head);
