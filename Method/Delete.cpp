@@ -1,4 +1,5 @@
 #include "Delete.hpp"
+#include "Request/Request.hpp"
 
 //config file check if the allowed is there for delete otherwise 405
 
@@ -30,7 +31,7 @@ int Delete::Can_Be_Deleted()
 		this->flag_response = 501;
 		this->response = "HTTP/1.1 501 Not Implemented\r\n"
 										"Content-Type: text/plain\r\n"
-										"Content-Length: " + std::to_string(58) + "\r\n"
+										"Content-Length: " + _to_string(58) + "\r\n"
 										"\r\n" +  // Blank line separating headers and body
 										"Not Implemented to delete this file";
 		return 0;
@@ -40,7 +41,7 @@ int Delete::Can_Be_Deleted()
 		this->flag_response = 405;
 		this->response = "HTTP/1.1 405 Method Not Allowed\r\n"
 										"Content-Type: text/plain\r\n"
-										"Content-Length: " + std::to_string(58) + "\r\n"
+										"Content-Length: " + _to_string(58) + "\r\n"
 										"\r\n" +  // Blank line separating headers and body
 										"Forbidden You do not have permission to delete this file.";
 		return 0;
@@ -58,7 +59,7 @@ int Delete::Can_Be_Deleted()
 			this->flag_response = 403;
 			this->response = "HTTP/1.1 403 Forbidden\r\n"
 											"Content-Type: text/plain\r\n"
-											"Content-Length: " + std::to_string(58) + "\r\n"
+											"Content-Length: " + _to_string(58) + "\r\n"
 											"\r\n" +  // Blank line separating headers and body
 											"Forbidden You do not have permission to delete this file.";
 			return 0;
@@ -75,7 +76,7 @@ int Delete::Can_Be_Deleted()
 					this->flag_response = 403;
 					this->response = "HTTP/1.1 403 Forbidden\r\n"
 													"Content-Type: text/plain\r\n"
-													"Content-Length: " + std::to_string(58) + "\r\n"
+													"Content-Length: " + _to_string(58) + "\r\n"
 													"\r\n" +  // Blank line separating headers and body
 													"Forbidden You do not have permission to delete this file.";
 					return 0;
@@ -100,7 +101,7 @@ void Delete::Delete_File()
 			this->flag_response = 200;
 			this->response = "HTTP/1.1 200 OK\r\n"
                                           "Content-Type: text/plain\r\n"
-                                          "Content-Length: " + std::to_string(16) + "\r\n"
+                                          "Content-Length: " + _to_string(16) + "\r\n"
                                           "\r\n" +  // Blank line separating headers and body
                                           "file is deleted";
 		}
@@ -110,7 +111,7 @@ void Delete::Delete_File()
 			this->flag_response = 500;
 			this->response = "HTTP/1.1 500 Internal Server Error\r\n"
                                           "Content-Type: text/plain\r\n"
-                                          "Content-Length: " + std::to_string(28) + "\r\n"
+                                          "Content-Length: " + _to_string(28) + "\r\n"
                                           "\r\n" +  // Blank line separating headers and body
                                           "Error Internal Server Error";
 		}
@@ -120,10 +121,10 @@ void Delete::Delete_File()
 			std::cout << "failed deleting the file\n";
 			this->flag_response = 400;
 			this->response = "HTTP/1.1 4000 Internal Server Error\r\n"
-											"Content-Type: text/plain\r\n"
-											"Content-Length: " + std::to_string(28) + "\r\n"
-											"\r\n" +  // Blank line separating headers and body
-											"Error Internal Server Error";
+                                          "Content-Type: text/plain\r\n"
+                                          "Content-Length: " + _to_string(28) + "\r\n"
+                                          "\r\n" +  // Blank line separating headers and body
+                                          "Error Internal Server Error";
 		}
 	}
 	else 

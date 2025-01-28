@@ -1,4 +1,5 @@
 #include "./File_Parsing.hpp"
+#include "../Method/Request/Request.hpp"
 
 vector<dt> File_Parsing::host_port;
 DynamicStruct File_Parsing::servers[4000];
@@ -342,12 +343,12 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			{
 				i++;
 				port_count++;
-				current.values[key +"_"+ std::to_string(i)] = words[1];
+				current.values[key +"_"+ _to_string(i)] = words[1];
 
 				words[1] = words[1].substr(0, words[1].find(';'));
 				words[1] = words[1].substr(words[1].find(':') + 1);
 				current.values["ports"] += " " + words[1];
-				current.values["port_count"] = std::to_string(i);
+				current.values["port_count"] = _to_string(i);
 			}
 			else if (key == "error_page")
 			{
@@ -398,12 +399,12 @@ string	get_port_index(DynamicStruct *server, string port)
 			port_2 = strtod(port.c_str(), NULL);
 			if (port_1 == port_2)
 			{
-				return (std::to_string(i));
+				return (_to_string(i));
 			}
 			i++;
 		}
 	}
-	return (std::to_string(i));
+	return (_to_string(i));
 }
 
 // override port if it is already in use

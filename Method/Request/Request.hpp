@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/26 17:47:22 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/27 19:29:52 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,3 +175,5 @@ class Request
 		bool		hasOneMatch(const std::string& str1, const std::string& str2); // change names here
 
 };
+
+string _to_string(int number);
