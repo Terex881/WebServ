@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/27 19:29:52 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 15:59:57 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ typedef struct s_Request
 	std::vector<string>			redirection;
 	string						default_page;
 	bool						isUpload;
+	std::map<int, string>		codeStatusMap;
 }	t_Request;
 
 typedef struct s_Header
@@ -75,6 +76,7 @@ typedef struct s_Header
 	std::vector<string>			queryStringVec;
 	std::map<string, string>	bigMap;
 	string						url;
+	string						urlFinal;
 	bool						isAlive;
 }	t_Header;
 

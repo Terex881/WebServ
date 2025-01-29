@@ -1,4 +1,4 @@
-#ifndef RESPONSE_HPP
+	#ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
 
@@ -52,9 +52,9 @@ class Response : public Delete
 		bool			isCgi;
 		DynamicStruct	server;
 		int				unlink_cgi;
-
+		string			urlFinal;
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi, DynamicStruct server);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi, DynamicStruct server, string urlFinal);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/27 19:45:33 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 13:54:07 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ void	Request::parseBoundryBody(string &body)
 			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());
 			// printV(BodyData.Vec);
 			RequestData.requestStat = 2;
+			RequestData.codeStatus = 201;
 			BodyData.outFile.close();
 		}
 	}

@@ -20,7 +20,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server, string urlFinal):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -36,6 +36,7 @@ Response::Response(string content_type,\
 	this->isCgi = isCgi;
 	this->server = server;
 	this->unlink_cgi = 0;
+	this->urlFinal = urlFinal;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -77,6 +78,7 @@ Response& Response::operator=(const Response& other)
 		isCgi = other.isCgi;
 		server = other.server;
 		unlink_cgi = other.unlink_cgi;
+		urlFinal = other.urlFinal;
 		if (file.is_open())
             file.close();
 
@@ -147,8 +149,8 @@ void	Response::Res_get_chunk(int &sent_head)
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
-	// cout << RED << server.values["404"] << RESET<< endl;
-	cout << "FFFFFF : " << Status_Code << "  Method : " << Method << endl;
+
+	cout << BLUE << Status_Code << "  Method : " << Method << RESET << endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
@@ -317,10 +319,15 @@ void	Response::Res_get_chunk(int &sent_head)
 			}
 			else
 			{
+				std::cout <<  Working_Path << std::endl;
 				while ((entry = readdir(dir)) != NULL) 
 				{
-					// response += "<li><a href=\"" + Working_Path + "/" + entry->d_name + "\">" + entry->d_name + "</a></li>";
-					response += "<li><a href=\"" + std::string(entry->d_name) + "\">" + entry->d_name + "</a></li>";
+					// urlFinal
+					if (urlFinal == "/")
+						response += "<li><a href=\"" + urlFinal + entry->d_name + "\">" + entry->d_name + "</a></li>";
+					else
+						response += "<li><a href=\"" + urlFinal + "/" + entry->d_name + "\">" + entry->d_name + "</a></li>";
+					// response += "<li><a href=\"" + std::string(entry->d_name) + "\">" + entry->d_name + "</a></li>";
 				}
 				response += "</ul>";
 				closedir(dir);
@@ -333,6 +340,18 @@ void	Response::Res_get_chunk(int &sent_head)
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return;
+		}
+		else if(Status_Code == 505)
+		{
+			cout << "enddddddddddwwwwwwddd "<< endl;
+			header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+					"Content-Type: text/plain\r\n"
+					"Content-Length: 3\r\n"
+					"\r\n"
+					"Bad " + _to_string(Status_Code);
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;
+			return	;
 		}
 		else
 		{

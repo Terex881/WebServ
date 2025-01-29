@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 09:56:21 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/15 15:17:40 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:51:06 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 #include "Response.hpp"
 #include "Method/Request/Request.hpp"
 #include "./cgi-bin/Cgi.hpp"
-// class Cgi;
 
 class Client
 {

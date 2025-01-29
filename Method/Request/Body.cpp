@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/27 19:44:19 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 16:45:25 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ void	Request::parseBodyTypes(string &body)
 	}
 
 
-	if (RequestData.isCgi &&  (BodyData.bodyType == BODY_SIZE || BodyData.bodyType == CHUNKED))
-		RequestData.isCgi = false;
+	// if (RequestData.isCgi &&  (BodyData.bodyType == BODY_SIZE || BodyData.bodyType == CHUNKED))
+	// 	RequestData.isCgi = false;
 	
 	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;

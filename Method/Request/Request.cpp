@@ -6,12 +6,13 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/27 19:33:26 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 16:01:11 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 #include "../Delete.hpp"
+#include <utility>
 
 Request::Request()
 {
@@ -31,6 +32,7 @@ Request::~Request()	{}
 void Request::clean(int code, string message)
 {
 	RequestData.codeStatus = code;
+	RequestData.codeStatusMap.insert(make_pair(code, message));
 	RequestData.requestStat = 2;
 	throw runtime_error(message);
 }
@@ -83,6 +85,8 @@ void Request::clearData()
 	BodyData.newStr.clear();
 	BodyData.buffer.clear()	;
 	BodyData.fileName.clear();
+	
+	RequestData.codeStatusMap.clear();
 }
 
 
@@ -132,13 +136,6 @@ void Request::request(string &request)
 		}
 		else if (HeaderData.requestMethod == "DELETE")
 		{
-				cout << "delte_1 ---------------------\n";
-			// Delete d(HeaderData.url, RequestData.fileLocation, 1, RequestData.isCgi);
-			// if (d.Can_Be_Deleted())
-			// {
-			// 	cout << "delte_2 ---------------------\n";
-			// 	d.Delete_File();
-			// }
 			RequestData.requestStat = 2;
 		}
 			

@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/27 20:13:06 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/01/29 16:44:26 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
  
 void Request::parseUri(string &str)
 {
+		
+		
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
 	{
 		clean(400, "Bad Request : bad URL");
@@ -63,6 +65,7 @@ void Request::parseUri(string &str)
 	size_t QMPos = str.find("?");
 	if (QMPos != string::npos)
 		storeQueryString(str, QMPos);
+	HeaderData.urlFinal = str;
 	HeaderData.url = str;
 }
 
@@ -79,10 +82,20 @@ void Request::parseFirstLine(const string &line)
 
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;
+
+	// cout << YELLOW << method << RESET << endl;
+	// cout << YELLOW << uri << RESET << endl;
+	// cout << YELLOW << httpVersion << RESET << endl;
 	
+	if (method.empty() || uri.empty() || httpVersion.empty())
+	{
+		clean(400, "Bad Request"); // check 405
+	}
 	HeaderData.bigMap.insert(std::make_pair("method", method));
 	HeaderData.bigMap.insert(std::make_pair("uri", uri));
 	HeaderData.bigMap.insert(std::make_pair("httpVersion", httpVersion));
+
+	cout << RED << HeaderData.bigMap.size() << RESET << endl;
 
 	HeaderData.requestMethod = method;
 	if (method != "POST" && method != "GET" && method != "DELETE")
@@ -171,15 +184,15 @@ void Request::achref()
 		if (!location.values["upload_path"].empty())
 			location.values["upload_path"] = location.values["upload_path"].substr(0, location.values["upload_path"].find(";"));
 		else
-		 	location.values["upload_path"] = "/Users/aibn-che/goinfre";
+		 	location.values["upload_path"] = "/Users/sdemnati/goinfre/UP";
 		configFileObj.server = server;
 		// cout << YELLOW << configFileObj.get_error_page("404",server) << RESET<< endl;
-		cout << GREEN << "Checking_1 .... " << location.values["upload_path"]<< RESET << endl;
+		// cout << GREEN << "Checking_1 .... " << location.values["upload_path"]<< RESET << endl;
 
 		// get max bosy size
 		location_data l_data = configFileObj.get_location_val(location);
 		RequestData.maxBodySize = atol(server.values["client_max_body_size"].c_str()) * 10000000;
-		RequestData.fileLocation = l_data.root;
+		RequestData.fileLocation = location.values["upload_path"];
 		// redirection
 		if (!l_data.rturn.empty())
 			RequestData.redirection = configFileObj.split_1(l_data.rturn);
@@ -193,7 +206,6 @@ void Request::achref()
 		{
 			RequestData.isCgi = true;
 		}
-		cout << RED << "1 "<< HeaderData.url << RESET << endl;
 		if (RequestData.isCgi)
 		{
 			cout << location.values["path"] << " cgi : " << RequestData.isCgi << endl;
@@ -228,7 +240,7 @@ void Request::achref()
 					cout << GREEN << "root : " << location.values["root"] << endl;
 					cout << GREEN << "Default : "<< RequestData.default_page << endl;
 				}
-				cout << GREEN << "Index Oder autoIndexxx" << RESET << endl;
+				// cout << GREEN << "Index Oder autoIndexxx" << RESET << endl;
 			}
 		}
 		else
@@ -237,18 +249,14 @@ void Request::achref()
 			if (!server.values["index"].empty())
 			{
 				RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
-				cout << GREEN << "root : " << location.values["root"] << endl;
-				cout << GREEN << "Default : "<< RequestData.default_page << endl;
+				// cout << GREEN << "root : " << location.values["root"] << endl;
+				// cout << GREEN << "Default : "<< RequestData.default_page << endl;
 			}
-			cout << GREEN << "Index Oder autoIndex" << RESET << endl;
+			// cout << GREEN << "Index Oder autoIndex" << RESET << endl;
 		}
-
-		
-		cout << GREEN << "Checking ...."<< RESET << endl;
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
 			// / check with nginx
-			cout << "dddddddddddd"<< endl;
 			clean(405, "405 Method Not Allowed");
 			// RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}
@@ -272,8 +280,8 @@ void Request::parseHeader(string &header)
 {
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
-
 	parseFirstLine(firstLine);
+	cout << RED << firstLine << RESET << endl;
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
@@ -345,5 +353,7 @@ void Request::getTypes(const std::map<string, string> &mp)
 	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
 			clean(501, "Bad Request1");
 		// {RequestData.codeStatus = 501;	RequestData.requestStat = 2;	throw runtime_error("Bad Request1");}
+
+	cout << "HERE " << RequestData.isCgi << endl;
 }
 // check 201 

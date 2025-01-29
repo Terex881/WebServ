@@ -119,9 +119,9 @@ void Server::ft_start(int size, int *fd)
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
 									
 									// ofstream ss("tmp.py", ios::app | ios::binary);
-									// ss << "[" << client_socket << "]"  << endl;
-									// // ss << clientsMap[client_socket].getReq().getHeaderData().url;
-									// cout  << BLUE<<  msg << endl;
+									// // ss << "[" << client_socket << "]"  << endl;
+									// // // ss << clientsMap[client_socket].getReq().getHeaderData().url;
+									// ss <<  msg << endl;
 									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									try
 									{
@@ -132,7 +132,7 @@ void Server::ft_start(int size, int *fd)
 										std::cerr << RED << e.what() << RESET << '\n';
 										clientsMap[client_socket].getReq().getRequestData().requestStat = 2;
 									}
-						// cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
+						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().isCgi << RESET << endl;
 									
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
@@ -173,7 +173,8 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getRequestData().default_page,
 												data->getReq().getRequestData().isUpload,
 												data->getReq().getRequestData().isCgi,
-												data->getReq().configFileObj.server);
+												data->getReq().configFileObj.server,
+												data->getReq().getHeaderData().urlFinal);
 				data->getReq().getRequestData().first = "not empty";
 
 
