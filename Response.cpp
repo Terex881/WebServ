@@ -1,6 +1,7 @@
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
 #include "./Method/Delete.hpp"
+#include <string>
 
 int Response::cookie_gen = 0;
 
@@ -19,7 +20,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -33,6 +34,8 @@ Response::Response(string content_type,\
 	this->default_page = default_page;
 	this->isUpload = isUpload;
 	this->isCgi = isCgi;
+	this->server = server;
+	this->unlink_cgi = 0;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -72,6 +75,8 @@ Response& Response::operator=(const Response& other)
 		default_page = other.default_page;
 		isUpload = other.isUpload;
 		isCgi = other.isCgi;
+		server = other.server;
+		unlink_cgi = other.unlink_cgi;
 		if (file.is_open())
             file.close();
 
@@ -83,6 +88,19 @@ Response& Response::operator=(const Response& other)
 		}
 	}
     return *this;
+}
+
+string	ret_header(int code_status, string status_msg, string res_msg, string type)
+{
+	string header;
+
+	header = "HTTP/1.1 "+ _to_string(code_status) +" "+status_msg +"\r\n"
+	"Content-Type: " + type + "\r\n"
+	"Content-Length: "+ _to_string(res_msg.length()) +"\r\n"
+	"\r\n"+
+	res_msg;
+
+	return header;
 }
 
 void	Response::handle_cgi_response(int &sent_head)
@@ -129,8 +147,9 @@ void	Response::Res_get_chunk(int &sent_head)
 	std::vector<char> buffer(Chunk_Size, 0);
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
-
+	// cout << RED << server.values["404"] << RESET<< endl;
 	cout << "FFFFFF : " << Status_Code << "  Method : " << Method << endl;
+
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
 		header = 
@@ -155,46 +174,63 @@ void	Response::Res_get_chunk(int &sent_head)
 		this->end = 1;
 		return;
 	}
-	if (Method == "Delete")
+	if (Method == "DELETE")
 	{
-		Delete_File();		
+		if (Status_Code == 405)
+			delete_config = 0;
+		else
+			delete_config = 1;
+		Delete a("",Working_Path,1, isCgi);
+		a.Delete_File();
+		cout <<GREEN << a.response <<RESET<< endl;
+		responseStream.write(a.response.c_str(), a.response.length());
+		this->end = 1;	return ;
 	}
-	if (isCgi)
+	if (isCgi && Status_Code == 200)
 	{
-		// cout << "33333333333333333" << endl;
 		handle_cgi_response(sent_head);
+		Method = "GET";
+		unlink_cgi = 1;
 		return;
 	}
-	if (Method == "POST")
+	else if ((Method == "POST"))
 	{
-		if (isUpload && Status_Code == 200)
+		
+		if (!isFile(Working_Path) && !isDirectory(Working_Path))
 		{
-			header =
-			"HTTP/1.1 200 OK\r\n"
-			"Content-Type: text/plain\r\n"
-			"Content-Length: 21\r\n"
-			"\r\n"
-			"Uploaded Successfully";
+			string idx_file = server.values["404"]; /// default error page
+			if (!idx_file.empty() && isFile(idx_file))
+			{
+				Working_Path = idx_file;
+				file.close();
+				filename = idx_file;
+				Content_Type = GetMimeType(idx_file);
+				file.open(idx_file, std::ios::binary);
+				Method = "GET";
+				return;
+			}
+			else
+				header = ret_header(404, "Not Found", "Not :(:( Found", "text/plain");
 		}
+		else if (isUpload && Status_Code == 200)
+			header = ret_header(200, "Ok", "Uploaded Successfully", "text/plain");
+		else if (Status_Code == 405)
+			header = ret_header(405, "Bad Request", "Method Not Allowed", "text/plain");
+		else if (Status_Code == 200)
+			header = ret_header(200, "OK", "Your data has been processed successfully", "text/plain");
 		else
-		{
-			header =
-			"HTTP/1.1 200 OK\r\n"
-			"Content-Type: text/plain\r\n"
-			"Content-Length: 15\r\n"
-			"\r\n"
-			"Error in upload";
-		}
+			header = ret_header(400, "Bad Request", "Error in upload", "text/plain");
+
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;	return ;
 	}
 	else if (Method == "GET")
 	{
-		// cout << "11111111111" << endl;
 		if (Status_Code == 200 && (isDirectory(Working_Path) && !default_page.empty()))
 		{
 			cout << RED<< "!!!!! "<<  default_page << endl;
 			Working_Path = default_page;
+
 			file.close();
 			filename = default_page;
 			Content_Type = GetMimeType(default_page);
@@ -301,11 +337,11 @@ void	Response::Res_get_chunk(int &sent_head)
 		else
 		{
 			cout << "endddddddddddd "<< endl;
-			responseStream << "HTTP/1.1 " << Status_Code << " Not Found\r\n"
-							<< "Content-Type: text/plain\r\n"
-								"Content-Length: 16\r\n"
-								"\r\n"
-								"Not :( Found "<< Status_Code;
+			header = "HTTP/1.1 " + _to_string(Status_Code) + " Not Found\r\n"
+					"Content-Type: text/plain\r\n"
+					"Content-Length: 16\r\n"
+					"\r\n"
+					"Not :( Found " + _to_string(Status_Code);
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;

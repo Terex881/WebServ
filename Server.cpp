@@ -137,7 +137,10 @@ void Server::ft_start(int size, int *fd)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
-					if (clientsMap[client_socket].getReq().getRequestData().isCgi && clientsMap[client_socket].getReq().getRequestData().requestStat == 2)
+					if (clientsMap[client_socket].getReq().getRequestData().isCgi
+						&& clientsMap[client_socket].getReq().getRequestData().requestStat == 2
+						&& clientsMap[client_socket].getReq().getHeaderData().requestMethod != "DELETE"
+						&& clientsMap[client_socket].getReq().getRequestData().codeStatus != 405)
 					{
 						clientsMap[client_socket].getCgi().execute_script(client_socket, kq, &clientsMap[client_socket]);
 					}
@@ -157,6 +160,7 @@ void Server::ft_start(int size, int *fd)
 				Client *data = (Client *)events[i].udata;
 				int client_socket = events[i].ident;
 				std::string responseStr;
+				
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
 												data->getReq().getHeaderData().url,
@@ -168,13 +172,16 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getRequestData().redirection,
 												data->getReq().getRequestData().default_page,
 												data->getReq().getRequestData().isUpload,
-												data->getReq().getRequestData().isCgi);
+												data->getReq().getRequestData().isCgi,
+												data->getReq().configFileObj.server);
 				data->getReq().getRequestData().first = "not empty";
 
 
 				
 				data->getRes().Res_get_chunk(data->getReq().getRequestData().sent_head);
 				responseStr = data->getRes().responseStream.str();
+				if (responseStr.empty() && !data->getRes().end)
+						continue;
 				// data->getRes().responseStream
 				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
 
@@ -193,6 +200,9 @@ void Server::ft_start(int size, int *fd)
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
 					data->res_obj.file.close();
+
+					if (data->res_obj.unlink_cgi)
+						unlink("cgi_output.txt");
 
 					// Remove from the client list
 					for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -216,7 +226,8 @@ void Server::ft_start(int size, int *fd)
 
 							data->res_obj.file.close();
 							data->getReq().getRequestData().codeStatus = 200;
-							
+							if (data->res_obj.unlink_cgi)
+								unlink("cgi_output.txt");
 							if (data->getReq().getHeaderData().isAlive == 0)
 				 			{
 								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);

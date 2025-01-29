@@ -88,10 +88,10 @@ void Request::parseBodyLength(string &body)
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();
 	BodyData.bodySize = tmp;
+	writeFile(body, 0, body.length(), 0);
 	if (!BodyData.bodySize)
 	{
 		RequestData.requestStat = 2;
 		BodyData.outFile.close();
 	}
-	writeFile(body, 0, body.length(), 0);
 }

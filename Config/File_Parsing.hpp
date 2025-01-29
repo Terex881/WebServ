@@ -52,6 +52,8 @@ class File_Parsing
 		static DynamicStruct servers[4000];
 		static DynamicStruct locations[4000];
 
+		DynamicStruct	server;
+
 		File_Parsing(void);
 		File_Parsing(string conf_path);
 		~File_Parsing(void);

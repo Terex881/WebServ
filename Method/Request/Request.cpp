@@ -132,9 +132,13 @@ void Request::request(string &request)
 		}
 		else if (HeaderData.requestMethod == "DELETE")
 		{
-			Delete d(HeaderData.url, RequestData.fileLocation, 1, RequestData.isCgi);
-			if (d.Can_Be_Deleted())
-				d.Delete_File();
+				cout << "delte_1 ---------------------\n";
+			// Delete d(HeaderData.url, RequestData.fileLocation, 1, RequestData.isCgi);
+			// if (d.Can_Be_Deleted())
+			// {
+			// 	cout << "delte_2 ---------------------\n";
+			// 	d.Delete_File();
+			// }
 			RequestData.requestStat = 2;
 		}
 			

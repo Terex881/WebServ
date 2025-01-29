@@ -11,6 +11,8 @@
 #include <vector>
 #include <dirent.h>
 #include "Method/Delete.hpp"
+#include "./Config/DynamicStruct.hpp"
+
 using namespace std;
 
 using std::string;
@@ -48,9 +50,11 @@ class Response : public Delete
 		static int		cookie_gen;
 		int				client_cookie;
 		bool			isCgi;
-	
+		DynamicStruct	server;
+		int				unlink_cgi;
+
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi);
+		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi, DynamicStruct server);
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 

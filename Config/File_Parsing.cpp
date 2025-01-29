@@ -326,7 +326,7 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 				(*file).close(), exit(10);
 			}
 			if (parent == "location" && key != "root" && key != "methods"
-				&& key != "directory_listing" && key != "return" && key != "cgi")
+				&& key != "directory_listing" && key != "return" && key != "cgi" && key != "upload_path")
 				(*file).close(), exit(11);
 			if (parent == "server" && key != "listen" && key != "error_page" &&
 					key != "client_max_body_size" && key != "server_name" && key != "root" && key != "index")
@@ -362,7 +362,9 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 				current.values[words[1]] = words[2];
 			}
 			else
+			{
 				current.values[key] = words[1];
+			}
 		}
 		n++;
 	}

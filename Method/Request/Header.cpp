@@ -155,7 +155,6 @@ void Request::achref()
 	DynamicStruct	server;
 	// std::vector<string> redirection;
 
-	
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
 	if (!location.values.size() || !server.values.size())
 	{
@@ -169,9 +168,15 @@ void Request::achref()
 	}
 	if (location.values.size())
 	{
-		cout << GREEN << "Checking_1 ...."<< RESET << endl;
+		if (!location.values["upload_path"].empty())
+			location.values["upload_path"] = location.values["upload_path"].substr(0, location.values["upload_path"].find(";"));
+		else
+		 	location.values["upload_path"] = "/Users/aibn-che/goinfre";
+		configFileObj.server = server;
+		// cout << YELLOW << configFileObj.get_error_page("404",server) << RESET<< endl;
+		cout << GREEN << "Checking_1 .... " << location.values["upload_path"]<< RESET << endl;
 
-		// get max bosy size 
+		// get max bosy size
 		location_data l_data = configFileObj.get_location_val(location);
 		RequestData.maxBodySize = atol(server.values["client_max_body_size"].c_str()) * 10000000;
 		RequestData.fileLocation = l_data.root;
@@ -239,10 +244,11 @@ void Request::achref()
 		}
 
 		
-			cout << GREEN << "Checking ...."<< RESET << endl;
+		cout << GREEN << "Checking ...."<< RESET << endl;
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
 		{
 			// / check with nginx
+			cout << "dddddddddddd"<< endl;
 			clean(405, "405 Method Not Allowed");
 			// RequestData.codeStatus = 405;	RequestData.requestStat = 2;	throw runtime_error("Method Not Allowed");
 		}
