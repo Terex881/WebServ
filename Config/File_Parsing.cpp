@@ -428,7 +428,7 @@ void	File_Parsing::override_server(int index, DynamicStruct *server)
 				{
 					port_count--;
 					port_index = get_port_index(&server[index], it->second);
-					server[index].values["listen_"+port_index] = "override";
+					server[index].values["listen_"+port_index] += "override";
 				}
 			}
 		}
@@ -568,7 +568,7 @@ void	File_Parsing::get_host_name(void)
 	{
 		for (map<std::string, std::string>::iterator it = servers[i].values.begin(); it != servers[i].values.end(); it++)
 		{
-			if (it->first.find("listen") != string::npos && it->second != "override")
+			if (it->first.find("listen") != string::npos && it->second.find("override") == string::npos)
 			{
 				port = "";
 				host = "";
@@ -661,19 +661,55 @@ std::string matchUrl(const std::string& requestUrl, std::string Location_path)
 	return bestMat;
 }
 
-// allow us to find server based on Port and location based on URL
-void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStruct &location, DynamicStruct &server)
+
+int	File_Parsing::Search_By_Server_Name_Port(string server_nama, string port)
 {
 	int i = 0;
+	// int j = 0;
 	while (i < servers_count)
 	{
 		for (map<std::string, std::string>::iterator it = servers[i].values.begin(); it != servers[i].values.end(); it++)
 		{
 			if (it->first.find("listen") != string::npos)
 			{
-				if (it->second.find(port) != string::npos)
+				if (servers[i].values["server_name"] == server_nama && it->second.find(port))
+					return i;
+			}
+		}
+		i++;
+	}
+	return -1;
+}
+
+// allow us to find server based on Port and location based on URL
+void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStruct &location, DynamicStruct &server, string server_nama)
+{
+	int i = 0;
+	bool found = false;
+	int selected_srv = Search_By_Server_Name_Port(server_nama, port);
+	// cout << "+++++++++++++++++++++++++++++++" << endl;
+	// cout << Search_By_Server_Name_Port("s1", port) << endl;
+	// cout << "+++++++++++++++++++++++++++++++" << endl;
+	while (i < servers_count)
+	{
+		for (map<std::string, std::string>::iterator it = servers[i].values.begin(); it != servers[i].values.end(); it++)
+		{
+			if (!servers[i].values["server_name"].empty() && servers[i].values["server_name"] == server_nama)
+				found = true;
+			if (it->first.find("listen") != string::npos)
+			{
+				if (selected_srv >= 0 && i != selected_srv)
+					break;
+				if ((it->second.find("override") != string::npos) && selected_srv == -1)
+					break;
+				if ((it->second.find(port) != string::npos))
 				{
 					server.values = servers[i].values;
+
+					// cout << GREEN <<"+++++++++++++++++++++++++++++++" << RESET<< endl;
+					// cout << "client_max_body_size : " << server.values["client_max_body_size"] << endl;
+					// cout << GREEN <<"+++++++++++++++++++++++++++++++" << RESET<< endl;
+
 					for (map<string, vector<DynamicStruct> >::iterator it = servers[i].children.begin(); it != servers[i].children.end(); it++)
 					{
 						vector<DynamicStruct> &locations = it->second;

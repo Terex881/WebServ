@@ -105,7 +105,8 @@ bool	Request::isBoundary(string &body)
 			contentEndtPos = endboundryPos;
 		else
 			contentEndtPos = body.length();
-		openFile(RequestData.fileLocation + "/" + BodyData.fileName);
+		BodyData.pathFormData = RequestData.fileLocation + "/" + BodyData.fileName;
+		openFile(BodyData.pathFormData);
 		writeFile(body, 0, contentEndtPos, 0);
 	}
 	else if (!i)

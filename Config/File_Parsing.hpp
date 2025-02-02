@@ -69,7 +69,8 @@ class File_Parsing
 		string			get_body_size();
 		string			get_error_page(string statut_code, DynamicStruct server);
 
-		static void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server);
+		static void	getLocationByPortAndUrl(string port, string url, DynamicStruct &location,  DynamicStruct &server, string server_nama);
+		static int			Search_By_Server_Name_Port(string server_nama, string port);
 
 		string	correct_url(string path);
 		std::vector<string>	split_1(string s);

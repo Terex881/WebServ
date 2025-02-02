@@ -29,7 +29,9 @@ string getNameFromTime()
 void Request::parseChunkedBody(string &body)
 {
 	RequestData.isUpload = true;
-	openFile(RequestData.fileLocation + "/" + getNameFromTime());
+	BodyData.pathFormData = RequestData.fileLocation + "/" + getNameFromTime();
+
+	openFile(BodyData.pathFormData);
 
 	size_t hexPos, strPos;
 	string subBody, str;
@@ -84,7 +86,8 @@ void Request::parseChunkedBody(string &body)
 void Request::parseBodyLength(string &body)
 {
 	RequestData.isUpload = true;
-	openFile(RequestData.fileLocation + "/" + getNameFromTime());
+	BodyData.pathFormData = RequestData.fileLocation + "/" + getNameFromTime();
+	openFile(BodyData.pathFormData);
 	
 	size_t tmp = BodyData.bodySize;
 	tmp -= body.length();

@@ -58,6 +58,7 @@ typedef struct s_Request
 	size_t						maxBodySize;
 	string						serverName;
 	bool						isCgi;
+	string						cgiError;
 	string						timeOut;
 	string						pathInfo;
 	string						fileLocation;
@@ -90,6 +91,7 @@ typedef struct s_Body
 	string									newStr;
 	string									buffer;	
 	string									fileName;
+	string									pathFormData;
 }	t_Body;
 
 #include "../../Config/File_Parsing.hpp"

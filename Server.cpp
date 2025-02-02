@@ -118,11 +118,11 @@ void Server::ft_start(int size, int *fd)
 					msg.assign(buffer, bytes_received);
 //---------------------------------------------------------------------------S_A_L_A_H----------------------------------------------------------------------------------------
 									
-									// ofstream ss("tmp.py", ios::app | ios::binary);
-									// // ss << "[" << client_socket << "]"  << endl;
-									// // // ss << clientsMap[client_socket].getReq().getHeaderData().url;
-									// ss <<  msg << endl;
-									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
+									ofstream ss("tmp.py", ios::app | ios::binary);
+									// ss << "[" << client_socket << "]"  << endl;
+									// // ss << clientsMap[client_socket].getReq().getHeaderData().url;
+									ss <<  msg << endl;
+									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									try
 									{
 										clientsMap[client_socket].getReq().request(msg);
@@ -161,6 +161,7 @@ void Server::ft_start(int size, int *fd)
 				int client_socket = events[i].ident;
 				std::string responseStr;
 				
+				cout << "++++++++++ " << data->getReq().getRequestData().codeStatusMap[200] << endl;
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
 												data->getReq().getHeaderData().url,
@@ -174,9 +175,11 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getRequestData().isUpload,
 												data->getReq().getRequestData().isCgi,
 												data->getReq().configFileObj.server,
-												data->getReq().getHeaderData().urlFinal);
+												data->getReq().getHeaderData().urlFinal,
+												data->getReq().getRequestData().timeOut,
+												data->getReq().getRequestData().cgiError,
+												data->getReq().getRequestData().codeStatusMap);
 				data->getReq().getRequestData().first = "not empty";
-
 
 				
 				data->getRes().Res_get_chunk(data->getReq().getRequestData().sent_head);
@@ -203,7 +206,10 @@ void Server::ft_start(int size, int *fd)
 					data->res_obj.file.close();
 
 					if (data->res_obj.unlink_cgi)
-						unlink("cgi_output.txt");
+					{
+						std::remove("cgi_output.txt");
+						std::remove("cgi_error.txt");
+					}
 
 					// Remove from the client list
 					for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -228,7 +234,10 @@ void Server::ft_start(int size, int *fd)
 							data->res_obj.file.close();
 							data->getReq().getRequestData().codeStatus = 200;
 							if (data->res_obj.unlink_cgi)
-								unlink("cgi_output.txt");
+							{
+								std::remove("cgi_output.txt");
+								std::remove("cgi_error.txt");
+							}
 							if (data->getReq().getHeaderData().isAlive == 0)
 				 			{
 								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);

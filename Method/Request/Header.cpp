@@ -168,19 +168,25 @@ void Request::achref()
 	DynamicStruct	server;
 	// std::vector<string> redirection;
 
-	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server);
+	// cout << GREEN <<"HeaderData.port : " <<  << RESET << endl;
+	string server_nama = "s1";
+	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server, server_nama);
 	if (!location.values.size() || !server.values.size())
 	{
 		if (configFileObj.correct_url(HeaderData.url)[0] == '/')
 		{
 			string sub_route = configFileObj.correct_url(HeaderData.url).substr(1);
 			// cout <<GREEN << "sub_route : " << sub_route << RESET<< endl;
-			configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url("/"), location, server);
+			configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url("/"), location, server, server_nama);
 			// HeaderData.url = 
 		}
 	}
 	if (location.values.size())
 	{
+		// cout << "________________________________________" << endl;
+		// cout << server.values["client_max_body_size"] << endl;
+		// cout << "________________________________________" << endl;
+
 		if (!location.values["upload_path"].empty())
 			location.values["upload_path"] = location.values["upload_path"].substr(0, location.values["upload_path"].find(";"));
 		else
@@ -270,9 +276,10 @@ void Request::achref()
 	}
 	else
 	{
+		// cout << "NOTTTTTT Found" << endl;
 		// check with nginx
 		// RequestData.codeStatus = 404;	RequestData.requestStat = 2;	throw runtime_error("location not found");
-		clean(404, "location not found");
+		clean(404, "Location Not Found");
 	}
 }
 

@@ -1,5 +1,8 @@
 #include "./Cgi.hpp"
 #include "../Client.hpp"
+#include <exception>
+#include <fstream>
+#include <unistd.h>
 
 Cgi::Cgi(int socket_fd, string path)
 {
@@ -8,13 +11,6 @@ Cgi::Cgi(int socket_fd, string path)
 }
 
 Cgi::Cgi(){};
-
-int	end_header(string header)
-{
-	if (header.size() > 4 && header.substr(header.size() - 4) == "\r\n\r\n")
-		return (1);
-	return (0);
-}
 
 bool fileExists(const std::string& filename)
 {
@@ -32,6 +28,9 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	}
 	if (pid == 0)
 	{
+		int input_fd;
+		int error_fd;
+
 		string key_val = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open("cgi_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -39,87 +38,109 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 			std::cerr << "Failed to open output file" << std::endl;
 			exit(1);
 		}
-		
-		// Redirect stdout to output file
-
-		if (dup2(output_fd, STDOUT_FILENO) == -1) {
-			std::cerr << "Failed to redirect stdout to file" << std::endl;
+		error_fd = open("cgi_error.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (error_fd == -1)
+		{
+			std::cerr << "Failed to open error file" << std::endl;
+			close(output_fd);
 			exit(1);
 		}
-    	close(output_fd);
-		
-		// const char* py_path = "/usr/local/bin/python3";
+		cerr  << GREEN << ".. " << data->getReq().getBodyData().pathFormData.c_str() << RESET << endl;
+		if (!data->getReq().getBodyData().pathFormData.empty())
+		{
+			input_fd = open(data->getReq().getBodyData().pathFormData.c_str(), O_RDONLY, 0644);
+			if (input_fd == -1)
+			{
+				std::cerr << "Failed to open input file" << std::endl;
+				close(output_fd);
+				close(error_fd);
+				exit(1);
+			}
+			if (dup2(input_fd, STDIN_FILENO) == -1)
+			{
+				std::cerr << "Failed to read from file" << std::endl;
+				close(input_fd);
+				close(output_fd);
+				close(error_fd);
+				exit(1);
+			}
+		}
+		if (dup2(error_fd, STDERR_FILENO) == -1)
+		{
+			std::cerr << "Failed to redirect stderr to file" << std::endl;
+			if (!data->getReq().getBodyData().pathFormData.empty())
+				close(input_fd);
+			close(output_fd);
+			close(error_fd);
+			exit(1);
+		}
+		if (dup2(output_fd, STDOUT_FILENO) == -1)
+		{
+			std::cerr << "Failed to redirect stdout to file" << std::endl;
+			if (!data->getReq().getBodyData().pathFormData.empty())
+				close(input_fd);
+			close(output_fd);
+			close(error_fd);
+			exit(1);
+		}
+		if (!data->getReq().getBodyData().pathFormData.empty())
+			close(input_fd);
+		close(output_fd);
+		close(error_fd);
+
 
 		const char* py_path = data->getReq().getRequestData().executable_file.c_str();
 		// data->getReq().getHeaderData().url
 		// const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
 		const char* py_script = data->getReq().getHeaderData().url.c_str();
+		string script_name = "SCRIPT_NAME=";
+		script_name.append(py_script);
+
 		int i = 5;
 		char* envp[6 + data->getReq().getHeaderData().queryStringVec.size()];
 		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
-		envp[3] = const_cast<char*>("para-m=sddd");
+		envp[3] = const_cast<char*>(script_name.c_str());
 		envp[4] = const_cast<char*>(key_val.c_str());
-		// envp[5] = NULL;
 
 		for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
 		{
-
-			// it->first = it->first + it->second;
 			envp[i++] = const_cast<char*>(it->c_str());
 		}
-		// i = 0;
-		// while(i < 8)
-		// {
-		// 	cout << "-->" << envp[i] <<endl;
-		// 	i++;
-
-		// }
-		// cout << ">> 5 "<< envp[5] << endl;
-		// cout << ">> 6 "<< envp[6] << endl;
-		// cout << ">> 7 "<< envp[7] << endl;
-
 		envp[i] = NULL;
+
 		char* argv[] = {
 			const_cast<char*>(py_path),
 			const_cast<char*>(py_script),
 			NULL
 		};
-
 		if (fileExists(py_script))
 		{
-			std::cerr << "test ----------------------------------------------------------\n";
 			execve(py_path, argv, envp);
 		}
-		unlink("cgi_output.txt");
+		std::remove("cgi_output.txt");
+		std::remove("cgi_error.txt");
 		perror("Execution failed");
 		data->getReq().getRequestData().isCgi = false;
 		exit(1);
 	}
 	else
 	{
-
-		// std::cout << "Executing CGI" << std::endl;
-		// Parent process: register the child process for event handling
 		EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 1000, data);
-		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {
+		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1)
 			std::cerr << "Failed to register EVFILT_TIMER : 11" << strerror(errno) << std::endl;
-		}
 		
 		EV_SET(&(*data->event), pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, data);
-		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {
-			std::cerr << "Failed to register EVFILT_TIMER : 00 " << strerror(errno) << std::endl;
-		}
-		
-		// struct kevent&data->events[1];
-		// std::cout << "Executing CGI ..." << std::endl;
+		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1)
+			std::cerr << "Failed to register EVFILT_TIMER : 00 " << strerror(errno) << std::endl;		
 	}
 }
 
 void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 {
+
 	cout <<BLUE << "Time out " <<RESET<< endl;
 	data->getReq().getRequestData().timeOut = "time_out";
 	struct kevent even;
@@ -136,14 +157,18 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 	}
 	// std::cout << "CGI script timeout, terminating..." << std::endl;
 	// EV_SET(&events[1], pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
+	data->getReq().getRequestData().codeStatus = 504;
+	try {
+		data->getReq().clean(504, "Gateway Timeout");
+	} catch (const exception& e) {
+		// Handle the specific exception
+	}
 
 	struct kevent event;
 	EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, data);
 	kevent(kq, &event, 1, NULL, 0, NULL);
 
 	// data->getReq().getHeaderData().filename = "/cgi_output.txt";
-	data->getReq().getRequestData().codeStatus = 504;
-	// handleProcessExit(pid, client_socket, kq, data);
 }
 // EV_SET(&event, pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, (void*)client_socket);
 // This line in the parent process is registering an event to monitor the child process. Specifically:
@@ -206,10 +231,21 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 		cout << "endlddd" << endl;
 		data->getReq().getHeaderData().url = "./cgi_output.txt";
 		data->getReq().getRequestData().codeStatus = 200;
+		std::ifstream f("./cgi_error.txt");
+		if (f.is_open() && data->getRes().Calculate_File_Size(f) != 0)
+		{
+			f.close();
+			data->getReq().getRequestData().cgiError = "yes";
+		}
 		if (!fileExists("./cgi_output.txt"))
 		{
-			data->getReq().getRequestData().isCgi = false;
+			// data->getReq().getRequestData().isCgi = false;
 			data->getReq().getRequestData().codeStatus = 500;
+			try {
+				data->getReq().clean(500, "Internal Server Erroreeeee");
+			} catch (const exception& e) {
+				// Handle the specific exception
+			}
 		}
 
 		struct kevent event;

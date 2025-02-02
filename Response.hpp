@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <sys/stat.h>
 #include <fstream>
 #include <sys/socket.h>
@@ -17,6 +18,7 @@ using namespace std;
 
 using std::string;
 using std::vector;
+using std::map;
 #define MAX_CLIENTS 128
 
 class Response : public Delete
@@ -53,8 +55,18 @@ class Response : public Delete
 		DynamicStruct	server;
 		int				unlink_cgi;
 		string			urlFinal;
+		string			timeOut;
+		string			cgiError;
+		map<int, string> codeStatusMap;
+		string			tmp_Status_Code;
+	
 		Response();
-		Response(string content_type, string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool isUpload, bool isCgi, DynamicStruct server, string urlFinal);
+		Response(string content_type, string working_path, string method,
+					string Url, int codeStatus, bool isLesn, string filename,
+					vector<string> redirection, string default_page, bool isUpload,
+					bool isCgi, DynamicStruct server, string urlFinal, string timeOut,
+					string cgiError, map<int, string> codeStatusMap);
+
 		Response(const Response& other);
 		Response&operator=(const Response& other);
 
@@ -63,7 +75,7 @@ class Response : public Delete
 		void	Res_get_chunk(int &sent_head);
 		static string	GetMimeType(const std::string& filename);
 		void	handle_cgi_response(int &sent_head);
-
+		static size_t	Calculate_File_Size(std::ifstream &file);
 };
 
 #endif

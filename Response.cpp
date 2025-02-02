@@ -1,11 +1,12 @@
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
 #include "./Method/Delete.hpp"
+#include <iostream>
 #include <string>
 
 int Response::cookie_gen = 0;
 
-size_t	Calculate_File_Size(std::ifstream &file)
+size_t	Response::Calculate_File_Size(std::ifstream &file)
 {
 	file.seekg(0, std::ios::end);
 	std::streampos fileSize = file.tellg();
@@ -20,7 +21,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server, string urlFinal):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server, string urlFinal, string timeOut, string cgiError, map<int, string> codeStatusMap):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -37,6 +38,9 @@ Response::Response(string content_type,\
 	this->server = server;
 	this->unlink_cgi = 0;
 	this->urlFinal = urlFinal;
+	this->timeOut = timeOut;
+	this->cgiError = cgiError;
+	this->codeStatusMap = codeStatusMap;
 	if (!filename.empty())
 		this->filename = filename;
 }
@@ -79,11 +83,14 @@ Response& Response::operator=(const Response& other)
 		server = other.server;
 		unlink_cgi = other.unlink_cgi;
 		urlFinal = other.urlFinal;
+		timeOut = other.timeOut;
+		cgiError = other.cgiError;
+		codeStatusMap = other.codeStatusMap;
 		if (file.is_open())
-            file.close();
+			file.close();
 
-        // Open new file
-        if (!other.filename.empty())
+		// Open new file
+		if (!other.filename.empty())
 		{
 			filename = other.filename;
 			file.open(filename, std::ios::binary);
@@ -107,25 +114,73 @@ string	ret_header(int code_status, string status_msg, string res_msg, string typ
 
 void	Response::handle_cgi_response(int &sent_head)
 {
-	char buffer[1024];
+	char buffer[4096];
 	std::string content;
-	size_t offset;
-
+	std::string default_hd;
+	size_t set = std::string::npos;
+	size_t offset = std::string::npos;
+	this->bytesRead = 0;
+	sent_head = 1;
 	isCgi = false;
-    while (file.read(buffer, 1024) || file.gcount() > 0)
+	
+	cout << YELLOW << ";; " << Working_Path << RESET << endl;
+	Res_Size = Calculate_File_Size(file);
+	int log = 0;
+	cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
+	if (!server.values[_to_string(Status_Code)].empty())
 	{
-        size_t bytesRead = file.gcount();
+		tmp_Status_Code = "3333";
+		return;
+	}
+	cout << "ENTER ................... " << endl;
+	// invalid syntax CGI
+	if (!cgiError.empty())
+	{
+		file.close();
+		file.open("./cgi_error.txt", std::ios::binary);
+		file.seekg(0, std::ios::beg);
+		header = "HTTP/1.1 500 Internal Server Error\r\n"
+				"Content-Type: text/plain\r\n"
+				"Content-Length: "+ _to_string(Calculate_File_Size(file) + 3) +"\r\n"
+				"\r\n";
+		file.seekg(0, std::ios::beg);
+		Working_Path = "./cgi_error.txt";
+		filename = "./cgi_error.txt";
+		responseStream.write(header.c_str(), header.length());
+		return;
+	}
+	default_hd = "HTTP/1.1 200 OK\r\n"
+				"Transfer-Encoding: chunked\r\n"
+				"Connection: keep-alive\r\n"
+				"Content-Type: text/html\r\n\r\n";
 
-        // Append the read data to content
-        content.insert(content.end(), buffer, buffer + bytesRead);
-		offset = content.find("\r\n\r\n");
+	if (!timeOut.empty())
+		return;
+	while (file.read(buffer, 4096) || file.gcount() > 0)
+	{
+		size_t bytesRead = file.gcount();
+
+		// Append the read data to content
+		content.append(buffer, bytesRead);
+		if (content.find("Set-Cookie:") != string::npos)
+			log = 1;
+		offset = content.find("Content-Type: text/html\r\n\r\n");
 		if (offset != string::npos)
 			break ;
 	}
-	if (offset == std::string::npos)
+
+	if (content != default_hd && !log)
+	{
+		if (offset == std::string::npos)
+			set = 0;
+		else
+			set = offset + 27;
+		content = default_hd;
+	}
+	else if (offset == std::string::npos && log)
 	{
 		header = 
-			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 500 Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
 			"Content-Length: 15\r\n"
 			"\r\n"
@@ -134,32 +189,45 @@ void	Response::handle_cgi_response(int &sent_head)
 		this->end = 1;
 		return;
 	}
-	sent_head = 1;
-	this->bytesRead = 0;
-	header = content.substr(0, offset + 4);
+	if (log && offset != string::npos)
+	{
+		header = content.substr(0, offset + 27);
+	}
+	else if (!set)
+		header = default_hd;
+	else
+		header = content.substr(0, set);
+
 	responseStream.write(header.c_str(), header.length());
 	file.clear();
-	file.seekg(offset, std::ios::beg);
-	return;
+	if (set != std::string::npos)
+		file.seekg(set, std::ios::beg);
+	else
+		file.seekg(offset + 27, std::ios::beg);
 }
 
 
 void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
+	string default_idx;
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
-	cout << BLUE << Status_Code << "  Method : " << Method << RESET << endl;
+	
+	if (tmp_Status_Code.empty())
+		tmp_Status_Code = _to_string(Status_Code);
+	cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
+	cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
 		header = 
 			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
 			"Content-Type: text/plain\r\n"
-			"Content-Length: 15\r\n"
+			"Content-Length: 11\r\n"
 			"\r\n"
-			"Internal Errorr";
+			"Bad Request";
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;
 		return;
@@ -178,17 +246,41 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	if (Method == "DELETE")
 	{
-		if (Status_Code == 405)
+		// res error msg
+		if(!codeStatusMap[Status_Code].empty())
+		{
+			// defaul err page
+			default_idx = server.values[_to_string(Status_Code)];
+			if (!default_idx.empty() && isFile(default_idx))
+			{
+				Working_Path = default_idx;
+				file.close();
+				sent_head = 0;
+				filename = default_idx;
+				tmp_Status_Code = "200";
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
+				Method = "GET";
+				return;
+			}
+			else
+				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+					"Content-Type: text/plain\r\n"
+					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
+					"\r\n"+	codeStatusMap[Status_Code];
+			responseStream.write(header.c_str(), header.length());
+			this->end = 1;	return ;
+		}
+		else if (Status_Code == 405)
 			delete_config = 0;
 		else
 			delete_config = 1;
 		Delete a("",Working_Path,1, isCgi);
 		a.Delete_File();
-		cout <<GREEN << a.response <<RESET<< endl;
 		responseStream.write(a.response.c_str(), a.response.length());
 		this->end = 1;	return ;
 	}
-	if (isCgi && Status_Code == 200)
+	if (isCgi)
 	{
 		handle_cgi_response(sent_head);
 		Method = "GET";
@@ -197,40 +289,57 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	else if ((Method == "POST"))
 	{
-		
 		if (!isFile(Working_Path) && !isDirectory(Working_Path))
 		{
-			string idx_file = server.values["404"]; /// default error page
-			if (!idx_file.empty() && isFile(idx_file))
+			default_idx = server.values["404"]; /// default error page
+			if (!default_idx.empty() && isFile(default_idx))
 			{
-				Working_Path = idx_file;
+				Working_Path = default_idx;
 				file.close();
-				filename = idx_file;
-				Content_Type = GetMimeType(idx_file);
-				file.open(idx_file, std::ios::binary);
+				filename = default_idx;
+				sent_head = 0;
+				tmp_Status_Code = "200";
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
 				Method = "GET";
 				return;
 			}
 			else
 				header = ret_header(404, "Not Found", "Not :(:( Found", "text/plain");
 		}
-		else if (isUpload && Status_Code == 200)
-			header = ret_header(200, "Ok", "Uploaded Successfully", "text/plain");
-		else if (Status_Code == 405)
-			header = ret_header(405, "Bad Request", "Method Not Allowed", "text/plain");
-		else if (Status_Code == 200)
-			header = ret_header(200, "OK", "Your data has been processed successfully", "text/plain");
+		else if (isUpload && (Status_Code == 201 || Status_Code == 200))
+			header = ret_header(201, "Ok", "Uploaded Successfully", "text/plain");
+		else if(!codeStatusMap[Status_Code].empty())
+		{
+			default_idx = server.values[_to_string(Status_Code)];
+			if (!default_idx.empty() && isFile(default_idx))
+			{
+				Working_Path = default_idx;
+				file.close();
+				filename = default_idx;
+				sent_head = 0;
+				tmp_Status_Code = "200";
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
+				Method = "GET";
+				return;
+			}
+			else
+				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+					"Content-Type: text/plain\r\n"
+					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
+					"\r\n"+	codeStatusMap[Status_Code];
+		}
 		else
 			header = ret_header(400, "Bad Request", "Error in upload", "text/plain");
-
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;	return ;
 	}
 	else if (Method == "GET")
 	{
-		if (Status_Code == 200 && (isDirectory(Working_Path) && !default_page.empty()))
+		if ((Status_Code == 200 || tmp_Status_Code == "200")
+			&& (isDirectory(Working_Path) && !default_page.empty()))
 		{
-			cout << RED<< "!!!!! "<<  default_page << endl;
 			Working_Path = default_page;
 
 			file.close();
@@ -239,12 +348,12 @@ void	Response::Res_get_chunk(int &sent_head)
 			file.open(default_page, std::ios::binary);
 			default_page = "";
 		}
-		if (isFile(Working_Path))
+		if (isFile(Working_Path) && (Status_Code == 200 || tmp_Status_Code == "200"))
 		{
-			// cout << "2222222222222" << endl; 
+			cout << "enter 1 " << Working_Path << " | Status_code : " << Status_Code << " | " << tmp_Status_Code<< endl;
+			cout << "[[[[[]]]]] sent_head : " <<  sent_head<< endl;
 			if (!file.is_open())
 			{
-				std::cout << "Not Open : " << filename << std::endl;
 				header = 
 					"HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
@@ -254,17 +363,18 @@ void	Response::Res_get_chunk(int &sent_head)
 				body = "";
 				responseStream.write(header.c_str(), header.length());
 				this->end = 1;
+				tmp_Status_Code = "";
 				return	;
 			}
 			else
 			{
 				if (!sent_head)
 				{
-					cout <<BLUE << "Working_Path : " << Working_Path << " | Status_Code : " << Status_Code << "  Content_Type : " <<Content_Type << RESET<< endl;
+					cout <<  "SENT HEAD " << endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					header =
-						"HTTP/1.1 200 OK\r\n"
+						"HTTP/1.1 "+ _to_string(Status_Code) +" OK\r\n"
 						"Content-Type: " + Content_Type + "\r\n"
 						"Transfer-Encoding: chunked\r\n"
 						"Connection: keep-alive\r\n"
@@ -276,25 +386,30 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 				else
 				{
-					file.read(buffer.data(), Chunk_Size); // Read a chunk
+					file.read(&buffer[0], Chunk_Size); // Read a chunk
 					this->current_read = file.gcount();
 					if (current_read == 0)
 					{
 						sent_head = 0;
+						tmp_Status_Code = "";
 						responseStream.str(""); // Clear previous content
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
 						responseStream << "0\r\n\r\n";
+					
 						this->end = 1;
 						return ;  // End of file or read error
 					}
 					responseStream << std::hex << current_read << "\r\n";
 					responseStream.write(buffer.data(), current_read);
 					responseStream << "\r\n";
+
 					this->bytesRead += current_read;
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
+						cout << "eeeennnnddddd " << endl;
 						responseStream << "0\r\n\r\n";
+						tmp_Status_Code = "";
 						this->end = 1;
 						sent_head = 0;
 					}
@@ -319,7 +434,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			}
 			else
 			{
-				std::cout <<  Working_Path << std::endl;
 				while ((entry = readdir(dir)) != NULL) 
 				{
 					// urlFinal
@@ -327,7 +441,6 @@ void	Response::Res_get_chunk(int &sent_head)
 						response += "<li><a href=\"" + urlFinal + entry->d_name + "\">" + entry->d_name + "</a></li>";
 					else
 						response += "<li><a href=\"" + urlFinal + "/" + entry->d_name + "\">" + entry->d_name + "</a></li>";
-					// response += "<li><a href=\"" + std::string(entry->d_name) + "\">" + entry->d_name + "</a></li>";
 				}
 				response += "</ul>";
 				closedir(dir);
@@ -341,26 +454,35 @@ void	Response::Res_get_chunk(int &sent_head)
 			this->end = 1;
 			return;
 		}
-		else if(Status_Code == 505)
+		else if(!codeStatusMap[Status_Code].empty())
 		{
-			cout << "enddddddddddwwwwwwddd "<< endl;
-			header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+			default_idx = server.values[_to_string(Status_Code)];
+			if (!default_idx.empty() && isFile(default_idx))
+			{
+				Working_Path = default_idx;
+				file.close();
+				filename = default_idx;
+				tmp_Status_Code = "200";
+				sent_head = 0;
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
+				return;
+			}
+			else
+				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
 					"Content-Type: text/plain\r\n"
-					"Content-Length: 3\r\n"
-					"\r\n"
-					"Bad " + _to_string(Status_Code);
+					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
+					"\r\n"+	codeStatusMap[Status_Code];
 			responseStream.write(header.c_str(), header.length());
-			this->end = 1;
-			return	;
+			this->end = 1;	return ;
 		}
 		else
 		{
-			cout << "endddddddddddd "<< endl;
-			header = "HTTP/1.1 " + _to_string(Status_Code) + " Not Found\r\n"
+			header = "HTTP/1.1 404 Not Found\r\n"
 					"Content-Type: text/plain\r\n"
-					"Content-Length: 16\r\n"
+					"Content-Length: 12\r\n"
 					"\r\n"
-					"Not :( Found " + _to_string(Status_Code);
+					"Not :( Found";
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;
