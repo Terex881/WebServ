@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybellakr <ybellakr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 09:56:21 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 17:51:06 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/03 13:51:09 by ybellakr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ class Client
 	{
 		// this->event = event;
 	}
-
 
 	Client(const Client &src)
 	{
