@@ -686,9 +686,7 @@ void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStru
 	int i = 0;
 	bool found = false;
 	int selected_srv = Search_By_Server_Name_Port(server_nama, port);
-	// cout << "+++++++++++++++++++++++++++++++" << endl;
-	// cout << Search_By_Server_Name_Port("s1", port) << endl;
-	// cout << "+++++++++++++++++++++++++++++++" << endl;
+
 	while (i < servers_count)
 	{
 		for (map<std::string, std::string>::iterator it = servers[i].values.begin(); it != servers[i].values.end(); it++)
@@ -704,11 +702,6 @@ void	File_Parsing::getLocationByPortAndUrl(string port, string url, 	DynamicStru
 				if ((it->second.find(port) != string::npos))
 				{
 					server.values = servers[i].values;
-
-					// cout << GREEN <<"+++++++++++++++++++++++++++++++" << RESET<< endl;
-					// cout << "client_max_body_size : " << server.values["client_max_body_size"] << endl;
-					// cout << GREEN <<"+++++++++++++++++++++++++++++++" << RESET<< endl;
-
 					for (map<string, vector<DynamicStruct> >::iterator it = servers[i].children.begin(); it != servers[i].children.end(); it++)
 					{
 						vector<DynamicStruct> &locations = it->second;

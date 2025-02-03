@@ -213,8 +213,8 @@ void	Response::Res_get_chunk(int &sent_head)
 	
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
-	cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
-	cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
+	// cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
+	// cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
@@ -346,8 +346,6 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		if (isFile(Working_Path) && (Status_Code == 200 || tmp_Status_Code == "200"))
 		{
-			cout << "enter 1 " << Working_Path << " | Status_code : " << Status_Code << " | " << tmp_Status_Code<< endl;
-			cout << "[[[[[]]]]] sent_head : " <<  sent_head<< endl;
 			if (!file.is_open())
 			{
 				header = 
@@ -366,7 +364,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				if (!sent_head)
 				{
-					cout <<  "SENT HEAD " << endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					header =

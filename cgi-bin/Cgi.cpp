@@ -35,7 +35,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		int input_fd;
 		int error_fd;
 
-		string key_val = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
+		string key_val = "PATH_INFO=" + data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open(cgi_output.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
@@ -99,13 +99,12 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		string script_name = "SCRIPT_NAME=";
 		script_name.append(py_script);
 
-		int i = 5;
+		int i = 4;
 		char* envp[6 + data->getReq().getHeaderData().queryStringVec.size()];
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
-		envp[1] = const_cast<char*>("QUERY_STRING=test");
-		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
-		envp[3] = const_cast<char*>(script_name.c_str());
-		envp[4] = const_cast<char*>(key_val.c_str());
+		envp[1] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
+		envp[2] = const_cast<char*>(script_name.c_str());
+		envp[3] = const_cast<char*>(key_val.c_str());
 
 		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
 		for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
@@ -215,6 +214,7 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 			waitpid(pid, NULL, 0);
 		}
 	}
+	data->getReq().getRequestData().timeOut = "";
 	EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
 	// kevent(kq, data->events, 2, NULL, 0, NULL);
 	if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {

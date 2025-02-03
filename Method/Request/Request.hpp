@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 15:59:57 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/03 15:29:10 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,6 +150,8 @@ class Request
 		t_Body&		getBodyData();
 		void		clean(int code, string message);
 		void		clearData();
+	void 		print1(std::map<string, string> &mp);
+
 
 
 		//---------------------------------------HEADER---------------------------------------
