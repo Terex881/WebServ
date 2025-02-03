@@ -168,8 +168,7 @@ void Request::achref()
 	DynamicStruct	server;
 	// std::vector<string> redirection;
 
-	// cout << GREEN <<"HeaderData.port : " <<  << RESET << endl;
-	string server_nama = "s1";
+	string server_nama = RequestData.hostName;
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server, server_nama);
 	if (!location.values.size() || !server.values.size())
 	{
@@ -183,9 +182,9 @@ void Request::achref()
 	}
 	if (location.values.size())
 	{
-		// cout << "________________________________________" << endl;
-		// cout << server.values["client_max_body_size"] << endl;
-		// cout << "________________________________________" << endl;
+		cout << "________________________________________" << endl;
+		cout << server.values["client_max_body_size"] << endl;
+		cout << "________________________________________" << endl;
 
 		if (!location.values["upload_path"].empty())
 			location.values["upload_path"] = location.values["upload_path"].substr(0, location.values["upload_path"].find(";"));
@@ -288,7 +287,6 @@ void Request::parseHeader(string &header)
 	size_t			pos = header.find(CRLF);
 	string			firstLine = header.substr(0, pos);
 	parseFirstLine(firstLine);
-	cout << RED << firstLine << RESET << endl;
 	header.erase(0, pos + 2);	
 	BodyData.bodyType = NONE;
 	fillHeaderMap(header);
@@ -306,7 +304,10 @@ void Request::fillData(const string &key, const string &value)
 	if (key == "content-length")
 		BodyData.bodySize = (std::atol(value.c_str()));
 	if (key == "host" && (Pos = value.find(":")) != NP)
+	{
+		RequestData.hostName = value.substr(0, Pos);
 		HeaderData.port = value.substr(Pos + 1, 10);
+	}
 	if (key == "cookie")
 		HeaderData.queryStringVec.push_back("Cookie=" + value);
 	

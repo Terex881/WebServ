@@ -49,7 +49,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 			close(output_fd);
 			exit(1);
 		}
-		cerr  << GREEN << ".. " << data->getReq().getBodyData().pathFormData.c_str() << RESET << endl;
+
 		if (!data->getReq().getBodyData().pathFormData.empty())
 		{
 			input_fd = open(data->getReq().getBodyData().pathFormData.c_str(), O_RDONLY, 0644);
@@ -101,13 +101,13 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 		int i = 5;
 		char* envp[6 + data->getReq().getHeaderData().queryStringVec.size()];
-		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
 		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
 		envp[1] = const_cast<char*>("QUERY_STRING=test");
 		envp[2] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
 		envp[3] = const_cast<char*>(script_name.c_str());
 		envp[4] = const_cast<char*>(key_val.c_str());
 
+		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
 		for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
 		{
 			envp[i++] = const_cast<char*>(it->c_str());

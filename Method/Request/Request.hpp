@@ -67,6 +67,7 @@ typedef struct s_Request
 	string						default_page;
 	bool						isUpload;
 	std::map<int, string>		codeStatusMap;
+	string						hostName;
 }	t_Request;
 
 typedef struct s_Header
