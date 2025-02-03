@@ -665,7 +665,6 @@ std::string matchUrl(const std::string& requestUrl, std::string Location_path)
 int	File_Parsing::Search_By_Server_Name_Port(string server_nama, string port)
 {
 	int i = 0;
-	// int j = 0;
 	while (i < servers_count)
 	{
 		for (map<std::string, std::string>::iterator it = servers[i].values.begin(); it != servers[i].values.end(); it++)

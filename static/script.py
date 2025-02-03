@@ -19,7 +19,6 @@ print(f"<h2>{os.environ['PATH_INFO']}</h2>")
 # while True:
 # 	pass
 
-
 for i in range(1001):
 	print(f"<p>{i}</p>", end="")
 print("end", end="")

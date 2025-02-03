@@ -30,6 +30,8 @@ class Cgi
 		int client_socket;
 	public :
 		string response;
+		string cgi_output;
+		string cgi_error;
 		int content_len;
 		Cgi();
 		Cgi(int socket_fd, string path);

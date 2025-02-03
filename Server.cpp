@@ -4,25 +4,7 @@
 #include "Method/Request/Request.hpp"
 
 #define MAX_CLIENTS 128
-#define BUFFER_SIZE 4096 *2
-
-// Function to clear socket's incoming buffer
-void clearSocketBuffer(int socket) {
-    char buffer[1024];
-    ssize_t bytes_read;
-
-    // Set socket to non-blocking mode temporarily
-    int flags = fcntl(socket, F_GETFL, 0);
-    fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-
-    // Read and discard all pending data
-    while ((bytes_read = recv(socket, buffer, sizeof(buffer), 0)) > 0) {
-        // Discard the data
-    }
-
-    // Restore original socket flags
-    fcntl(socket, F_SETFL, flags);
-}
+#define BUFFER_SIZE 4096 * 2
 
 void Server::ft_start(int size, int *fd)
 {
@@ -197,7 +179,6 @@ void Server::ft_start(int size, int *fd)
 					std::cerr << "Send error: " << strerror(errno) 
 					<< " (errno: " << errno << ")" << std::endl;
 					std::cerr << "send failed" << std::endl;
-					clearSocketBuffer(client_socket);
 					close(data->getReq().getRequestData().fd);
 					data->getReq().getRequestData().codeStatus = 200;//--------------------------------------------------why
 					EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
@@ -207,8 +188,8 @@ void Server::ft_start(int size, int *fd)
 
 					if (data->res_obj.unlink_cgi)
 					{
-						std::remove("cgi_output.txt");
-						std::remove("cgi_error.txt");
+						std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
+						std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
 					}
 
 					// Remove from the client list
@@ -227,7 +208,6 @@ void Server::ft_start(int size, int *fd)
 						if ((size_t)data->getRes().bytesRead >= data->getRes().Res_Size || data->getRes().end)
 						{
 							data->getReq().getRequestData().first = "";
-							clearSocketBuffer(client_socket);
 							data->getRes().bytesRead = 0;
 							data->getReq().getRequestData().sent_head = 0;
 
@@ -235,8 +215,8 @@ void Server::ft_start(int size, int *fd)
 							data->getReq().getRequestData().codeStatus = 200;
 							if (data->res_obj.unlink_cgi)
 							{
-								std::remove("cgi_output.txt");
-								std::remove("cgi_error.txt");
+								std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
+								std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
 							}
 							if (data->getReq().getHeaderData().isAlive == 0)
 				 			{

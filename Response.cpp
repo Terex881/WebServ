@@ -136,16 +136,12 @@ void	Response::handle_cgi_response(int &sent_head)
 	// invalid syntax CGI
 	if (!cgiError.empty())
 	{
-		file.close();
-		file.open("./cgi_error.txt", std::ios::binary);
-		file.seekg(0, std::ios::beg);
+		tmp_Status_Code = "200";
+
 		header = "HTTP/1.1 500 Internal Server Error\r\n"
 				"Content-Type: text/plain\r\n"
 				"Content-Length: "+ _to_string(Calculate_File_Size(file) + 3) +"\r\n"
 				"\r\n";
-		file.seekg(0, std::ios::beg);
-		Working_Path = "./cgi_error.txt";
-		filename = "./cgi_error.txt";
 		responseStream.write(header.c_str(), header.length());
 		return;
 	}

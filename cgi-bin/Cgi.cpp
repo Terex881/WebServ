@@ -10,7 +10,11 @@ Cgi::Cgi(int socket_fd, string path)
 	file_path = path;
 }
 
-Cgi::Cgi(){};
+Cgi::Cgi()
+{
+	cgi_output = "./cgi_output.txt";
+	cgi_error = "./cgi_error.txt";
+};
 
 bool fileExists(const std::string& filename)
 {
@@ -33,12 +37,12 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 		string key_val = "PATH_INFO="+data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
-		int output_fd = open("cgi_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		int output_fd = open(cgi_output.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
 			std::cerr << "Failed to open output file" << std::endl;
 			exit(1);
 		}
-		error_fd = open("cgi_error.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		error_fd = open(cgi_error.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (error_fd == -1)
 		{
 			std::cerr << "Failed to open error file" << std::endl;
@@ -90,9 +94,8 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 
 		const char* py_path = data->getReq().getRequestData().executable_file.c_str();
-		// data->getReq().getHeaderData().url
-		// const char* py_script = "/Users/aibn-che/wbw/cgi-bin/script.py";
 		const char* py_script = data->getReq().getHeaderData().url.c_str();
+
 		string script_name = "SCRIPT_NAME=";
 		script_name.append(py_script);
 
@@ -120,10 +123,8 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		{
 			execve(py_path, argv, envp);
 		}
-		std::remove("cgi_output.txt");
-		std::remove("cgi_error.txt");
+		std::remove(cgi_output.c_str());
 		perror("Execution failed");
-		data->getReq().getRequestData().isCgi = false;
 		exit(1);
 	}
 	else
@@ -229,15 +230,16 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 	if (WIFEXITED(status))
 	{
 		cout << "endlddd" << endl;
-		data->getReq().getHeaderData().url = "./cgi_output.txt";
+		data->getReq().getHeaderData().url = cgi_output;
 		data->getReq().getRequestData().codeStatus = 200;
-		std::ifstream f("./cgi_error.txt");
+		std::ifstream f(cgi_error);
 		if (f.is_open() && data->getRes().Calculate_File_Size(f) != 0)
 		{
 			f.close();
+			data->getReq().getHeaderData().url = cgi_error;
 			data->getReq().getRequestData().cgiError = "yes";
 		}
-		if (!fileExists("./cgi_output.txt"))
+		if (!fileExists(cgi_output))
 		{
 			// data->getReq().getRequestData().isCgi = false;
 			data->getReq().getRequestData().codeStatus = 500;
