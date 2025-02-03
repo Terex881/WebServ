@@ -401,7 +401,7 @@ void	Response::Res_get_chunk(int &sent_head)
 						return ;  // End of file or read error
 					}
 					responseStream << std::hex << current_read << "\r\n";
-					responseStream.write(buffer.data(), current_read);
+					responseStream.write(&buffer[0], current_read);
 					responseStream << "\r\n";
 
 					this->bytesRead += current_read;

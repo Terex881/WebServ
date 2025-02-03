@@ -121,8 +121,8 @@ void Server::ft_start(int size, int *fd)
 									ofstream ss("tmp.py", ios::app | ios::binary);
 									// ss << "[" << client_socket << "]"  << endl;
 									// // ss << clientsMap[client_socket].getReq().getHeaderData().url;
-									ss <<  msg << endl;
-									ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
+									// ss <<  msg << endl;
+									// ss << "\n-----------------------------------------------------------------------\n"; ss.flush();
 									try
 									{
 										clientsMap[client_socket].getReq().request(msg);
