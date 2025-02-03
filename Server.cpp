@@ -160,8 +160,8 @@ void Server::ft_start(int size, int *fd)
 
 					if (data->res_obj.unlink_cgi)
 					{
-						std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
-						std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
+						// std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
+						// std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
 					}
 
 					for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -186,8 +186,8 @@ void Server::ft_start(int size, int *fd)
 							data->getReq().getRequestData().codeStatus = 200;
 							if (data->res_obj.unlink_cgi)
 							{
-								std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
-								std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
+								// std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
+								// std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
 							}
 							if (data->getReq().getHeaderData().isAlive == 0)
 				 			{

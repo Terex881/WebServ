@@ -145,10 +145,16 @@ void	Response::handle_cgi_response(int &sent_head)
 		responseStream.write(header.c_str(), header.length());
 		return;
 	}
-	default_hd = "HTTP/1.1 200 OK\r\n"
-				"Transfer-Encoding: chunked\r\n"
-				"Connection: keep-alive\r\n"
-				"Content-Type: text/html\r\n\r\n";
+	if (!Res_Size)
+		default_hd = "HTTP/1.1 200 OK\r\n"
+					"Content-Length: 0\r\n"
+					"Content-Type: text/plain\r\n"
+					"\r\n";
+	else
+		default_hd = "HTTP/1.1 200 OK\r\n"
+					"Transfer-Encoding: chunked\r\n"
+					"Connection: keep-alive\r\n"
+					"Content-Type: text/html\r\n\r\n";
 
 	if (!timeOut.empty())
 		return;
@@ -369,12 +375,18 @@ void	Response::Res_get_chunk(int &sent_head)
 					cout <<  "SENT HEAD " << endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
-					header =
-						"HTTP/1.1 "+ _to_string(Status_Code) +" OK\r\n"
-						"Content-Type: " + Content_Type + "\r\n"
-						"Transfer-Encoding: chunked\r\n"
-						"Connection: keep-alive\r\n"
-						"\r\n";
+					if (!Res_Size)
+						header = "HTTP/1.1 200 OK\r\n"
+									"Content-Length: 0\r\n"
+									"Content-Type: text/plain\r\n"
+									"\r\n";
+					else
+						header =
+							"HTTP/1.1 "+ _to_string(Status_Code) +" OK\r\n"
+							"Content-Type: " + Content_Type + "\r\n"
+							"Transfer-Encoding: chunked\r\n"
+							"Connection: keep-alive\r\n"
+							"\r\n";
 					sent_head = 1;
 					this->bytesRead = 0;
 					responseStream.write(header.c_str(), header.length());
