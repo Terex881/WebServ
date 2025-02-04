@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 16:01:11 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/03 15:30:28 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,11 @@ void Request::clearData()
 	RequestData.codeStatusMap.clear();
 }
 
-
+void Request::print1(std::map<string, string> &mp)
+{
+	for(map<string, string>::iterator it = mp.begin(); it!=mp.end(); it++)
+		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << RESET << endl;;
+}
 void Request::print(vector<string> &mp)
 {
 	for(vector<string>::iterator it = mp.begin(); it!=mp.end(); it++)

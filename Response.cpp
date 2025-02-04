@@ -123,16 +123,16 @@ void	Response::handle_cgi_response(int &sent_head)
 	sent_head = 1;
 	isCgi = false;
 	
-	cout << YELLOW << ";; " << Working_Path << RESET << endl;
+	// cout << YELLOW << ";; " << Working_Path << RESET << endl;
 	Res_Size = Calculate_File_Size(file);
 	int log = 0;
-	cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
+	// cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
 	if (!server.values[_to_string(Status_Code)].empty() || 	!timeOut.empty())
 	{
 		tmp_Status_Code = "3333";
 		return;
 	}
-	cout << "ENTER ................... " << endl;
+	// cout << "ENTER ................... " << endl;
 	// invalid syntax CGI
 	if (!cgiError.empty())
 	{
@@ -305,8 +305,8 @@ void	Response::Res_get_chunk(int &sent_head)
 	
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
-	cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
-	cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
+	// cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
+	// cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
@@ -366,8 +366,6 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		if (isFile(Working_Path) && (Status_Code == 200 || tmp_Status_Code == "200"))
 		{
-			cout << "enter 1 " << Working_Path << " | Status_code : " << Status_Code << " | " << tmp_Status_Code<< endl;
-			cout << "[[[[[]]]]] sent_head : " <<  sent_head<< endl;
 			if (!file.is_open())
 			{
 				header = 
@@ -386,7 +384,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				if (!sent_head)
 				{
-					cout <<  "SENT HEAD " << endl;
 					size_t file_size = Calculate_File_Size(file);
 					this->Res_Size = file_size;
 					if (!Res_Size)
@@ -396,7 +393,7 @@ void	Response::Res_get_chunk(int &sent_head)
 									"\r\n";
 					else
 						header =
-							"HTTP/1.1 "+ _to_string(Status_Code) +" OK\r\n"
+							"HTTP/1.1 "+ _to_string(Status_Code) + (codeStatusMap[Status_Code].empty() ? "OK" :  codeStatusMap[Status_Code]) + "\r\n"
 							"Content-Type: " + Content_Type + "\r\n"
 							"Transfer-Encoding: chunked\r\n"
 							"Connection: keep-alive\r\n"

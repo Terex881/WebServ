@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 13:54:07 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:18:06 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,7 @@ void	Request::openFile(const string &name)
 	{
 		BodyData.outFile.open(name, ios::binary | ios::trunc);
 		if (!BodyData.outFile.is_open())
-			clean(500, "Internal Server Error : FAILED OPEN " + name);
-			// {RequestData.codeStatus = 505;	RequestData.requestStat = 2; throw runtime_error("FAILED OPEN " + fileNamee);}
+			clean(500, "Internal Server Error");
 	}
 }
 
@@ -59,10 +58,7 @@ int	Request::getFileName(string &body)
 	string first = tmp.substr(0, tmp.find(CRLF) + 2);
 
 	if (first.find("\"\r\n") == NP || body.find(DCRLF) == NP)
-	{
-		cout << RED << "error: no CRLF founded\n" << RESET;
 		return 0;
-	}
 	size_t filePos = first.find(FILE_NAME);
 	if (filePos != NP)
 	{

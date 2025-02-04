@@ -48,3 +48,22 @@ run nginx and test
 code status 201
 
 remove second value in host 
+
+
+
+
+000000000000000000000000000000000000000000000000000000000000
+*************************
+
+CHECK script Critical Lines
+
+*****
+
+
+Also i have to change cgi_output & cgi_error PATH
+
+
+
+
+Also I have to pass Header Key-Vals to CGI env
+000000000000000000000000000000000000000000000000000000000000

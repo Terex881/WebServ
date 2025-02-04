@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/23 17:57:08 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:18:54 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,9 @@ void Request::parseChunkedBoundryBody(string &body)
 				if (str != CRLF && str.find_first_of(CRLF) == NP)
 					parseBoundryBody(str);
 			}
-			/* */
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == NP)
-			{
-				cout << RED << "error: no length founded\n" << RESET;
 				return;
-			}
 			/* get decimal number and erase hex + crlf and if length 0 erase 0 and rnrnr of crlf*/
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);

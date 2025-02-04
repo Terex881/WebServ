@@ -116,8 +116,7 @@ void Server::ft_start(int size, int *fd)
 				Client *data = (Client *)events[i].udata;
 				int client_socket = events[i].ident;
 				std::string responseStr;
-				
-				cout << "++++++++++ " << data->getReq().getRequestData().codeStatusMap[200] << endl;
+
 				if (data->getReq().getRequestData().first.empty())
 					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
 												data->getReq().getHeaderData().url,

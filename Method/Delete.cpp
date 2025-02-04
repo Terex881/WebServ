@@ -86,7 +86,6 @@ int Delete::Can_Be_Deleted()
 			}
 		}
 	}
-	cout << "here 1 ---------------------------------\n";
     return 2;
 }
 
@@ -110,7 +109,6 @@ void Delete::Delete_File()
 	}
 	else if (a == 2)
 	{
-		cout << "here 2 ---------------------------------\n";
 		std::cout << "failed deleting the file\n";
 		this->flag_response = 400;
 		this->response = "HTTP/1.1 500 Internal Server Error\r\n"
