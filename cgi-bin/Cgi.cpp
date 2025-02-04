@@ -58,7 +58,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 				std::cerr << "Failed to open input file" << std::endl;
 				close(output_fd);
 				close(error_fd);
-				exit(1);
+				// exit(1);
 			}
 			if (dup2(input_fd, STDIN_FILENO) == -1)
 			{
