@@ -208,6 +208,94 @@ void	Response::handle_cgi_response(int &sent_head)
 		file.seekg(offset + 27, std::ios::beg);
 }
 
+int	Response::res_delete(int &sent_head)
+{
+	string	default_idx;
+	// res error msg
+	if(!codeStatusMap[Status_Code].empty())
+	{
+		// defaul err page
+		default_idx = server.values[_to_string(Status_Code)];
+		if (!default_idx.empty() && isFile(default_idx))
+		{
+			Working_Path = default_idx;
+			file.close();
+			sent_head = 0;
+			filename = default_idx;
+			tmp_Status_Code = "200";
+			Content_Type = GetMimeType(default_idx);
+			file.open(default_idx, std::ios::binary);
+			Method = "GET";
+			return (0);
+		}
+		else
+			header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+				"Content-Type: text/plain\r\n"
+				"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
+				"\r\n"+	codeStatusMap[Status_Code];
+		responseStream.write(header.c_str(), header.length());
+		return (1);
+	}
+	else if (Status_Code == 405)
+		delete_config = 0;
+	else
+		delete_config = 1;
+	Delete a("",Working_Path,1, isCgi);
+	a.Delete_File();
+	responseStream.write(a.response.c_str(), a.response.length());
+	return (1);
+}
+
+int	Response::res_post(int &sent_head)
+{
+	string	default_idx;
+
+	if (!isFile(Working_Path) && !isDirectory(Working_Path))
+	{
+		default_idx = server.values["404"]; /// default error page
+		if (!default_idx.empty() && isFile(default_idx))
+		{
+			Working_Path = default_idx;
+			file.close();
+			filename = default_idx;
+			sent_head = 0;
+			tmp_Status_Code = "200";
+			Content_Type = GetMimeType(default_idx);
+			file.open(default_idx, std::ios::binary);
+			Method = "GET";
+			return (0);
+		}
+		else
+			header = ret_header(404, "Not Found", "Not :(:( Found", "text/plain");
+	}
+	else if (isUpload && (Status_Code == 201 || Status_Code == 200))
+		header = ret_header(201, "Ok", "Uploaded Successfully", "text/plain");
+	else if(!codeStatusMap[Status_Code].empty())
+	{
+		default_idx = server.values[_to_string(Status_Code)];
+		if (!default_idx.empty() && isFile(default_idx))
+		{
+			Working_Path = default_idx;
+			file.close();
+			filename = default_idx;
+			sent_head = 0;
+			tmp_Status_Code = "200";
+			Content_Type = GetMimeType(default_idx);
+			file.open(default_idx, std::ios::binary);
+			Method = "GET";
+			return (0);
+		}
+		else
+			header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+				"Content-Type: text/plain\r\n"
+				"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
+				"\r\n"+	codeStatusMap[Status_Code];
+	}
+	else
+		header = ret_header(400, "Bad Request", "Error in upload", "text/plain");
+	responseStream.write(header.c_str(), header.length());
+	return (1);
+}
 
 void	Response::Res_get_chunk(int &sent_head)
 {
@@ -248,39 +336,9 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	if (Method == "DELETE")
 	{
-		// res error msg
-		if(!codeStatusMap[Status_Code].empty())
-		{
-			// defaul err page
-			default_idx = server.values[_to_string(Status_Code)];
-			if (!default_idx.empty() && isFile(default_idx))
-			{
-				Working_Path = default_idx;
-				file.close();
-				sent_head = 0;
-				filename = default_idx;
-				tmp_Status_Code = "200";
-				Content_Type = GetMimeType(default_idx);
-				file.open(default_idx, std::ios::binary);
-				Method = "GET";
-				return;
-			}
-			else
-				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
-					"Content-Type: text/plain\r\n"
-					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
-					"\r\n"+	codeStatusMap[Status_Code];
-			responseStream.write(header.c_str(), header.length());
-			this->end = 1;	return ;
-		}
-		else if (Status_Code == 405)
-			delete_config = 0;
-		else
-			delete_config = 1;
-		Delete a("",Working_Path,1, isCgi);
-		a.Delete_File();
-		responseStream.write(a.response.c_str(), a.response.length());
-		this->end = 1;	return ;
+		if (res_delete(sent_head))
+			this->end = 1;
+		return;
 	}
 	if (isCgi)
 	{
@@ -291,51 +349,9 @@ void	Response::Res_get_chunk(int &sent_head)
 	}
 	else if ((Method == "POST"))
 	{
-		if (!isFile(Working_Path) && !isDirectory(Working_Path))
-		{
-			default_idx = server.values["404"]; /// default error page
-			if (!default_idx.empty() && isFile(default_idx))
-			{
-				Working_Path = default_idx;
-				file.close();
-				filename = default_idx;
-				sent_head = 0;
-				tmp_Status_Code = "200";
-				Content_Type = GetMimeType(default_idx);
-				file.open(default_idx, std::ios::binary);
-				Method = "GET";
-				return;
-			}
-			else
-				header = ret_header(404, "Not Found", "Not :(:( Found", "text/plain");
-		}
-		else if (isUpload && (Status_Code == 201 || Status_Code == 200))
-			header = ret_header(201, "Ok", "Uploaded Successfully", "text/plain");
-		else if(!codeStatusMap[Status_Code].empty())
-		{
-			default_idx = server.values[_to_string(Status_Code)];
-			if (!default_idx.empty() && isFile(default_idx))
-			{
-				Working_Path = default_idx;
-				file.close();
-				filename = default_idx;
-				sent_head = 0;
-				tmp_Status_Code = "200";
-				Content_Type = GetMimeType(default_idx);
-				file.open(default_idx, std::ios::binary);
-				Method = "GET";
-				return;
-			}
-			else
-				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
-					"Content-Type: text/plain\r\n"
-					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
-					"\r\n"+	codeStatusMap[Status_Code];
-		}
-		else
-			header = ret_header(400, "Bad Request", "Error in upload", "text/plain");
-		responseStream.write(header.c_str(), header.length());
-		this->end = 1;	return ;
+		if (res_post(sent_head))
+			this->end = 1;
+		return;
 	}
 	else if (Method == "GET")
 	{
@@ -477,7 +493,7 @@ void	Response::Res_get_chunk(int &sent_head)
 				return;
 			}
 			else
-				header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+				header = "HTTP/1.1 " + _to_string(Status_Code) + " " +codeStatusMap[Status_Code]+ "\r\n"
 					"Content-Type: text/plain\r\n"
 					"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
 					"\r\n"+	codeStatusMap[Status_Code];

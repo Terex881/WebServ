@@ -76,6 +76,8 @@ class Response : public Delete
 		static string	GetMimeType(const std::string& filename);
 		void	handle_cgi_response(int &sent_head);
 		static size_t	Calculate_File_Size(std::ifstream &file);
+		int		res_delete(int &sent_head);
+		int		res_post(int &sent_head);
 };
 
 #endif
