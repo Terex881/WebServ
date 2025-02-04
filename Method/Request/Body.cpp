@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 16:45:25 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:17:37 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,6 @@ void	Request::parseBodyTypes(string &body)
 	static u_long totalBodySize;
 	totalBodySize += body.length();
 
-	// cout << BLUE << BodyData.bodyType << RESET << endl;
-
 	if (BodyData.bodyType == CHUNKED && body == "0\r\n\r\n")
 		BodyData.bodyType = NONE;
 
@@ -32,14 +30,7 @@ void	Request::parseBodyTypes(string &body)
 		string name = RequestData.fileLocation + "/" + BodyData.fileName;
 		std::remove(name.c_str());
 		clean(413, "Content Too Large");
-		// RequestData.codeStatus = 400;
-		// RequestData.requestStat = 2;
-		// throw runtime_error("MAX bady szie1");
 	}
-
-
-	// if (RequestData.isCgi &&  (BodyData.bodyType == BODY_SIZE || BodyData.bodyType == CHUNKED))
-	// 	RequestData.isCgi = false;
 	
 	if (hasOneMatch(last, BodyData.endBoundry) && BodyData.newStr.find(BodyData.endBoundry) == NP)
 		return;
@@ -52,7 +43,6 @@ void	Request::parseBodyTypes(string &body)
 		case(NONE):	RequestData.requestStat = 2;	break;
 	}
 }
-// 150 0 000 000
 
 bool Request::hasOneMatch(const std::string& str1, const std::string& str2)
 {

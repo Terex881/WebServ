@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/03 16:51:04 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:51:47 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
-		clean(400, "Bad Request : bad URL");
+		clean(400, "Bad Request");
 	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
 	{
@@ -67,30 +67,27 @@ void Request::parseUri(string &str)
 void Request::parseFirstLine(const string &line)
 {
 	string method, uri, httpVersion;
-	map<string, string>::iterator it;
 
 	if (isspace(line[0]))
-	{
-		clean(400, "Bad Request : foud space in the begening");
-	}
+		clean(400, "Bad Request");
 
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;	
 	if (method.empty() || uri.empty() || httpVersion.empty())
-	{
 		clean(400, "Bad Request"); // check 405
-	}
-	HeaderData.bigMap.insert(std::make_pair("METHOD", method));
+	HeaderData.bigMap.insert(std::make_pair("REQUEST_METHOD", method));
 	HeaderData.bigMap.insert(std::make_pair("URI", uri));
-	HeaderData.bigMap.insert(std::make_pair("HTTPVERSION", httpVersion));
+	HeaderData.bigMap.insert(std::make_pair("HTTP_VERSION", httpVersion));
 
 	HeaderData.requestMethod = method;
+	if (method != "GET" && method != "HEAD" && method != "OPTIONS" && method != "TRACE" && method != "PUT" && method != "DELETE" && method != "POST" && method != "PATCH" && method != "CONNECT")
+		clean(400, "Bad Request");
 	if (method != "POST" && method != "GET" && method != "DELETE")
-		clean(400, "Bad Request : 501 Not Implement");
-		// check if 501
-	if ((it = HeaderData.bigMap.find("uri")) != HeaderData.bigMap.end())
-		parseUri(it->second);
-	if ((it = HeaderData.bigMap.find("httpVersion")) != HeaderData.bigMap.end() && it->second != "HTTP/1.1")
+		clean(501, "Not Implemented");
+	parseUri(uri);
+	if (httpVersion != "HTTP/0.9" && httpVersion != "HTTP/1.0" && httpVersion != "HTTP/1.1" && httpVersion != "HTTP/2" && httpVersion != "HTTP/3")
+		clean(400, "Bad Request");
+	if (httpVersion != "HTTP/1.1")
 		clean(505, "HTTP Version Not Supported");
 }
 
@@ -106,16 +103,14 @@ void Request::fillHeaderMap(string &header)
 		
 		key = line.substr(0, colonPos);
 		if(key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0]))
-			clean(400, "Bad Request : foud space or doesn't find :");
+			clean(400, "Bad Request");
 
 		size_t valEndPos  = line.find_first_not_of(' ', colonPos + 1);
 		if (valEndPos == NP)	valEndPos = 0;
 		value = line.substr(valEndPos, line.find_last_not_of(' ') - valEndPos + 1);
 	
-		std::transform(key.begin(), key.end(), key.begin(), ::toupper); // check this 
+		std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 		std::replace(key.begin(), key.end(), '-', '_');
-		// if (key == "transfer-encoding") // check other
-		// 	std::transform(value.begin(), value.end(), value.begin(), ::toupper); // check this 
 
 		fillData(key, value);
 		HeaderData.bigMap.insert(std::make_pair(key, value));	
@@ -135,7 +130,6 @@ string	find_extension(string url)
 	}
 	return extension;
 }
-
 
 void Request::achref()
 {
@@ -205,7 +199,7 @@ void Request::achref()
 				RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
 		}
 		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
-			clean(405, "405 Method Not Allowed");
+			clean(405, "Method Not Allowed");
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
 		if (!l_data.rturn.empty())
@@ -214,7 +208,7 @@ void Request::achref()
 			RequestData.serverName = server.values["server_name"];	
 	}
 	else
-		clean(404, "Location Not Found");
+		clean(404, "Not Found");
 }
 
 void Request::parseHeader(string &header)
@@ -227,30 +221,31 @@ void Request::parseHeader(string &header)
 	fillHeaderMap(header);
 
 	achref();
-	print1(HeaderData.bigMap);
+	// print1(HeaderData.bigMap);
 	getTypes(HeaderData.bigMap);
 }
 
-void Request::fillData(const string &key, const string &value)
+void Request::fillData(string &key, const string &value)
 {
 	size_t Pos = 0;
-	if (key == "content-length")
+	if (key == "CONTENT_LENGTH")
 		BodyData.bodySize = (std::atol(value.c_str()));
-	if (key == "host" && (Pos = value.find(":")) != NP)
+	if (key == "HOST" && (Pos = value.find(":")) != NP)
 	{
 		RequestData.hostName = value.substr(0, Pos);
 		HeaderData.port = value.substr(Pos + 1, 10);
+		key = "SERVER_NAME";
 	}
-	if (key == "cookie")
+	if (key == "COOKIE")
 		HeaderData.queryStringVec.push_back("Cookie=" + value);
 	
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
 {
-	map<string, string>::const_iterator	multiPart = mp.find("content-type");
-	map<string, string>::const_iterator	chunked = mp.find("transfer-encoding");
-	map<string, string>::const_iterator	alive = mp.find("connection");
+	map<string, string>::const_iterator	multiPart = mp.find("CONTENT_TYPE");
+	map<string, string>::const_iterator	chunked = mp.find("TRANSFER_ENCODING");
+	map<string, string>::const_iterator	alive = mp.find("CONNECTION");
 	
 	if (alive != mp.end() && alive->second == "close")
 		HeaderData.isAlive = false;
@@ -270,7 +265,7 @@ void Request::getTypes(const std::map<string, string> &mp)
 	}
 
 	if (HeaderData.port.empty())
-		clean(400, "Bad Request : no Host found !!");
+		clean(400, "Bad Request");
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
 	if (bol)
@@ -287,8 +282,8 @@ void Request::getTypes(const std::map<string, string> &mp)
 		else if (chunked->second == "chunked" && bol)
 			BodyData.bodyType = CHUNKED_BOUNDARY;
 		else
-			clean(501, "Bad Request2");
+			clean(501, "Not Implemented");
 	}
 	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
-		clean(501, "Bad Request1");
+		clean(501, "Not Implemented");
 }

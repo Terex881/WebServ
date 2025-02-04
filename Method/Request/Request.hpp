@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/03 15:29:10 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:23:17 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ class Request
 		void		parseHeader(string &header);
 		void		parseUri(string &str);
 		void		storeQueryString(string &str, const size_t &QMPos);
-		void		fillData(const string &key, const string &value);
+		void		fillData(string &key, const string &value);
 
 		void		fillHeaderMap(string &header);
 

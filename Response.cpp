@@ -123,16 +123,16 @@ void	Response::handle_cgi_response(int &sent_head)
 	sent_head = 1;
 	isCgi = false;
 	
-	cout << YELLOW << ";; " << Working_Path << RESET << endl;
+	// cout << YELLOW << ";; " << Working_Path << RESET << endl;
 	Res_Size = Calculate_File_Size(file);
 	int log = 0;
-	cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
+	// cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
 	if (!server.values[_to_string(Status_Code)].empty())
 	{
 		tmp_Status_Code = "3333";
 		return;
 	}
-	cout << "ENTER ................... " << endl;
+	// cout << "ENTER ................... " << endl;
 	// invalid syntax CGI
 	if (!cgiError.empty())
 	{

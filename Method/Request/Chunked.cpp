@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/01/29 13:55:43 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 11:18:31 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,23 +53,14 @@ void Request::parseChunkedBody(string &body)
 			}
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == NP)
-			{
-				cout << RED << "error: no length founded\n" << RESET;
 				return;
-			}
 			
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);
 
 			if (!length)
 			{
-				/* erase last DCRLF */
 				body.erase(0, 4);
-				/* if strtol fails will return 0 */
-				if (!body.empty())
-				{
-					cout << RED << "error: strtol fails\n" << RESET;
-				}
 				BodyData.outFile.close();
 				RequestData.requestStat = 2;
 				RequestData.codeStatus = 201;
