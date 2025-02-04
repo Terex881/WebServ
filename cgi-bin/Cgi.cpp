@@ -158,7 +158,7 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 	}
 	// std::cout << "CGI script timeout, terminating..." << std::endl;
 	// EV_SET(&events[1], pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
-	data->getReq().getRequestData().codeStatus = 504;
+	// data->getReq().getRequestData().codeStatus = 504;
 	try {
 		data->getReq().clean(504, "Gateway Timeout");
 	} catch (const exception& e) {
@@ -241,7 +241,6 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 		}
 		if (!fileExists(cgi_output))
 		{
-			// data->getReq().getRequestData().isCgi = false;
 			data->getReq().getRequestData().codeStatus = 500;
 			try {
 				data->getReq().clean(500, "Internal Server Erroreeeee");

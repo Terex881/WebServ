@@ -127,7 +127,7 @@ void	Response::handle_cgi_response(int &sent_head)
 	Res_Size = Calculate_File_Size(file);
 	int log = 0;
 	cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
-	if (!server.values[_to_string(Status_Code)].empty())
+	if (!server.values[_to_string(Status_Code)].empty() || 	!timeOut.empty())
 	{
 		tmp_Status_Code = "3333";
 		return;
@@ -156,8 +156,6 @@ void	Response::handle_cgi_response(int &sent_head)
 					"Connection: keep-alive\r\n"
 					"Content-Type: text/html\r\n\r\n";
 
-	if (!timeOut.empty())
-		return;
 	while (file.read(buffer, 4096) || file.gcount() > 0)
 	{
 		size_t bytesRead = file.gcount();
@@ -229,7 +227,7 @@ int	Response::res_delete(int &sent_head)
 			return (0);
 		}
 		else
-			header = "HTTP/1.1 " + _to_string(Status_Code) + " Bad Request\r\n"
+			header = "HTTP/1.1 " + _to_string(Status_Code) + " "+ codeStatusMap[Status_Code] +"\r\n"
 				"Content-Type: text/plain\r\n"
 				"Content-Length: " + _to_string(codeStatusMap[Status_Code].length()) + "\r\n"
 				"\r\n"+	codeStatusMap[Status_Code];
