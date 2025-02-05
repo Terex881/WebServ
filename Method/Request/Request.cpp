@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/03 15:30:28 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 19:46:42 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void Request::clean(int code, string message)
 	RequestData.codeStatus = code;
 	RequestData.codeStatusMap.insert(make_pair(code, message));
 	RequestData.requestStat = 2;
-	throw runtime_error(message);
+	// throw runtime_error(message);
 }
 
 

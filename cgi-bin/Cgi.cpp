@@ -1,5 +1,5 @@
 #include "./Cgi.hpp"
-#include "../Client.hpp"
+#include "../Server/Client.hpp"
 #include <exception>
 #include <fstream>
 #include <unistd.h>

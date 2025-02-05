@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:51:47 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 19:49:56 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
 		if (andPos != string::npos)	queryStrings.erase(0, endPos + 1);
 		else	queryStrings.clear();
 	}
-	print(HeaderData.queryStringVec);
 }
  
 void Request::parseUri(string &str)
@@ -209,6 +208,12 @@ void Request::achref()
 	}
 	else
 		clean(404, "Not Found");
+	if (RequestData.codeStatus != 200 && RequestData.codeStatus != 201)
+	{
+		cout << GREEN << RequestData.codeStatusMap[RequestData.codeStatus] << RESET << endl; 
+		throw runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
+	}
+
 }
 
 void Request::parseHeader(string &header)

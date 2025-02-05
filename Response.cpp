@@ -393,7 +393,7 @@ void	Response::Res_get_chunk(int &sent_head)
 									"\r\n";
 					else
 						header =
-							"HTTP/1.1 "+ _to_string(Status_Code) + (codeStatusMap[Status_Code].empty() ? "OK" :  codeStatusMap[Status_Code]) + "\r\n"
+							"HTTP/1.1 "+ _to_string(Status_Code) +" " +(codeStatusMap[Status_Code].empty() ? "OK" :  codeStatusMap[Status_Code]) + "\r\n"
 							"Content-Type: " + Content_Type + "\r\n"
 							"Transfer-Encoding: chunked\r\n"
 							"Connection: keep-alive\r\n"
