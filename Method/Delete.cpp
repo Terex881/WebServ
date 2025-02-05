@@ -14,7 +14,7 @@ Delete::Delete()
 	// cout <<  "343434534534534545345343455345" << endl;
 }
 
-Delete::Delete(std::string file, std::string path, int delete_con, int cgi)
+Delete::Delete(std::string file, std::string path, int delete_con, int cgi, DynamicStruct server)
 {
 	this->file_to_deleted = file;
 	this->flag_response = -1337;
@@ -22,6 +22,7 @@ Delete::Delete(std::string file, std::string path, int delete_con, int cgi)
 	this->path_config = path;
 	this->delete_config = delete_con;
 	this->cgi_ = cgi;
+	this->server = server;
 }
 
 int Delete::Can_Be_Deleted()
@@ -90,11 +91,36 @@ int Delete::Can_Be_Deleted()
 }
 
 
-void Delete::Delete_File()
+int	Delete::Delete_File(size_t &Status_Code,  map<int, string> &codeStatusMap)
 {
 	// check if the file can be deleted
 	int a = this->Can_Be_Deleted();
-	if (a == 1)
+	cout << YELLOW <<  flag_response << "   | "<< server.values[_to_string(flag_response)] << RESET<< endl;
+
+	if (a == 2)
+	{
+		std::cout << "failed deleting the file\n";
+		this->flag_response = 500;
+		this->response = "HTTP/1.1 500 Internal Server Error\r\n"
+										"Content-Type: text/plain\r\n"
+										"Content-Length: " + _to_string(21) + "\r\n"
+										"\r\n" +  // Blank line separating headers and body
+										"Internal Server Error";
+	}
+	if ((!a || a == 2) && !server.values[_to_string(flag_response)].empty())
+	{
+		if (flag_response == 501)
+			codeStatusMap.insert(make_pair(flag_response, "Not Implemented"));
+		else if (flag_response == 405)
+			codeStatusMap.insert(make_pair(flag_response, "Method Not Allowed"));
+		else if (flag_response == 403)
+			codeStatusMap.insert(make_pair(flag_response, "Forbidden"));
+		else
+			codeStatusMap.insert(make_pair(flag_response, "Internal Server Error"));
+		Status_Code = flag_response;
+		return (0);
+	}
+	else
 	{
 		if (remove((this->path_config + this->file_to_deleted).c_str()) == 0)
 		{
@@ -107,16 +133,17 @@ void Delete::Delete_File()
                                           "file is deleted";
 		}
 	}
-	else if (a == 2)
-	{
-		std::cout << "failed deleting the file\n";
-		this->flag_response = 400;
-		this->response = "HTTP/1.1 500 Internal Server Error\r\n"
-										"Content-Type: text/plain\r\n"
-										"Content-Length: " + _to_string(21) + "\r\n"
-										"\r\n" +  // Blank line separating headers and body
-										"Internal Server Error";
-	}
+	// else if (a == 2)
+	// {
+	// 	std::cout << "failed deleting the file\n";
+	// 	this->flag_response = 400;
+	// 	this->response = "HTTP/1.1 500 Internal Server Error\r\n"
+	// 									"Content-Type: text/plain\r\n"
+	// 									"Content-Length: " + _to_string(21) + "\r\n"
+	// 									"\r\n" +  // Blank line separating headers and body
+	// 									"Internal Server Error";
+	// }
+	return (1);
 }
 
 Delete::~Delete()

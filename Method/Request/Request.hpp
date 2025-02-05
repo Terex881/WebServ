@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:23:17 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/04 19:46:38 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,12 +145,13 @@ class Request
 		void		request(string &body);
 		void		print(vector<string> &headerMap);
 		void		printV(vector<pair<string, string> > &mp);
+	void 		print1(std::map<string, string> &mp);
+	
 		t_Request&	getRequestData();
 		t_Header&	getHeaderData();
 		t_Body&		getBodyData();
 		void		clean(int code, string message);
 		void		clearData();
-	void 		print1(std::map<string, string> &mp);
 
 
 

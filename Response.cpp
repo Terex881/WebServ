@@ -21,7 +21,7 @@ Response::Response():Chunk_Size(1024)
 }
 
 Response::Response(string content_type,\
-					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server, string urlFinal, string timeOut, string cgiError, map<int, string> codeStatusMap):Delete("", Url, 1, isCgi),Chunk_Size(1024) // 8 KB chunks 8192
+					string working_path, string method, string Url, int codeStatus, bool isLesn, string filename, vector<string> redirection, string default_page, bool	isUpload, bool isCgi, DynamicStruct server, string urlFinal, string timeOut, string cgiError, map<int, string> codeStatusMap):Delete("", Url, 1, isCgi, server),Chunk_Size(1024) // 8 KB chunks 8192
 {
 	this->Content_Type = content_type;
 	this->Working_Path = working_path;
@@ -221,6 +221,11 @@ int	Response::res_delete(int &sent_head)
 			Content_Type = GetMimeType(default_idx);
 			file.open(default_idx, std::ios::binary);
 			Method = "GET";
+			if (isCgi)
+			{
+				isCgi = false;
+				unlink_cgi = 1;
+			}
 			return (0);
 		}
 		else
@@ -235,9 +240,30 @@ int	Response::res_delete(int &sent_head)
 		delete_config = 0;
 	else
 		delete_config = 1;
-	Delete a("",Working_Path,1, isCgi);
-	a.Delete_File();
-	responseStream.write(a.response.c_str(), a.response.length());
+
+	Delete a("", Working_Path, 1, isCgi, server);
+	int rt = a.Delete_File(Status_Code, codeStatusMap);
+	default_idx = server.values[_to_string(Status_Code)];
+
+	if(!rt && !default_idx.empty() && isFile(default_idx))
+	{
+		Working_Path = default_idx;
+		file.close();
+		sent_head = 0;
+		filename = default_idx;
+		tmp_Status_Code = "200";
+		Content_Type = GetMimeType(default_idx);
+		file.open(default_idx, std::ios::binary);
+		Method = "GET";
+		if (isCgi)
+		{
+			isCgi = false;
+			unlink_cgi = 1;
+		}
+		return (0);
+	}
+	else
+		responseStream.write(a.response.c_str(), a.response.length());
 	return (1);
 }
 
@@ -305,12 +331,30 @@ void	Response::Res_get_chunk(int &sent_head)
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
-		header = 
-			"HTTP/1.1 " + _to_string(405) + " Method Not Allowed\r\n"
-			"Content-Type: text/plain\r\n"
-			"Content-Length: 17\r\n"
-			"\r\n"
-			"Method Not Allowed";
+		if(!codeStatusMap[Status_Code].empty())
+		{
+			// defaul err page
+			default_idx = server.values[_to_string(Status_Code)];
+			if (!default_idx.empty() && isFile(default_idx))
+			{
+				Working_Path = default_idx;
+				file.close();
+				sent_head = 0;
+				filename = default_idx;
+				tmp_Status_Code = "200";
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
+				Method = "GET";
+				return ;
+			}
+		}
+		else
+			header = 
+				"HTTP/1.1 " + _to_string(405) + " Method Not Allowed\r\n"
+				"Content-Type: text/plain\r\n"
+				"Content-Length: 17\r\n"
+				"\r\n"
+				"Method Not Allowed";
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;
 		return;
@@ -491,11 +535,24 @@ void	Response::Res_get_chunk(int &sent_head)
 		}
 		else
 		{
-			header = "HTTP/1.1 404 Not Found\r\n"
-					"Content-Type: text/plain\r\n"
-					"Content-Length: 12\r\n"
-					"\r\n"
-					"Not :( Found";
+			default_idx = server.values["404"];
+			if (!default_idx.empty() && isFile(default_idx))
+			{
+				Working_Path = default_idx;
+				file.close();
+				filename = default_idx;
+				tmp_Status_Code = "200";
+				sent_head = 0;
+				Content_Type = GetMimeType(default_idx);
+				file.open(default_idx, std::ios::binary);
+				return;
+			}
+			else
+				header = "HTTP/1.1 404 Not Found\r\n"
+						"Content-Type: text/plain\r\n"
+						"Content-Length: 12\r\n"
+						"\r\n"
+						"Not :( Found";
 			responseStream.write(header.c_str(), header.length());
 			this->end = 1;
 			return	;

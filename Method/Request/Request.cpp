@@ -6,13 +6,11 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/03 15:30:28 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/05 10:27:10 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
-#include "../Delete.hpp"
-#include <utility>
 
 Request::Request()
 {
@@ -34,7 +32,7 @@ void Request::clean(int code, string message)
 	RequestData.codeStatus = code;
 	RequestData.codeStatusMap.insert(make_pair(code, message));
 	RequestData.requestStat = 2;
-	throw runtime_error(message);
+	// throw runtime_error(message);
 }
 
 

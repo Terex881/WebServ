@@ -1,5 +1,5 @@
 #include "./Cgi.hpp"
-#include "../Client.hpp"
+#include "../Server/Client.hpp"
 #include <exception>
 #include <fstream>
 #include <unistd.h>
@@ -26,8 +26,8 @@ std::string get_current_time_string() {
 
 Cgi::Cgi()
 {
-	cgi_output = "/tmp/cgi_output_"+ get_current_time_string() +".txt";
-	cgi_error = "/tmp/cgi_error_"+ get_current_time_string() +".txt";
+	cgi_output = "/tmp/.cgi_output_"+ get_current_time_string() +".txt";
+	cgi_error = "/tmp/.cgi_error_"+ get_current_time_string() +".txt";
 };
 
 void	fill_env(Client *data, char **envp)
@@ -172,6 +172,7 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 	struct kevent even;
 	EV_SET(&even, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
 	kevent(kq, &even, 1, NULL, 0, NULL);
+
 	kill(pid, SIGTERM);
 	usleep(100000); // Wait 100ms
 
