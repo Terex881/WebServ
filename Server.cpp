@@ -85,6 +85,7 @@ void Server::ft_start(int size, int *fd)
 				} else
 				{
 					msg.assign(buffer, bytes_received);
+
 					try
 					{
 						clientsMap[client_socket].getReq().request(msg);

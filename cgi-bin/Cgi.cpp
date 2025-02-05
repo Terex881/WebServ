@@ -30,6 +30,35 @@ Cgi::Cgi()
 	cgi_error = "/tmp/cgi_error_"+ get_current_time_string() +".txt";
 };
 
+void	fill_env(Client *data, char **envp)
+{
+	int i = 0;
+	string script_name = "SCRIPT_NAME=";
+	string key_val = "PATH_INFO=" + data->getReq().getRequestData().pathInfo;
+
+	script_name.append(data->getReq().getHeaderData().url.c_str());
+	data->getReq().getHeaderData().bigMap["SERVER_NAME"] = "SERVER_NAME="+data->getReq().getHeaderData().bigMap["SERVER_NAME"];
+	data->getReq().getHeaderData().bigMap["CONTENT_TYPE"] = "CONTENT_TYPE="+data->getReq().getHeaderData().bigMap["CONTENT_TYPE"];
+	data->getReq().getHeaderData().bigMap["REQUEST_METHOD"] = "REQUEST_METHOD="+data->getReq().getHeaderData().bigMap["REQUEST_METHOD"];
+	data->getReq().getHeaderData().bigMap["CONTENT_LENGTH"] = "CONTENT_LENGTH="+data->getReq().getHeaderData().bigMap["CONTENT_LENGTH"];
+	data->getReq().getHeaderData().bigMap["PATH_INFO"] = key_val;
+	data->getReq().getHeaderData().bigMap["SCRIPT_NAME"] = script_name;
+	
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["SERVER_NAME"].c_str());
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["CONTENT_TYPE"].c_str());
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["REQUEST_METHOD"].c_str());
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["CONTENT_LENGTH"].c_str());
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["PATH_INFO"].c_str());
+	envp[i++] = const_cast<char*>(data->getReq().getHeaderData().bigMap["SCRIPT_NAME"].c_str());
+
+	std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
+	for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
+	{
+		envp[i++] = const_cast<char*>(it->c_str());
+	}
+	envp[i] = NULL;
+}
+
 bool fileExists(const std::string& filename)
 {
 	return (access(filename.c_str(), F_OK) == 0);  // F_OK checks for existence
@@ -48,9 +77,10 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	{
 		int input_fd;
 		int error_fd;
-		// cgi_output = "/tmp/cgi_output_" + std::to_string(getpid());
-		// cgi_error = "/tmp/cgi_error_" + std::to_string(getpid());
-		string key_val = "PATH_INFO=" + data->getReq().getRequestData().pathInfo;
+
+		char* envp[10 + data->getReq().getHeaderData().queryStringVec.size()];
+		fill_env(data, envp);
+
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open(cgi_output.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
@@ -111,23 +141,6 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		const char* py_path = data->getReq().getRequestData().executable_file.c_str();
 		const char* py_script = data->getReq().getHeaderData().url.c_str();
 
-		string script_name = "SCRIPT_NAME=";
-		script_name.append(py_script);
-
-		int i = 4;
-		char* envp[6 + data->getReq().getHeaderData().queryStringVec.size()];
-		envp[0] = const_cast<char*>("REQUEST_METHOD=GET");
-		envp[1] = const_cast<char*>("SERVER_SOFTWARE=CustomServer/1.0");
-		envp[2] = const_cast<char*>(script_name.c_str());
-		envp[3] = const_cast<char*>(key_val.c_str());
-
-		std::vector<string>::iterator it = data->getReq().getHeaderData().queryStringVec.begin();
-		for (; it != data->getReq().getHeaderData().queryStringVec.end(); it++)
-		{
-			envp[i++] = const_cast<char*>(it->c_str());
-		}
-		envp[i] = NULL;
-
 		char* argv[] = {
 			const_cast<char*>(py_path),
 			const_cast<char*>(py_script),
@@ -155,14 +168,13 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 
 void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 {
-
-	cout <<BLUE << "Time out " <<RESET<< endl;
 	data->getReq().getRequestData().timeOut = "time_out";
 	struct kevent even;
 	EV_SET(&even, pid, EVFILT_PROC, EV_DELETE, 0, 0, NULL);
 	kevent(kq, &even, 1, NULL, 0, NULL);
 	kill(pid, SIGTERM);
 	usleep(100000); // Wait 100ms
+
 	// If still alive, force kill
 	if (kill(pid, 0) == 0)
 	{
@@ -170,20 +182,15 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 		// One final wait to clean up zombie
 		waitpid(pid, NULL, 0);
 	}
-	// std::cout << "CGI script timeout, terminating..." << std::endl;
-	// EV_SET(&events[1], pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
-	// data->getReq().getRequestData().codeStatus = 504;
+
 	try {
 		data->getReq().clean(504, "Gateway Timeout");
 	} catch (const exception& e) {
-		// Handle the specific exception
 	}
 
 	struct kevent event;
 	EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, data);
 	kevent(kq, &event, 1, NULL, 0, NULL);
-
-	// data->getReq().getHeaderData().filename = "/cgi_output.txt";
 }
 // EV_SET(&event, pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, (void*)client_socket);
 // This line in the parent process is registering an event to monitor the child process. Specifically:
@@ -223,7 +230,8 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 		usleep(100000); // Wait 100ms
 		
 		// If still alive, force kill
-		if (kill(pid, 0) == 0) {
+		if (kill(pid, 0) == 0)
+		{
 			kill(pid, SIGKILL);
 			// One final wait to clean up zombie
 			waitpid(pid, NULL, 0);
@@ -231,20 +239,11 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 	}
 	data->getReq().getRequestData().timeOut = "";
 	EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_DELETE, 0, 0, NULL);
-	// kevent(kq, data->events, 2, NULL, 0, NULL);
-	if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1) {
-		std::cerr << "Failed to register EVFILT_TIMER 0 : " << strerror(errno) << std::endl;
-	}
-// 	if (kevent(kq, &data->events[1], 1, NULL, 0, NULL) == -1) {
-// 	std::cerr << "Failed to register EVFILT_TIMER 1 : " << strerror(errno) << std::endl;
-// }
-	// sleep(5);
+	kevent(kq, &(*data->event), 1, NULL, 0, NULL);
 	kill(pid, SIGTERM);
-	// exit(1);
-	// After CGI script execution, register for writing output to client
+
 	if (WIFEXITED(status))
 	{
-		cout << "endlddd" << endl;
 		data->getReq().getHeaderData().url = cgi_output;
 		data->getReq().getRequestData().codeStatus = 200;
 		std::ifstream f(cgi_error);
@@ -260,7 +259,6 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 			try {
 				data->getReq().clean(500, "Internal Server Error");
 			} catch (const exception& e) {
-				// Handle the specific exception
 			}
 		}
 

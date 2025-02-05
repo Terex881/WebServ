@@ -123,16 +123,13 @@ void	Response::handle_cgi_response(int &sent_head)
 	sent_head = 1;
 	isCgi = false;
 	
-	// cout << YELLOW << ";; " << Working_Path << RESET << endl;
 	Res_Size = Calculate_File_Size(file);
 	int log = 0;
-	// cout << "ddd ................... " << server.values[_to_string(Status_Code)] << endl;
 	if (!server.values[_to_string(Status_Code)].empty() || 	!timeOut.empty())
 	{
 		tmp_Status_Code = "3333";
 		return;
 	}
-	// cout << "ENTER ................... " << endl;
 	// invalid syntax CGI
 	if (!cgiError.empty())
 	{
@@ -305,8 +302,6 @@ void	Response::Res_get_chunk(int &sent_head)
 	
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
-	cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
-	// cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{

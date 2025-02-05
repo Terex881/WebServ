@@ -138,13 +138,11 @@ void Request::achref()
 
 	string server_nama = RequestData.hostName;
 	configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url(HeaderData.url), location, server, server_nama);
+
 	if (!location.values.size() || !server.values.size())
 	{
 		if (configFileObj.correct_url(HeaderData.url)[0] == '/')
-		{
-			string sub_route = configFileObj.correct_url(HeaderData.url).substr(1);
 			configFileObj.getLocationByPortAndUrl(HeaderData.port, configFileObj.correct_url("/"), location, server, server_nama);
-		}
 	}
 	if (location.values.size())
 	{
@@ -162,8 +160,7 @@ void Request::achref()
 			RequestData.redirection = configFileObj.split_1(l_data.rturn);
 		HeaderData.url = configFileObj.correct_url(HeaderData.url);
 	
-		string	final_url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
-		HeaderData.url = final_url;
+		HeaderData.url = configFileObj.correct_url(l_data.root + "/" + HeaderData.url);
 
 		string extension = find_extension(HeaderData.url);
 		if ((!location.values[".py"].empty() && extension == ".py") || (!location.values[".php"].empty() && extension == ".php"))

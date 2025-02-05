@@ -4,12 +4,6 @@
 
 int main(int argc, char **argv)
 {
-
-	// string port = "3344";
-	// string to_f = "3344override";
-	// if (to_f.find(port) != string::npos)
-	// 	cout << "founddddd" << endl;
-	// exit(1);
 	signal(SIGPIPE, SIG_IGN);
 
 		if (argc != 2)
