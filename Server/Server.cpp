@@ -136,7 +136,6 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getRequestData().codeStatusMap);
 				data->getReq().getRequestData().first = "not empty";
 
-				
 				data->getRes().Res_get_chunk(data->getReq().getRequestData().sent_head);
 				responseStr = data->getRes().responseStream.str();
 				if (responseStr.empty() && !data->getRes().end)

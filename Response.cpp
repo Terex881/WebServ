@@ -305,17 +305,17 @@ void	Response::Res_get_chunk(int &sent_head)
 	
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
-	// cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
+	cout << BLUE << "Method : " << Method << " | Status_Code : " << Status_Code  << "  |  Url : " << Url << "  || isCgi : " << isCgi<< RESET << endl;
 	// cout << GREEN << "Working_Path : " << Working_Path << RESET<< endl;
 
 	if (Method != "GET" && Method != "POST" && Method != "DELETE")
 	{
 		header = 
-			"HTTP/1.1 " + _to_string(Status_Code) +" Internal Error\r\n"
+			"HTTP/1.1 " + _to_string(405) + " Method Not Allowed\r\n"
 			"Content-Type: text/plain\r\n"
-			"Content-Length: 11\r\n"
+			"Content-Length: 17\r\n"
 			"\r\n"
-			"Bad Request";
+			"Method Not Allowed";
 		responseStream.write(header.c_str(), header.length());
 		this->end = 1;
 		return;
@@ -393,7 +393,7 @@ void	Response::Res_get_chunk(int &sent_head)
 									"\r\n";
 					else
 						header =
-							"HTTP/1.1 "+ _to_string(Status_Code) +" " +(codeStatusMap[Status_Code].empty() ? "OK" :  codeStatusMap[Status_Code]) + "\r\n"
+							"HTTP/1.1 "+ _to_string(Status_Code) + " "+(codeStatusMap[Status_Code].empty() ? "OK" :  codeStatusMap[Status_Code]) + "\r\n"
 							"Content-Type: " + Content_Type + "\r\n"
 							"Transfer-Encoding: chunked\r\n"
 							"Connection: keep-alive\r\n"
@@ -426,7 +426,6 @@ void	Response::Res_get_chunk(int &sent_head)
 					this->bytesRead += current_read;
 					if ((size_t)this->bytesRead >= this->Res_Size)
 					{
-						cout << "eeeennnnddddd " << endl;
 						responseStream << "0\r\n\r\n";
 						tmp_Status_Code = "";
 						this->end = 1;
@@ -507,7 +506,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			return	;
 		}
 	}
-	
 }
 
 bool	Response::isDirectory(const std::string& path)
@@ -535,8 +533,6 @@ bool	Response::isFile(const std::string& path)
 	// S_IFREG : Represents a regular file.
 	return (pathStat.st_mode & S_IFMT) == S_IFREG;
 }
-// (pathStat.st_mode & S_IFMT) gives the type of the file (directory, regular file, etc.)
-
 
 std::string Response::GetMimeType(const std::string& filename)
 {
@@ -597,7 +593,5 @@ std::string Response::GetMimeType(const std::string& filename)
 	if (ext == "xls" || ext == "xlsx") return "application/vnd.ms-excel";
 	if (ext == "ppt" || ext == "pptx") return "application/vnd.ms-powerpoint";
 
-	// Fallback
-	// return "application/octet-stream";
 	return "text/plain";
 }

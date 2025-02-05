@@ -10,10 +10,24 @@ Cgi::Cgi(int socket_fd, string path)
 	file_path = path;
 }
 
+std::string get_current_time_string() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);  // Get current time with milliseconds
+
+    struct tm* timeinfo = localtime(&tv.tv_sec);  // Convert to local time
+
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", timeinfo);  // Format as YYYYMMDD_HHMMSS
+
+    std::ostringstream oss;
+    oss << buffer << "_" << std::setw(3) << std::setfill('0') << tv.tv_usec / 1000;  // Add milliseconds
+    return oss.str();
+}
+
 Cgi::Cgi()
 {
-	cgi_output = "./cgi_output.txt";
-	cgi_error = "./cgi_error.txt";
+	cgi_output = "/tmp/cgi_output_"+ get_current_time_string() +".txt";
+	cgi_error = "/tmp/cgi_error_"+ get_current_time_string() +".txt";
 };
 
 bool fileExists(const std::string& filename)
@@ -34,7 +48,8 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	{
 		int input_fd;
 		int error_fd;
-
+		// cgi_output = "/tmp/cgi_output_" + std::to_string(getpid());
+		// cgi_error = "/tmp/cgi_error_" + std::to_string(getpid());
 		string key_val = "PATH_INFO=" + data->getReq().getRequestData().pathInfo;
 		// Child process: execute the CGI script and write output to a file
 		int output_fd = open(cgi_output.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
