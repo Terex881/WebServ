@@ -91,6 +91,7 @@ void Server::ft_start(int size, int *fd)
 					}
 					catch(const std::exception& e)
 					{
+						cout << RED <<  clientsMap[client_socket].getReq().getRequestData().requestStat << RESET << endl;
 					}
 									
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
@@ -118,7 +119,7 @@ void Server::ft_start(int size, int *fd)
 				std::string responseStr;
 
 				if (data->getReq().getRequestData().first.empty())
-					data->res_obj = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
+					data->getRes() = Response(Response::GetMimeType(data->getReq().getHeaderData().url),
 												data->getReq().getHeaderData().url,
 												data->getReq().getHeaderData().requestMethod,
 												data->getReq().getHeaderData().url,
@@ -154,9 +155,9 @@ void Server::ft_start(int size, int *fd)
 					EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 					kevent(kq, &event, 1, NULL, 0, NULL);
 
-					data->res_obj.file.close();
+					data->getRes().file.close();
 
-					if (data->res_obj.unlink_cgi)
+					if (data->getRes().unlink_cgi)
 					{
 						std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
 						std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
@@ -180,9 +181,9 @@ void Server::ft_start(int size, int *fd)
 							data->getRes().bytesRead = 0;
 							data->getReq().getRequestData().sent_head = 0;
 
-							data->res_obj.file.close();
+							data->getRes().file.close();
 							data->getReq().getRequestData().codeStatus = 200;
-							if (data->res_obj.unlink_cgi)
+							if (data->getRes().unlink_cgi)
 							{
 								std::remove(clientsMap[client_socket].getCgi().cgi_output.c_str());
 								std::remove(clientsMap[client_socket].getCgi().cgi_error.c_str());
@@ -211,12 +212,12 @@ void Server::ft_start(int size, int *fd)
 			{
 				pid_t pid = (pid_t)events[i].ident;
 				Client* data = (Client*)events[i].udata;
-				data->cgi_obj.handleProcessExit(pid, data->getReq().getRequestData().fd, kq, data);
+				data->getCgi().handleProcessExit(pid, data->getReq().getRequestData().fd, kq, data);
 			}
 			else if (events[i].filter == EVFILT_TIMER)
 			{
 				Client* data = (Client*)events[i].udata;
-				data->cgi_obj.handleTimeout(event.ident, data->getReq().getRequestData().fd, kq, data);
+				data->getCgi().handleTimeout(event.ident, data->getReq().getRequestData().fd, kq, data);
 			}
 		}
 	}

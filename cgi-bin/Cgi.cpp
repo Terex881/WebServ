@@ -26,8 +26,8 @@ std::string get_current_time_string() {
 
 Cgi::Cgi()
 {
-	cgi_output = "/tmp/cgi_output_"+ get_current_time_string() +".txt";
-	cgi_error = "/tmp/cgi_error_"+ get_current_time_string() +".txt";
+	cgi_output = "/tmp/.cgi_output_"+ get_current_time_string() +".txt";
+	cgi_error = "/tmp/.cgi_error_"+ get_current_time_string() +".txt";
 };
 
 bool fileExists(const std::string& filename)
@@ -46,6 +46,8 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	}
 	if (pid == 0)
 	{
+		data->getReq().getHeaderData().bigMap;
+
 		int input_fd;
 		int error_fd;
 		// cgi_output = "/tmp/cgi_output_" + std::to_string(getpid());

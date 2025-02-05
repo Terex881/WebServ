@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 19:49:56 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/05 14:08:43 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,12 +81,12 @@ void Request::parseFirstLine(const string &line)
 	HeaderData.requestMethod = method;
 	if (method != "GET" && method != "HEAD" && method != "OPTIONS" && method != "TRACE" && method != "PUT" && method != "DELETE" && method != "POST" && method != "PATCH" && method != "CONNECT")
 		clean(400, "Bad Request");
-	if (method != "POST" && method != "GET" && method != "DELETE")
+	else if (method != "POST" && method != "GET" && method != "DELETE")
 		clean(501, "Not Implemented");
 	parseUri(uri);
 	if (httpVersion != "HTTP/0.9" && httpVersion != "HTTP/1.0" && httpVersion != "HTTP/1.1" && httpVersion != "HTTP/2" && httpVersion != "HTTP/3")
 		clean(400, "Bad Request");
-	if (httpVersion != "HTTP/1.1")
+	else if (httpVersion != "HTTP/1.1")
 		clean(505, "HTTP Version Not Supported");
 }
 
@@ -109,6 +109,9 @@ void Request::fillHeaderMap(string &header)
 		value = line.substr(valEndPos, line.find_last_not_of(' ') - valEndPos + 1);
 	
 		std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+		if (key == "TRANSFER_ENCODING" || key == "CONNECTION")
+			std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+			
 		std::replace(key.begin(), key.end(), '-', '_');
 
 		fillData(key, value);
@@ -197,7 +200,7 @@ void Request::achref()
 			if (!server.values["index"].empty())
 				RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
 		}
-		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end())
+		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end() && RequestData.codeStatus == 200)
 			clean(405, "Method Not Allowed");
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
@@ -208,11 +211,7 @@ void Request::achref()
 	}
 	else
 		clean(404, "Not Found");
-	if (RequestData.codeStatus != 200 && RequestData.codeStatus != 201)
-	{
-		cout << GREEN << RequestData.codeStatusMap[RequestData.codeStatus] << RESET << endl; 
-		throw runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
-	}
+	
 
 }
 
@@ -273,14 +272,14 @@ void Request::getTypes(const std::map<string, string> &mp)
 		clean(400, "Bad Request");
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
-	if (bol)
+	if (bol && HeaderData.requestMethod == "POST")
 	{
 		string sep = multiPart->second.substr(multiPart->second.rfind("boundary=") + 9 , multiPart->second.length());
 		BodyData.boundry = ("--" + sep + "\r\n");
 		BodyData.endBoundry = ("\r\n--" + sep + "--\r\n");
 		BodyData.bodyType = BOUNDARY;
 	}
-	if (chunked != mp.end())
+	if (chunked != mp.end() && HeaderData.requestMethod == "POST")
 	{
 		if (chunked->second == "chunked" && !bol && RequestData.isCgi)
 			BodyData.bodyType = CHUNKED;
@@ -289,6 +288,13 @@ void Request::getTypes(const std::map<string, string> &mp)
 		else
 			clean(501, "Not Implemented");
 	}
-	else if (BodyData.bodySize && !RequestData.isCgi && !bol)
+	else if (BodyData.bodySize && !RequestData.isCgi && !bol && HeaderData.requestMethod == "POST")
 		clean(501, "Not Implemented");
+	
+	if (RequestData.codeStatus != 200 && RequestData.codeStatus != 201)
+	{
+		cout << GREEN << RequestData.codeStatusMap[RequestData.codeStatus] << RESET << endl;
+		RequestData.requestStat = 2;
+		throw runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
+	}
 }
