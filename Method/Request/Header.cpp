@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/05 14:08:43 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 11:14:40 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void Request::storeQueryString(string &str, const size_t &QMPos)
  
 void Request::parseUri(string &str)
 {
-	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos)
+	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos && RequestData.errorFlag)
 		clean(400, "Bad Request");
 	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
@@ -66,27 +66,26 @@ void Request::parseUri(string &str)
 void Request::parseFirstLine(const string &line)
 {
 	string method, uri, httpVersion;
-
-	if (isspace(line[0]))
+	if (isspace(line[0]) && RequestData.errorFlag)
 		clean(400, "Bad Request");
 
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;	
-	if (method.empty() || uri.empty() || httpVersion.empty())
+	if ((method.empty() || uri.empty() || httpVersion.empty()) && RequestData.errorFlag)
 		clean(400, "Bad Request"); // check 405
 	HeaderData.bigMap.insert(std::make_pair("REQUEST_METHOD", method));
 	HeaderData.bigMap.insert(std::make_pair("URI", uri));
 	HeaderData.bigMap.insert(std::make_pair("HTTP_VERSION", httpVersion));
 
 	HeaderData.requestMethod = method;
-	if (method != "GET" && method != "HEAD" && method != "OPTIONS" && method != "TRACE" && method != "PUT" && method != "DELETE" && method != "POST" && method != "PATCH" && method != "CONNECT")
+	if (method != "GET" && method != "HEAD" && method != "OPTIONS" && method != "TRACE" && method != "PUT" && method != "DELETE" && method != "POST" && method != "PATCH" && method != "CONNECT" && RequestData.errorFlag)
 		clean(400, "Bad Request");
-	else if (method != "POST" && method != "GET" && method != "DELETE")
+	else if (method != "POST" && method != "GET" && method != "DELETE" && RequestData.errorFlag)
 		clean(501, "Not Implemented");
 	parseUri(uri);
-	if (httpVersion != "HTTP/0.9" && httpVersion != "HTTP/1.0" && httpVersion != "HTTP/1.1" && httpVersion != "HTTP/2" && httpVersion != "HTTP/3")
+	if (httpVersion != "HTTP/0.9" && httpVersion != "HTTP/1.0" && httpVersion != "HTTP/1.1" && httpVersion != "HTTP/2" && httpVersion != "HTTP/3" && RequestData.errorFlag)
 		clean(400, "Bad Request");
-	else if (httpVersion != "HTTP/1.1")
+	else if (httpVersion != "HTTP/1.1" && RequestData.errorFlag)
 		clean(505, "HTTP Version Not Supported");
 }
 
@@ -101,17 +100,17 @@ void Request::fillHeaderMap(string &header)
 		colonPos = line.find(":");
 		
 		key = line.substr(0, colonPos);
-		if(key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0]))
+		if((key.find_first_of(" \t\r\f\v\n") != NP || colonPos == NP || isspace(line[colonPos - 1]) || isspace(line[0])) && RequestData.errorFlag)
 			clean(400, "Bad Request");
 
 		size_t valEndPos  = line.find_first_not_of(' ', colonPos + 1);
 		if (valEndPos == NP)	valEndPos = 0;
 		value = line.substr(valEndPos, line.find_last_not_of(' ') - valEndPos + 1);
+
 	
 		std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 		if (key == "TRANSFER_ENCODING" || key == "CONNECTION")
 			std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-			
 		std::replace(key.begin(), key.end(), '-', '_');
 
 		fillData(key, value);
@@ -196,7 +195,7 @@ void Request::achref()
 			if (!server.values["index"].empty())
 				RequestData.default_page = location.values["root"].substr(0, location.values["root"].find(";")) +"/" + server.values["index"];
 		}
-		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end() && RequestData.codeStatus == 200)
+		if (l_data.methods.size() && find(l_data.methods.begin(), l_data.methods.end(), HeaderData.requestMethod) == l_data.methods.end() && RequestData.codeStatus == 200 && RequestData.errorFlag)
 			clean(405, "Method Not Allowed");
 		if (!l_data.directory_listing.empty() && l_data.directory_listing == "on;")
 			RequestData.isDirListening = true;
@@ -205,7 +204,7 @@ void Request::achref()
 		if (!server.values["server_name"].empty())
 			RequestData.serverName = server.values["server_name"];	
 	}
-	else
+	else if (RequestData.errorFlag)
 		clean(404, "Not Found");
 	
 
@@ -213,15 +212,15 @@ void Request::achref()
 
 void Request::parseHeader(string &header)
 {
-	size_t			pos = header.find(CRLF);
-	string			firstLine = header.substr(0, pos);
+	size_t	pos = header.find(CRLF);
+	string	firstLine = header.substr(0, pos);
+	
 	parseFirstLine(firstLine);
 	header.erase(0, pos + 2);	
-	BodyData.bodyType = NONE;
+	
 	fillHeaderMap(header);
-
 	achref();
-	// print1(HeaderData.bigMap);
+	print1(HeaderData.bigMap);
 	getTypes(HeaderData.bigMap);
 }
 
@@ -237,8 +236,7 @@ void Request::fillData(string &key, const string &value)
 		key = "SERVER_NAME";
 	}
 	if (key == "COOKIE")
-		HeaderData.queryStringVec.push_back("Cookie=" + value);
-	
+		HeaderData.queryStringVec.push_back("Cookie=" + value);	
 }
 
 void Request::getTypes(const std::map<string, string> &mp)
@@ -246,6 +244,8 @@ void Request::getTypes(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	multiPart = mp.find("CONTENT_TYPE");
 	map<string, string>::const_iterator	chunked = mp.find("TRANSFER_ENCODING");
 	map<string, string>::const_iterator	alive = mp.find("CONNECTION");
+
+	cout << RED << alive->second << RESET << endl;
 	
 	if (alive != mp.end() && alive->second == "close")
 		HeaderData.isAlive = false;
@@ -257,14 +257,13 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (BodyData.bodySize && RequestData.isCgi)
 		BodyData.bodyType = BODY_SIZE;
 	
-	if (BodyData.bodySize > RequestData.maxBodySize)
+	if (BodyData.bodySize > RequestData.maxBodySize && RequestData.errorFlag)
 	{
-		// check with nginx
 		RequestData.isCgi = false;
 		clean(413, "Content Too Large");
 	}
 
-	if (HeaderData.port.empty())
+	if (HeaderData.port.empty() && RequestData.errorFlag)
 		clean(400, "Bad Request");
 
 	bool bol = multiPart != mp.end() && multiPart->second.find("multipart/form-data;") != std::string::npos;
@@ -281,15 +280,14 @@ void Request::getTypes(const std::map<string, string> &mp)
 			BodyData.bodyType = CHUNKED;
 		else if (chunked->second == "chunked" && bol)
 			BodyData.bodyType = CHUNKED_BOUNDARY;
-		else
+		else if (RequestData.errorFlag)
 			clean(501, "Not Implemented");
 	}
-	else if (BodyData.bodySize && !RequestData.isCgi && !bol && HeaderData.requestMethod == "POST")
+	else if (BodyData.bodySize && !RequestData.isCgi && !bol && HeaderData.requestMethod == "POST" && RequestData.errorFlag)
 		clean(501, "Not Implemented");
 	
 	if (RequestData.codeStatus != 200 && RequestData.codeStatus != 201)
 	{
-		cout << GREEN << RequestData.codeStatusMap[RequestData.codeStatus] << RESET << endl;
 		RequestData.requestStat = 2;
 		throw runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
 	}

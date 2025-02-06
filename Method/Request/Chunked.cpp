@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:18:31 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:12:52 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void Request::parseChunkedBody(string &body)
 			if (!length)
 			{
 				body.erase(0, 4);
-				BodyData.outFile.close();
+				outFile.close();
 				RequestData.requestStat = 2;
 				RequestData.codeStatus = 201;
 				return;
@@ -88,6 +88,6 @@ void Request::parseBodyLength(string &body)
 	{
 		RequestData.requestStat = 2;
 		RequestData.codeStatus = 201;
-		BodyData.outFile.close();
+		outFile.close();
 	}
 }

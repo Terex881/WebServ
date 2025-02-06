@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:18:06 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:12:42 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,21 @@
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
 {
 	string content = body.substr(start, end);
-	if (BodyData.outFile.is_open())
-		BodyData.outFile.write(content.c_str(), content.length()); BodyData.outFile.flush();
+	if (outFile.is_open())
+	{
+		outFile.write(content.c_str(), content.length()); outFile.flush();
+		if (outFile.bad())
+			clean(500, "Internal Server Error");
+	}
 	body.erase(0, end + len);
 }
 
 void	Request::openFile(const string &name)
 {
-	if (!BodyData.outFile.is_open())
+	if (!outFile.is_open())
 	{
-		BodyData.outFile.open(name, ios::binary | ios::trunc);
-		if (!BodyData.outFile.is_open())
+		outFile.open(name, ios::binary | ios::trunc);
+		if (!outFile.is_open() && RequestData.errorFlag)
 			clean(500, "Internal Server Error");
 	}
 }
@@ -86,7 +90,7 @@ bool	Request::isBoundary(string &body)
 
 	if (boundryPos != 0) writeFile(body, 0, boundryPos - 2, 2);
 	else writeFile(body, 0, boundryPos, 0);
-	BodyData.outFile.close();
+	outFile.close();
 	
 	int i = getFileName(body);
 	if (i == 1)
@@ -134,7 +138,7 @@ void	Request::parseBoundryBody(string &body)
 			// printV(BodyData.Vec);
 			RequestData.requestStat = 2;
 			RequestData.codeStatus = 201;
-			BodyData.outFile.close();
+			outFile.close();
 		}
 	}
 }

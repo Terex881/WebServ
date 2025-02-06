@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 19:46:38 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:28:55 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ typedef struct s_Request
 	bool						isUpload;
 	std::map<int, string>		codeStatusMap;
 	string						hostName;
+	bool						errorFlag;
 }	t_Request;
 
 typedef struct s_Header
@@ -88,7 +89,6 @@ typedef struct s_Body
 	size_t									bodySize;
 	string									boundry;
 	string									endBoundry;
-	ofstream								outFile;
 	string									newStr;
 	string									buffer;	
 	string									fileName;
@@ -103,58 +103,28 @@ class Request
 		t_Request		RequestData;
 		t_Header		HeaderData;
 		t_Body			BodyData;
+		File_Parsing	configFileObj;
+		ofstream								outFile;
 	public:
-		File_Parsing			configFileObj;
-
-		File_Parsing& geto()
-		{
-			return configFileObj;
-		}
-
-		
-
-	Request(const Request &src)
-	{
-		*this = src;
-	}
-
-
-	Request& operator=(const Request &copy)
-	{
-		if (this != &copy)
-		{
-			BodyData.bodyType = copy.BodyData.bodyType;
-			BodyData.bodySize = copy.BodyData.bodySize;
-			BodyData.boundry = copy.BodyData.boundry;
-			BodyData.endBoundry = copy.BodyData.endBoundry;
-			BodyData.newStr = copy.BodyData.newStr;
-			BodyData.buffer = copy.BodyData.buffer;
-			// BodyData.outFile = copy.BodyData.outFile;
-			RequestData = copy.RequestData;
-			HeaderData = copy.HeaderData;
-		}
-		return *this;
-	}
-				
-
 		Request();
 		~Request();
-		
+		Request(const Request &src);
+		Request& operator=(const Request &copy);
+	
 		//---------------------------------------REQUEST---------------------------------------
 
 		void		request(string &body);
 		void		print(vector<string> &headerMap);
 		void		printV(vector<pair<string, string> > &mp);
-	void 		print1(std::map<string, string> &mp);
+		void 		print1(std::map<string, string> &mp);
 	
-		t_Request&	getRequestData();
-		t_Header&	getHeaderData();
-		t_Body&		getBodyData();
-		void		clean(int code, string message);
-		void		clearData();
-
-
-
+		File_Parsing&	getConfigFileObj();
+		t_Request&		getRequestData();
+		t_Header&		getHeaderData();
+		t_Body&			getBodyData();
+		void			clean(int code, string message);
+		void			clearData();
+		
 		//---------------------------------------HEADER---------------------------------------
 
 		void		parseFirstLine(const string &line);
@@ -163,10 +133,8 @@ class Request
 		void		parseUri(string &str);
 		void		storeQueryString(string &str, const size_t &QMPos);
 		void		fillData(string &key, const string &value);
-
 		void		fillHeaderMap(string &header);
-
-		void		achref();
+		void		achref(); // change name
 
 		//---------------------------------------BODY---------------------------------------
 

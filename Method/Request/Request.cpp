@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/05 10:27:10 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:28:45 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ Request::Request()
 	RequestData.isCgi = false;
 	RequestData.isUpload = false;
 	HeaderData.isAlive = true;
+	BodyData.bodyType = NONE;
+	RequestData.errorFlag = true;
 }
 
 Request::~Request()	{}
@@ -29,15 +31,15 @@ Request::~Request()	{}
 
 void Request::clean(int code, string message)
 {
+	RequestData.errorFlag = false;
 	RequestData.codeStatus = code;
 	RequestData.codeStatusMap.insert(make_pair(code, message));
-	RequestData.requestStat = 2;
-	// throw runtime_error(message);
 }
 
 
 void Request::clearData()
 {
+	
 	BodyData.bodySize = 0;
 	RequestData.requestStat = 0;
 	RequestData.codeStatus = 200;
@@ -46,46 +48,41 @@ void Request::clearData()
 	RequestData.isCgi = false;
 	RequestData.isUpload = false;
 	HeaderData.isAlive = true;
+	BodyData.bodyType = NONE;
+	RequestData.errorFlag = true;
+	
+	BodyData.boundry.clear();
+	BodyData.endBoundry.clear();
+	// BodyData.outFile.clear();
+	BodyData.newStr.clear();
+	BodyData.buffer.clear();
+	BodyData.fileName.clear();
+	BodyData.pathFormData.clear();
+
+	HeaderData.port.clear();
+	HeaderData.extension.clear();
 	HeaderData.requestMethod.clear();
-	HeaderData.bigMap.clear();
 	HeaderData.queryStringVec.clear();
-	// HeaderData.url.clear();
+	HeaderData.bigMap.clear();
+	HeaderData.url.clear();
+	HeaderData.urlFinal.clear();
 
 	RequestData.header.clear();
-	// RequestData.requestStat.clear();
-	// RequestData.fd.clear();
-	// RequestData.is_server.clear();
-	// RequestData.is_client.clear();
-	// RequestData.sent_head.clear();
+	RequestData.requestStat = 0;
 	RequestData.first.clear();
-	// RequestData.bytes_sent.clear();
-	// RequestData.file.clear();
-	// RequestData.codeStatus.clear();
-	// RequestData.isDirListening.clear();
-	// RequestData.isRedirect.clear();
-	// RequestData.maxBodySize.clear();
 	RequestData.serverName.clear();
-	// RequestData.isCgi.clear();
+	RequestData.cgiError.clear();
 	RequestData.timeOut.clear();
 	RequestData.pathInfo.clear();
-	// RequestData.extension.clear();
 	RequestData.fileLocation.clear();
 	RequestData.executable_file.clear();
 	RequestData.redirection.clear();
 	RequestData.default_page.clear();
-	// RequestData.isUpload.clear();
-
-	// BodyData.bodyType = NONE;
-	// BodyData.bodySize.clear();
-	BodyData.boundry.clear();
-	BodyData.endBoundry.clear();
-	BodyData.outFile.clear();
-	BodyData.newStr.clear();
-	BodyData.buffer.clear()	;
-	BodyData.fileName.clear();
-	
 	RequestData.codeStatusMap.clear();
+	RequestData.hostName.clear();
+
 }
+
 
 void Request::print1(std::map<string, string> &mp)
 {
@@ -142,4 +139,33 @@ void Request::request(string &request)
 		}
 			
 	}
+}
+
+
+File_Parsing& Request::getConfigFileObj()
+{
+	return configFileObj;
+}
+
+Request::Request(const Request &src)
+{
+	*this = src;
+}
+
+Request& Request::operator=(const Request &copy)
+{
+	if (this != &copy)
+	{
+		// BodyData.bodyType = copy.BodyData.bodyType;
+		// BodyData.bodySize = copy.BodyData.bodySize;
+		// BodyData.boundry = copy.BodyData.boundry;
+		// BodyData.endBoundry = copy.BodyData.endBoundry;
+		// BodyData.newStr = copy.BodyData.newStr;
+		// BodyData.buffer = copy.BodyData.buffer;
+		// BodyData.outFile = copy.BodyData.outFile;
+		BodyData = copy.BodyData;
+		RequestData = copy.RequestData;
+		HeaderData = copy.HeaderData;
+	}
+	return *this;
 }

@@ -85,10 +85,10 @@ void Server::ft_start(int size, int *fd)
 				} else
 				{
 					msg.assign(buffer, bytes_received);
-
 					try
 					{
 						clientsMap[client_socket].getReq().request(msg);
+						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().requestStat << RESET << endl;
 					}
 					catch(const std::exception& e)
 					{
@@ -131,7 +131,7 @@ void Server::ft_start(int size, int *fd)
 												data->getReq().getRequestData().default_page,
 												data->getReq().getRequestData().isUpload,
 												data->getReq().getRequestData().isCgi,
-												data->getReq().configFileObj.server,
+												data->getReq().getConfigFileObj().server,
 												data->getReq().getHeaderData().urlFinal,
 												data->getReq().getRequestData().timeOut,
 												data->getReq().getRequestData().cgiError,

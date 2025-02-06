@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:52:32 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:17:37 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:13:00 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ void	Request::parseBodyTypes(string &body)
 	if (BodyData.bodyType == CHUNKED && body == "0\r\n\r\n")
 		BodyData.bodyType = NONE;
 
-	if (totalBodySize > RequestData.maxBodySize)
+	if (totalBodySize > RequestData.maxBodySize && RequestData.errorFlag)
 	{
 		RequestData.isCgi = false;
-		BodyData.outFile.close();
+		outFile.close();
 		string name = RequestData.fileLocation + "/" + BodyData.fileName;
 		std::remove(name.c_str());
 		clean(413, "Content Too Large");

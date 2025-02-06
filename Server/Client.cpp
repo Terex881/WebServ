@@ -6,7 +6,7 @@
 /*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 13:42:50 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/05 13:42:56 by sdemnati         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:21:33 by sdemnati         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,23 @@
 
 
 Client::Client()    {}
+Client::~Client()    {}
 
-Client::Client(const Client &src)
-{
-	*this = src;
-}
+// Client::Client(const Client &src)
+// {
+// 	*this = src;
+// }
 
-Client& Client::operator=(const Client &copy)
-{
-	if (this != &copy)
-	{
-		req_obj = copy.req_obj;
-		res_obj = copy.res_obj;
-		cgi_obj = copy.cgi_obj;
-	}
-	return *this;
-}
+// Client& Client::operator=(const Client &copy)
+// {
+// 	if (this != &copy)
+// 	{
+// 		req_obj = copy.req_obj;
+// 		res_obj = copy.res_obj;
+// 		cgi_obj = copy.cgi_obj;
+// 	}
+// 	return *this;
+// }
 
 Response&	Client::getRes()
 {
