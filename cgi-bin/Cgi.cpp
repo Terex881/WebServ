@@ -10,7 +10,7 @@ Cgi::Cgi(int socket_fd, string path)
 	file_path = path;
 }
 
-std::string get_current_time_string() {
+std::string get_current_time_string(){
     struct timeval tv;
     gettimeofday(&tv, NULL);  // Get current time with milliseconds
 
@@ -158,11 +158,11 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 	{
 		EV_SET(&(*data->event), pid, EVFILT_TIMER, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 1000, data);
 		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1)
-			std::cerr << "Failed to register EVFILT_TIMER : 11" << strerror(errno) << std::endl;
+			std::cerr << "Failed to register EVFILT_TIMER" << std::endl;
 		
 		EV_SET(&(*data->event), pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, data);
 		if (kevent(kq, &(*data->event), 1, NULL, 0, NULL) == -1)
-			std::cerr << "Failed to register EVFILT_TIMER : 00 " << strerror(errno) << std::endl;		
+			std::cerr << "Failed to register EVFILT_TIMER" << std::endl;		
 	}
 }
 
@@ -225,7 +225,6 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 
 	if (wait_result == -1)
 	{
-		std::cerr << "waitpid error: " << strerror(errno) << std::endl;
 		// Try to kill the process anyway
 		kill(pid, SIGTERM);
 		usleep(100000); // Wait 100ms

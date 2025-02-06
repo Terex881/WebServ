@@ -139,7 +139,18 @@ void	Response::handle_cgi_response(int &sent_head)
 				"Content-Type: text/plain\r\n"
 				"Content-Length: "+ _to_string(Calculate_File_Size(file) + 3) +"\r\n"
 				"\r\n";
-		responseStream.write(header.c_str(), header.length());
+		if (!responseStream.write(header.c_str(), header.length()))
+		{
+			if (responseStream.bad())
+			{
+				responseStream.clear();
+				responseStream.str("");
+				Status_Code = 500;
+				tmp_Status_Code = "3333";
+				codeStatusMap.insert(make_pair(500, "Internal Server Error"));
+				return;
+			}
+		}
 		return;
 	}
 	if (!Res_Size)
@@ -155,6 +166,15 @@ void	Response::handle_cgi_response(int &sent_head)
 
 	while (file.read(buffer, 4096) || file.gcount() > 0)
 	{
+		if (file.eof() && file.gcount() == 0)
+			break;
+		if (file.fail() && !file.eof())
+		{
+			Status_Code = 500;
+			codeStatusMap.insert(make_pair(500, "Internal Server Error"));
+			tmp_Status_Code = "3333";
+			return;
+		}
 		size_t bytesRead = file.gcount();
 
 		// Append the read data to content
@@ -325,7 +345,6 @@ void	Response::Res_get_chunk(int &sent_head)
 	responseStream.str(""); // Clear previous content
 	responseStream.clear(); // Clear any error flags
 
-	
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
 
@@ -446,6 +465,15 @@ void	Response::Res_get_chunk(int &sent_head)
 				{
 					file.read(&buffer[0], Chunk_Size); // Read a chunk
 					this->current_read = file.gcount();
+
+					if (file.fail() && !file.eof())
+					{
+						responseStream << "0\r\n\r\n";
+						tmp_Status_Code = "";
+						this->end = 1;
+						sent_head = 0;
+						return;
+					}
 					if (current_read == 0)
 					{
 						sent_head = 0;
