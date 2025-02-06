@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Request.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:52 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/06 12:28:45 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 
 Request::Request()
@@ -53,7 +41,6 @@ void Request::clearData()
 	
 	BodyData.boundry.clear();
 	BodyData.endBoundry.clear();
-	// BodyData.outFile.clear();
 	BodyData.newStr.clear();
 	BodyData.buffer.clear();
 	BodyData.fileName.clear();
@@ -81,27 +68,6 @@ void Request::clearData()
 	RequestData.codeStatusMap.clear();
 	RequestData.hostName.clear();
 
-}
-
-
-void Request::print1(std::map<string, string> &mp)
-{
-	for(map<string, string>::iterator it = mp.begin(); it!=mp.end(); it++)
-		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":" << RESET << endl;;
-}
-void Request::print(vector<string> &mp)
-{
-	for(vector<string>::iterator it = mp.begin(); it!=mp.end(); it++)
-		cout << RED << ":" << *it << ":" << endl;
-}
-
-void Request::printV(vector<pair<string, string> > &mp)
-{
-	for(vector<pair<string, string> >::iterator it = mp.begin(); it!=mp.end(); it++)
-	{
-		cout << RED << ":" << it->first << ": :" << GREEN << it->second << ":";
-		cout << "\n--------------------------------------------\n";
-	}
 }
 
 t_Request&	Request::getRequestData()	{ return RequestData; }
@@ -141,7 +107,6 @@ void Request::request(string &request)
 	}
 }
 
-
 File_Parsing& Request::getConfigFileObj()
 {
 	return configFileObj;
@@ -156,13 +121,6 @@ Request& Request::operator=(const Request &copy)
 {
 	if (this != &copy)
 	{
-		// BodyData.bodyType = copy.BodyData.bodyType;
-		// BodyData.bodySize = copy.BodyData.bodySize;
-		// BodyData.boundry = copy.BodyData.boundry;
-		// BodyData.endBoundry = copy.BodyData.endBoundry;
-		// BodyData.newStr = copy.BodyData.newStr;
-		// BodyData.buffer = copy.BodyData.buffer;
-		// BodyData.outFile = copy.BodyData.outFile;
 		BodyData = copy.BodyData;
 		RequestData = copy.RequestData;
 		HeaderData = copy.HeaderData;

@@ -6,22 +6,10 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/event.h>
-// #include "../Client.hpp"
+
 class Client;
 
 using	std::string;
-
-// class Cgi
-// {
-// 	private :
-// 		string file_path;
-// 		int client_socket;
-// 	public :
-// 		string response;
-// 		int content_len;
-// 		Cgi(int socket_fd, string path);
-// 		bool	execute_script();
-// };
 
 class Cgi
 {

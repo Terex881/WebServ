@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Chunked.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:40 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/06 12:12:52 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 
 string _to_string(int number)
@@ -21,9 +9,10 @@ string _to_string(int number)
 
 string getNameFromTime()
 {
-	std::time_t now = std::time(nullptr);
+	std::time_t now = std::time(NULL);
 	std::tm* localTime = std::localtime(&now);
-	return (_to_string(localTime->tm_hour) + ":" + _to_string(localTime->tm_min) + ":" + _to_string(localTime->tm_sec));
+	size_t ms = localTime->tm_sec * 1000;
+	return (_to_string(localTime->tm_hour) + ":" + _to_string(localTime->tm_min) + ":" + _to_string(localTime->tm_sec) + ":" + _to_string(ms));
 }
 
 void Request::parseChunkedBody(string &body)
@@ -41,11 +30,9 @@ void Request::parseChunkedBody(string &body)
 	{
 		if (length == 0)
 		{
-			strPos = body.find_first_of("0123456789abcdefABCDEF");	
-			/* check if not 0 to avoid reallocat for nothing */
+			strPos = body.find_first_of("0123456789abcdefABCDEF");
 			if (strPos != 0)
 			{
-				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());
 				if (str != CRLF && str.find_first_of(CRLF) == NP)
@@ -72,7 +59,6 @@ void Request::parseChunkedBody(string &body)
 		writeFile(body, 0, subBody.length(), 0);
 	}
 }
-
 
 void Request::parseBodyLength(string &body)
 {

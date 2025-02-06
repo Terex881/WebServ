@@ -9,5 +9,3 @@ print("</p>")
 print("<p>hello</p>")
 
 print(f"<p>{os.environ['REQUEST_METHOD']}</p>")
-while True:
-	pass

@@ -1,8 +1,5 @@
 #include "./Cgi.hpp"
 #include "../Server/Client.hpp"
-#include <exception>
-#include <fstream>
-#include <unistd.h>
 
 Cgi::Cgi(int socket_fd, string path)
 {
@@ -20,7 +17,7 @@ std::string get_current_time_string(){
     strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", timeinfo);  // Format as YYYYMMDD_HHMMSS
 
     std::ostringstream oss;
-    oss << buffer << "_" << std::setw(3) << std::setfill('0') << tv.tv_usec / 1000;  // Add milliseconds
+    oss << buffer << "_" << std::setw(3) << std::setfill('0') << tv.tv_usec;  // Add milliseconds
     return oss.str();
 }
 
@@ -61,7 +58,7 @@ void	fill_env(Client *data, char **envp)
 
 bool fileExists(const std::string& filename)
 {
-	return (access(filename.c_str(), F_OK) == 0);  // F_OK checks for existence
+	return (access(filename.c_str(), F_OK) == 0);
 }
 
 // Fork and execute the CGI process
@@ -81,7 +78,6 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 		char* envp[10 + data->getReq().getHeaderData().queryStringVec.size()];
 		fill_env(data, envp);
 
-		// Child process: execute the CGI script and write output to a file
 		int output_fd = open(cgi_output.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (output_fd == -1) {
 			std::cerr << "Failed to open output file" << std::endl;
@@ -103,7 +99,7 @@ void Cgi::execute_script(int client_socket, int kq, Client* data)
 				std::cerr << "Failed to open input file" << std::endl;
 				close(output_fd);
 				close(error_fd);
-				// exit(1);
+				exit(1);
 			}
 			if (dup2(input_fd, STDIN_FILENO) == -1)
 			{
@@ -180,60 +176,32 @@ void Cgi::handleTimeout(pid_t pid, int client_socket, int kq, Client* data)
 	if (kill(pid, 0) == 0)
 	{
 		kill(pid, SIGKILL);
-		// One final wait to clean up zombie
 		waitpid(pid, NULL, 0);
 	}
 
 	try {
 		data->getReq().clean(504, "Gateway Timeout");
-	} catch (const exception& e) {
+	} catch (const std::exception& e) {
 	}
 
 	struct kevent event;
 	EV_SET(&event, client_socket, EVFILT_WRITE, EV_ADD, 0, 0, data);
 	kevent(kq, &event, 1, NULL, 0, NULL);
 }
-// EV_SET(&event, pid, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, (void*)client_socket);
-// This line in the parent process is registering an event to monitor the child process. Specifically:
 
-// pid is the process ID of the child that was just created by fork()
-// EVFILT_PROC tells kqueue to monitor process-related events
-// NOTE_EXIT specifies that we want to be notified when this process exits
-
-// The child process isn't registering anything - it's just being monitored by the parent process. This is important because:
-
-// Parent needs to know when the CGI script (running in child process) finishes
-// When the child exits, the parent gets notified via kqueue
-// After notification, parent can then read the output file and send it back to the client
-
-// Think of it like this:
-
-// Child process: Just executes the CGI script and writes output to a file
-// Parent process: Watches for child to finish using kqueue
-// When child finishes: Parent gets notified and can start sending the output
-
-// The event registration is done BY the parent TO monitor the child, not BY the child itsel
-
-
-
-
-// Function to handle the exit of the CGI child process
 void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 {
 	int status;
-	int wait_result = waitpid(pid, &status, WNOHANG); // -1
+	int wait_result = waitpid(pid, &status, WNOHANG);
 
 	if (wait_result == -1)
 	{
-		// Try to kill the process anyway
 		kill(pid, SIGTERM);
-		usleep(100000); // Wait 100ms
+		usleep(100000);
 		
-		// If still alive, force kill
 		if (kill(pid, 0) == 0)
 		{
 			kill(pid, SIGKILL);
-			// One final wait to clean up zombie
 			waitpid(pid, NULL, 0);
 		}
 	}
@@ -258,7 +226,7 @@ void	Cgi::handleProcessExit(pid_t pid, int client_socket, int kq, Client* data)
 			data->getReq().getRequestData().codeStatus = 500;
 			try {
 				data->getReq().clean(500, "Internal Server Error");
-			} catch (const exception& e) {
+			} catch (const std::exception& e) {
 			}
 		}
 

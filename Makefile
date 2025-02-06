@@ -2,7 +2,7 @@ NAME = webserv
 
 CC = c++
 
-# FLAG = -Wall -Wextra -Werror -std=c++98 #-O3 -Ofast     
+FLAG = -Wall -Wextra -Werror -std=c++98
 
 OBJ =	main.o	Method/Delete.o	Server/Server.o	Config/File_Parsing.o	cgi-bin/Cgi.o	Response.o Server/Client.o\
 		Method/Request/Boundary.o	Method/Request/Chunked.o	Method/Request/Request.o	Method/Request/Header.o	Method/Request/ChunkedBoundary.o	Method/Request/Body.o
@@ -22,8 +22,6 @@ clean:
 	rm -rf $(OBJ)
 
 fclean: clean
-	rm -rf $(NAME) rm *.py *.json /Users/sdemnati/goinfre/UP/*.jpg .DS_Store *.jpeg *.txt *.pdf *.jpg *.png \
-	rm /Users/sdemnati/Desktop/Webserv/Upload/*.png /Users/sdemnati/Desktop/Webserv/Upload/*.jpg /Users/sdemnati/Desktop/Webserv/Upload/*.pdf
-
+	rm -rf $(NAME)
 
 re: fclean all

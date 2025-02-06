@@ -1,18 +1,5 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Header.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:45 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/06 11:14:40 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 #include "../../Config/File_Parsing.hpp"
-#include <cctype>
 
 void Request::storeQueryString(string &str, const size_t &QMPos)
 {
@@ -44,7 +31,6 @@ void Request::parseUri(string &str)
 {
 	if (str.find_first_not_of("%!#$&'()*+,/:;=?@[]-_.~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") != std::string::npos && RequestData.errorFlag)
 		clean(400, "Bad Request");
-	/* encoding reserved characters remoce % and 2 hex and replace it with character*/
 	for(size_t i = 0; i < str.length(); i++)
 	{
 		if (str[i] == '%' && i + 2 < str.length() && isxdigit(str[i+1]) && isxdigit(str[i+2]))
@@ -72,7 +58,7 @@ void Request::parseFirstLine(const string &line)
 	std::istringstream ss(line);
 	ss >> method >> uri >> httpVersion;	
 	if ((method.empty() || uri.empty() || httpVersion.empty()) && RequestData.errorFlag)
-		clean(400, "Bad Request"); // check 405
+		clean(400, "Bad Request");
 	HeaderData.bigMap.insert(std::make_pair("REQUEST_METHOD", method));
 	HeaderData.bigMap.insert(std::make_pair("URI", uri));
 	HeaderData.bigMap.insert(std::make_pair("HTTP_VERSION", httpVersion));
@@ -132,7 +118,7 @@ string	find_extension(string url)
 	return extension;
 }
 
-void Request::achref()
+void Request::parseConfigInHeader()
 {
 	DynamicStruct	location;
 	DynamicStruct	server;
@@ -219,8 +205,7 @@ void Request::parseHeader(string &header)
 	header.erase(0, pos + 2);	
 	
 	fillHeaderMap(header);
-	achref();
-	print1(HeaderData.bigMap);
+	parseConfigInHeader();
 	getTypes(HeaderData.bigMap);
 }
 
@@ -244,8 +229,6 @@ void Request::getTypes(const std::map<string, string> &mp)
 	map<string, string>::const_iterator	multiPart = mp.find("CONTENT_TYPE");
 	map<string, string>::const_iterator	chunked = mp.find("TRANSFER_ENCODING");
 	map<string, string>::const_iterator	alive = mp.find("CONNECTION");
-
-	cout << RED << alive->second << RESET << endl;
 	
 	if (alive != mp.end() && alive->second == "close")
 		HeaderData.isAlive = false;
@@ -289,6 +272,6 @@ void Request::getTypes(const std::map<string, string> &mp)
 	if (RequestData.codeStatus != 200 && RequestData.codeStatus != 201)
 	{
 		RequestData.requestStat = 2;
-		throw runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
+		throw std::runtime_error(RequestData.codeStatusMap[RequestData.codeStatus]);
 	}
 }

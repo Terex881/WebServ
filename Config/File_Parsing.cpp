@@ -60,41 +60,7 @@ File_Parsing::File_Parsing(string conf_path):file(conf_path)
 		file.close();
 		exit(3);
 	}
-
 	get_host_name();
-
-	// DynamicStruct location;
-	// DynamicStruct server;
-	// // /cgi-bin/script.py && /dsf
-	// getLocationByPortAndUrl("2432", correct_url("/c"), location, server); // WARNING
-
-	// recursive_call(server, servers, locations);
-	// if (!server.values.size())
-	// {
-	// 	cout << "SErver not found" << endl;
-	// }
-	// if (!location.values.size())
-	// {
-	// 	string my_url = "/bull_shit/d1";
-	// 	if (my_url[0] == '/')
-	// 	{
-	// 		cout << my_url.substr(1) << endl;
-	// 		getLocationByPortAndUrl("2432", correct_url("/"), location, server);
-	// 	}
-	// 	else
-	// 		cout << "Location not found" << endl;
-	// }
-	// cout << "###########################################################################" << endl;
-	// cout << "error page : " << get_error_page("404", server) << endl;
-	// if (server.values.size() && location.values.size())
-	// {
-	// 	cout << location.values["path"] << endl;
-	// 	cout << location.values[".py"] << endl;
-	// 	cout << location.values["root"] << endl;
-	// }
-	// else
-	// 	cout << "Server Or Location Doesn't Exist" << endl;
-	// cout << "###########################################################################" << endl;
 	file.close();
 }
 
@@ -237,7 +203,6 @@ int	check_val(vector<string> line)
 	return (1);
 }
 
-//// Storing Data In A Recursive Way
 DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *open_bracket, int *close_bracket)
 {
 	DynamicStruct current;
@@ -261,14 +226,12 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 			(*close_bracket)++;
 		if (words[0] == "}")
 			break ;
-		
-		// Ensure there are at least two words
+
 		string key = words[0];
 		if (contain_bracket(line))
 		{
 			if (words.size() < 2 || words.size() > 3)
 				(*file).close(), exit(4);
-			// checking keys format {}
 			if (key == "location" && (words.size() != 3 || words[2] != "{"))
 				(*file).close(), exit(5);
 			if ((key == "http" || key == "server") && words[1] != "{")
@@ -318,7 +281,6 @@ DynamicStruct	File_Parsing::recursive_push(ifstream *file, string parent, int *o
 		}
 		else
 		{
-			// regular key : value
 			if (key == "listen" && !check_port(words))
 				(*file).close(), exit(9);
 			else if (!check_val(words))
@@ -375,8 +337,7 @@ bool isPortInString(const std::string& portString, const std::string& searchPort
 {
 	std::istringstream iss(portString);
 	std::string port;
-	
-	// Read each port from the string
+
 	while (iss >> port)
 	{
 		if (searchPort.find(port) != string::npos)
@@ -409,7 +370,6 @@ string	get_port_index(DynamicStruct *server, string port)
 	return (_to_string(i));
 }
 
-// override port if it is already in use
 void	File_Parsing::override_server(int index, DynamicStruct *server)
 {
 	int	i = 0;
@@ -447,10 +407,8 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct *block, DynamicStruct *serve
 	static int i;
 	static int j;
 
-	// http : must contain 2 key:value (default) and at least 1 children
 	if (name == "http" && (block->values.size() != 2 || block->children.size() == 0))
 		file.close(), exit(13);
-	// http : must contain at least 2 key:value (default) and only 1 children (location)
 	if (name == "server" && (block->values.size() < 3 || block->children.size() == 0))
 		file.close(), exit(14);
 	if (name == "location" && block->values.size() <= 3)
@@ -531,38 +489,13 @@ void File_Parsing::Checking_Hierarchy(DynamicStruct *block, DynamicStruct *serve
 	}
 }
 
-
-void File_Parsing::recursive_call(DynamicStruct &block, DynamicStruct *server, DynamicStruct *locations, const string &name)
-{
-	(void)name;
-	map<string, string>::iterator it;
-
-	for (it = block.values.begin(); it != block.values.end(); it++)
-	{
-		cout << "" << it->first << "   ----->  " << it->second<< endl;
-	}
-
-	for (map<string, vector<DynamicStruct> >::iterator it = block.children.begin(); it != block.children.end(); ++it)
-	{
-		const string &block_name = it->first;
-		cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&& "<< block_name << endl;
-		vector<DynamicStruct> &blocks = it->second;
-		for (vector<DynamicStruct>::iterator child_it = blocks.begin(); child_it != blocks.end(); ++child_it)
-		{
-			recursive_call(*child_it, server, locations, block_name);
-		}
-	}
-}
-
 void	File_Parsing::get_host_name(void)
 {
-	// string	port_key;
 	size_t	index;
 	string	host;
 	string	port;
 	dt	data;
 	int i = 0;
-	// int j = 0;
 
 	while (i < servers_count)
 	{
@@ -626,7 +559,6 @@ string	File_Parsing::get_body_size()
 	return servers[0].values["client_max_body_size"];
 }
 
-// return error page based on statut_code
 string	File_Parsing::get_error_page(string statut_code, DynamicStruct server)
 {
 	return server.values[statut_code];

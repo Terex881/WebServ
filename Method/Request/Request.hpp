@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Request.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:55 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/06 12:28:55 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #pragma once
 
 #include <cstddef>
@@ -20,17 +8,18 @@
 #include <vector>
 #include "sstream"
 
-#define RED "\033[31m"
-#define BLUE "\033[34m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define RESET "\033[0m"
-using namespace std;
+
 #define CRLF "\r\n"
 #define DCRLF "\r\n\r\n"
 #define FILE_NAME "; filename=\""
 #define NP std::string::npos
 
+using std::vector;
+using std::map;
+using std::string;
+using std::make_pair;
+
+#include "../../Config/File_Parsing.hpp"
 
 enum type
 {
@@ -95,7 +84,6 @@ typedef struct s_Body
 	string									pathFormData;
 }	t_Body;
 
-#include "../../Config/File_Parsing.hpp"
 
 class Request 
 {
@@ -104,7 +92,7 @@ class Request
 		t_Header		HeaderData;
 		t_Body			BodyData;
 		File_Parsing	configFileObj;
-		ofstream								outFile;
+		std::ofstream		outFile;
 	public:
 		Request();
 		~Request();
@@ -113,15 +101,11 @@ class Request
 	
 		//---------------------------------------REQUEST---------------------------------------
 
-		void		request(string &body);
-		void		print(vector<string> &headerMap);
-		void		printV(vector<pair<string, string> > &mp);
-		void 		print1(std::map<string, string> &mp);
-	
 		File_Parsing&	getConfigFileObj();
 		t_Request&		getRequestData();
 		t_Header&		getHeaderData();
 		t_Body&			getBodyData();
+		void			request(string &body);
 		void			clean(int code, string message);
 		void			clearData();
 		
@@ -134,7 +118,7 @@ class Request
 		void		storeQueryString(string &str, const size_t &QMPos);
 		void		fillData(string &key, const string &value);
 		void		fillHeaderMap(string &header);
-		void		achref(); // change name
+		void		parseConfigInHeader();
 
 		//---------------------------------------BODY---------------------------------------
 
@@ -148,8 +132,9 @@ class Request
 		void		parseChunkedBoundryBody(string &body);
 		int			getFileName(string &body);
 		void		parseBodyTypes(string &body);
-		bool		hasOneMatch(const std::string& str1, const std::string& str2); // change names here
+		bool		hasOneMatch(const std::string& str1, const std::string& str2);
 
 };
 
 string _to_string(int number);
+string getNameFromTime();

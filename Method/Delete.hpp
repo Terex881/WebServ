@@ -2,25 +2,19 @@
 #define DELETE_HPP 
 
 #include <dirent.h>
-#include <iostream>
 #include <cstdlib>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/event.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <exception>
-#include <iostream>
 #include <sys/event.h>
 #include <sys/time.h>
-#include <unistd.h>
-#include <iostream>
-#include <map>
 #include "../Config/DynamicStruct.hpp"
-
 
 using std::string;
 using std::map;
+
 class Delete
 {
 	public:

@@ -59,8 +59,6 @@ class File_Parsing
 		~File_Parsing(void);
 		DynamicStruct	recursive_push(ifstream *file, string parent, int *open_bracket, int *close_bracket);
 		void	Checking_Hierarchy(DynamicStruct *block, DynamicStruct *server, DynamicStruct *locations, const string &name = "");
-		void	recursive_call(DynamicStruct &block, DynamicStruct *server, DynamicStruct *locations, const string &name = "");
-
 		void	override_server(int index, DynamicStruct *server);
 		void	Struct_Call(DynamicStruct inner);
 		void	get_host_name(void);

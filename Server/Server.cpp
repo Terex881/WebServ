@@ -88,11 +88,9 @@ void Server::ft_start(int size, int *fd)
 					try
 					{
 						clientsMap[client_socket].getReq().request(msg);
-						cout << BLUE << clientsMap[client_socket].getReq().getRequestData().requestStat << RESET << endl;
 					}
 					catch(const std::exception& e)
 					{
-						cout << RED <<  clientsMap[client_socket].getReq().getRequestData().requestStat << RESET << endl;
 					}
 									
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
@@ -193,13 +191,11 @@ void Server::ft_start(int size, int *fd)
 				 			{
 								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 								kevent(kq, &event, 1, NULL, 0, NULL);
-								cout << YELLOW << "connection close \n" << RESET;
 								close(client_socket);
 								data->getReq().clearData();
 							}
 							else
 							{
-								cout << YELLOW << "connection open " << data->getReq().getRequestData().fd << "\n" << RESET;
 								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 								kevent(kq, &event, 1, NULL, 0, NULL);
 								EV_SET(&event, data->getReq().getRequestData().fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
@@ -255,7 +251,6 @@ int Server::ft_server_init() {
 		exit(1);
 	}
 	fcntl(server_fd, F_SETFL, O_NONBLOCK);
-	// Enable SO_REUSEADDR to allow quick reuse of the port
 	int opt = 1;
 	
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
@@ -264,13 +259,13 @@ int Server::ft_server_init() {
 		exit(1);
 	}
 
-	int sendbuf_size = 256 * 1024;  // 256KB
+	int sendbuf_size = 256 * 1024;
 	setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &sendbuf_size, sizeof(sendbuf_size));
 
 	struct sockaddr_in server_addr;
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = inet_addr(this->host.c_str()); // by default Binding to localhost
-	server_addr.sin_port = htons(this->port); // by default Port 8080
+	server_addr.sin_addr.s_addr = inet_addr(this->host.c_str());
+	server_addr.sin_port = htons(this->port);
 
 	if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
 		std::cout << "bind failed" << std::endl;

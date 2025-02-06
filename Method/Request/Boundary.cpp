@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Boundary.cpp                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:37 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/06 12:12:42 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 
 void	Request::writeFile(string &body, int start, size_t end, size_t len)
@@ -28,7 +16,7 @@ void	Request::openFile(const string &name)
 {
 	if (!outFile.is_open())
 	{
-		outFile.open(name, ios::binary | ios::trunc);
+		outFile.open(name, std::ios::binary | std::ios::trunc);
 		if (!outFile.is_open() && RequestData.errorFlag)
 			clean(500, "Internal Server Error");
 	}
@@ -135,11 +123,9 @@ void	Request::parseBoundryBody(string &body)
 		{
 			endboundryPos = body.find(BodyData.endBoundry);	
 			writeFile(body, 0, endboundryPos, BodyData.endBoundry.length());
-			// printV(BodyData.Vec);
 			RequestData.requestStat = 2;
 			RequestData.codeStatus = 201;
 			outFile.close();
 		}
 	}
 }
-

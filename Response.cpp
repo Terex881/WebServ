@@ -1,8 +1,6 @@
 #include "./Response.hpp"
 #include "Method/Request/Request.hpp"
 #include "./Method/Delete.hpp"
-#include <iostream>
-#include <string>
 
 int Response::cookie_gen = 0;
 
@@ -15,7 +13,7 @@ size_t	Response::Calculate_File_Size(std::ifstream &file)
 	return fileSize;
 }
 
-Response::Response():Chunk_Size(1024)
+Response::Response():Chunk_Size(4096 * 2)
 {
 
 }
@@ -89,7 +87,6 @@ Response& Response::operator=(const Response& other)
 		if (file.is_open())
 			file.close();
 
-		// Open new file
 		if (!other.filename.empty())
 		{
 			filename = other.filename;
@@ -293,7 +290,7 @@ int	Response::res_post(int &sent_head)
 
 	if (!isFile(Working_Path) && !isDirectory(Working_Path))
 	{
-		default_idx = server.values["404"]; /// default error page
+		default_idx = server.values["404"];
 		if (!default_idx.empty() && isFile(default_idx))
 		{
 			Working_Path = default_idx;
@@ -342,8 +339,8 @@ void	Response::Res_get_chunk(int &sent_head)
 {
 	std::vector<char> buffer(Chunk_Size, 0);
 	string default_idx;
-	responseStream.str(""); // Clear previous content
-	responseStream.clear(); // Clear any error flags
+	responseStream.str("");
+	responseStream.clear();
 
 	if (tmp_Status_Code.empty())
 		tmp_Status_Code = _to_string(Status_Code);
@@ -463,7 +460,7 @@ void	Response::Res_get_chunk(int &sent_head)
 				}
 				else
 				{
-					file.read(&buffer[0], Chunk_Size); // Read a chunk
+					file.read(&buffer[0], Chunk_Size);
 					this->current_read = file.gcount();
 
 					if (file.fail() && !file.eof())
@@ -478,13 +475,13 @@ void	Response::Res_get_chunk(int &sent_head)
 					{
 						sent_head = 0;
 						tmp_Status_Code = "";
-						responseStream.str(""); // Clear previous content
+						responseStream.str("");
 						responseStream.clear();
 						std::cerr << "End of file or read error!" << std::endl;
 						responseStream << "0\r\n\r\n";
 					
 						this->end = 1;
-						return ;  // End of file or read error
+						return ;
 					}
 					responseStream << std::hex << current_read << "\r\n";
 					responseStream.write(&buffer[0], current_read);
@@ -521,7 +518,6 @@ void	Response::Res_get_chunk(int &sent_head)
 			{
 				while ((entry = readdir(dir)) != NULL) 
 				{
-					// urlFinal
 					if (urlFinal == "/")
 						response += "<li><a href=\"" + urlFinal + entry->d_name + "\">" + entry->d_name + "</a></li>";
 					else

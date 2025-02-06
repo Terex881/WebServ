@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ChunkedBoundary.cpp                                :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: sdemnati <sdemnati@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/31 15:52:30 by sdemnati          #+#    #+#             */
-/*   Updated: 2025/02/04 11:18:54 by sdemnati         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 
 void Request::parseChunkedBoundryBody(string &body)
@@ -23,10 +11,8 @@ void Request::parseChunkedBoundryBody(string &body)
 		if (length == 0)		
 		{	
 			strPos = body.find_first_of("0123456789abcdefABCDEF");	
-			/* check if not 0 to avoid reallocat for nothing */
 			if (strPos != 0)
 			{
-				/* get string before hexadecimal and write it to file and erase it */
 				str = body.substr(0, strPos);
 				body.erase(0, str.length());;
 				if (str != CRLF && str.find_first_of(CRLF) == NP)
@@ -35,7 +21,6 @@ void Request::parseChunkedBoundryBody(string &body)
 			hexPos = body.find_first_not_of("0123456789abcdefABCDEF");	
 			if (hexPos == NP)
 				return;
-			/* get decimal number and erase hex + crlf and if length 0 erase 0 and rnrnr of crlf*/
 			length = strtol(body.substr(0, hexPos).c_str(), NULL, 16);
 			body.erase(0, hexPos + 2);
 			if (!length)
