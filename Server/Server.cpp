@@ -98,9 +98,10 @@ void Server::ft_start(int size, int *fd)
 					clientsMap[client_socket].getReq().getRequestData().sent_head = 0;
 					clientsMap[client_socket].getReq().getRequestData().fd = client_socket;
 					if (clientsMap[client_socket].getReq().getRequestData().isCgi
-						&& clientsMap[client_socket].getReq().getRequestData().requestStat == 2
-						&& clientsMap[client_socket].getReq().getHeaderData().requestMethod != "DELETE"
-						&& clientsMap[client_socket].getReq().getRequestData().codeStatus != 405)
+                        && clientsMap[client_socket].getReq().getRequestData().requestStat == 2
+                        && (clientsMap[client_socket].getReq().getHeaderData().requestMethod == "GET"
+                        || clientsMap[client_socket].getReq().getHeaderData().requestMethod == "POST")
+                        && clientsMap[client_socket].getReq().getRequestData().codeStatus != 405)
 					{
 						clientsMap[client_socket].getCgi().execute_script(client_socket, kq, &clientsMap[client_socket]);
 					}
@@ -143,13 +144,12 @@ void Server::ft_start(int size, int *fd)
 				if (responseStr.empty() && !data->getRes().end)
 						continue;
 				size_t bytes_sent = send(client_socket, responseStr.data(), responseStr.length(), 0);
-				if (bytes_sent < 0 || bytes_sent == SIZE_MAX)
+				if (bytes_sent <= 0 || bytes_sent == SIZE_MAX)
 				{
 					data->getReq().getRequestData().first = "";
 					data->getRes().bytesRead = 0;
 					data->getReq().getRequestData().sent_head = 0;
-					std::cerr << "Send error: " << strerror(errno) 
-					<< " (errno: " << errno << ")" << std::endl;
+					std::cerr << "Send error"<< std::endl;
 					std::cerr << "send failed" << std::endl;
 					close(data->getReq().getRequestData().fd);
 					data->getReq().getRequestData().codeStatus = 200;
