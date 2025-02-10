@@ -80,9 +80,10 @@ make
 
 ## 🔍 Key Constraints
 
+- **Keque-Driven** Concurrency Model
 - **Zero Downtime** Design
 - Strictly **Non-Blocking** Operation
-- **Single Poll()** for I/O Management
+- Efficient **I/O Management**
 - No Arbitrary `fork()` Usage
 - Resilient Error Handling
 
@@ -94,4 +95,4 @@ make
 
 ## 📜 Licensing
 
-[Open Source License Details]
+This project is part of the 42 curriculum and is provided as-is.
