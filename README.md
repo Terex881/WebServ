@@ -57,7 +57,7 @@ Compliance     : HTTP 1.1 Standard
   - Parsing complex POST, GET, and DELETE requests
   - Managing diverse file upload scenarios
   - Handling form data, query strings, and no-data uploads
-  - Ensuring robust request processing
+  - Ensuring robust request processing.
 
 ## 🛠️ Technical Capabilities
 
