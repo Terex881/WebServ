@@ -249,7 +249,7 @@ int Server::ft_server_init() {
 	if (server_fd < 0) {
 		std::cout << "socket failed" << std::endl;
 		exit(1);
-	}
+	} 
 	fcntl(server_fd, F_SETFL, O_NONBLOCK);
 	int opt = 1;
 	
